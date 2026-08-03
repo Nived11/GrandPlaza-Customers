@@ -21,9 +21,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className="antialiased">
       <body className={`${inter.className} min-h-screen flex flex-col bg-gray-50 text-gray-900 m-0 p-0`}>
         
+        {/* Responsive Header (Desktop Top Nav & Mobile Top Header) */}
         <UserHeader />
 
-        <main className="flex-1 w-full mt-32.5 md:mt-20">
+        {/* Main Content Area with Bottom Padding on mobile for bottom navigation bar */}
+        <main className="flex-1 w-full mt-24 md:mt-28 pb-20 md:pb-0">
           {children}
         </main>
 

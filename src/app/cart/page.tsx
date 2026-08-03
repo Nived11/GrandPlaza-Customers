@@ -1,4 +1,4 @@
-import  CartMain  from "@/features/cart/components/CartMain";
+import  CartMain  from "@/features/cart/CartMain";
 
 export default function CartPage() {
   return <CartMain />;

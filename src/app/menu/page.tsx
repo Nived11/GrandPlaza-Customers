@@ -1,4 +1,4 @@
-import  MenuMain  from "@/features/menu/components/MenuMain";
+import  MenuMain  from "@/features/menu/MenuMain";
 
 export default function MenuPage() {
   return <MenuMain />;
