@@ -126,13 +126,6 @@ export default function ComboOffersSection() {
         ))}
       </div>
       
-      {/* Mobile View All Button */}
-      <div className="flex justify-center mt-6 md:hidden">
-        <button className="flex items-center gap-1 border border-[var(--brand-gold)]/50 text-[var(--brand-green-dark)] hover:bg-[var(--brand-gold)] hover:text-[var(--brand-green-dark)] px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-colors">
-          View All <ChevronRight size={14} />
-        </button>
-      </div>
-
     </div>
   );
 }

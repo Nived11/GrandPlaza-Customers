@@ -34,7 +34,7 @@ export default function CallToActionSection() {
         </p>
         
         {/* CTA Button */}
-        <button className="bg-[var(--brand-green-dark)] hover:bg-[#024532] text-[var(--brand-gold)] px-7 py-3 md:py-3.5 md:px-8 rounded-full font-black uppercase tracking-[0.15em] text-[9px] md:text-[10px] transition-all inline-flex items-center gap-2 shadow-[0_10px_30px_rgba(1,90,65,0.15)] hover:shadow-[0_10px_30px_rgba(1,90,65,0.25)] active:scale-95 border border-[var(--brand-gold)]/20">
+        <button className="bg-[var(--brand-green-dark)] hover:bg-[#024532] text-[var(--brand-gold)] px-7 py-3 md:py-3.5 md:px-8 rounded-lg font-black uppercase tracking-[0.15em] text-[9px] md:text-[10px] transition-all inline-flex items-center gap-2 shadow-[0_10px_30px_rgba(1,90,65,0.15)] hover:shadow-[0_10px_30px_rgba(1,90,65,0.25)] active:scale-95 border border-[var(--brand-gold)]/20">
           Explore Everything <ArrowRight size={14} className="text-[var(--brand-gold)]" />
         </button>
         

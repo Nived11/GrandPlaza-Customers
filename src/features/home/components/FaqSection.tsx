@@ -35,15 +35,24 @@ export default function FaqSection() {
   };
 
   return (
-    <div className="w-full mt-16 lg:mt-24 pb-10">
-      <div className="max-w-[1200px] mx-auto px-4 lg:px-8">
+    <div className="w-full mt-16 lg:mt-24 mb-10 lg:mb-20">
+      <div className="max-w-[1200px] mx-auto  ">
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           
           {/* 📝 Left Side: Questions (Accordion) */}
-          <div className="flex flex-col">
+          <div className="flex flex-col relative w-full">
             
-            <div className="flex items-center gap-2 mb-8">
+            {/* 🌟 Mobile Background Image (Only visible on mobile behind FAQs) */}
+            <div className="absolute inset-0 z-0 lg:hidden flex justify-center items-center pointer-events-none overflow-hidden">
+              <img 
+                src="/faqimg.png" 
+                alt="FAQ Background" 
+                className="w-[85%] h-auto object-contain opacity-15" 
+              />
+            </div>
+
+            <div className="relative z-10 flex items-center justify-center gap-2 mb-8">
               <span className="text-[var(--brand-gold)] text-xs">✦</span>
               <h2 className="text-xl lg:text-2xl font-black text-slate-800 uppercase tracking-widest">
                 Common Questions
@@ -51,7 +60,7 @@ export default function FaqSection() {
               <span className="text-[var(--brand-gold)] text-xs">✦</span>
             </div>
 
-            <div className="flex flex-col gap-3 lg:gap-4">
+            <div className="relative z-10 flex flex-col gap-3 lg:gap-4">
               {faqs.map((faq, index) => {
                 const isOpen = openIndex === index;
                 
@@ -59,10 +68,10 @@ export default function FaqSection() {
                   <div 
                     key={index} 
                     onClick={() => toggleFaq(index)}
-                    className={`border transition-all duration-300 cursor-pointer overflow-hidden
+                    className={`border transition-all duration-300 cursor-pointer overflow-hidden rounded-lg backdrop-blur-sm
                       ${isOpen 
-                        ? 'bg-white border-[var(--brand-gold)] shadow-md rounded-2xl' 
-                        : 'bg-[#fdfbf7] border-[var(--brand-gold)]/20 shadow-sm rounded-xl hover:border-[var(--brand-gold)]/50'
+                        ? 'bg-white/90 border-[var(--brand-gold)] shadow-md' 
+                        : 'bg-[#fdfbf7]/90 border-[var(--brand-gold)]/20 shadow-sm hover:border-[var(--brand-gold)]/50'
                       }`}
                   >
                     {/* Question Header */}
@@ -80,7 +89,7 @@ export default function FaqSection() {
                     <div 
                       className={`px-5 transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[200px] opacity-100 pb-5' : 'max-h-0 opacity-0 pb-0'}`}
                     >
-                      <p className="text-[10px] lg:text-[11px] text-gray-500 font-medium leading-relaxed border-t border-gray-100 pt-3">
+                      <p className="text-[10px] lg:text-[11px] text-gray-500 font-medium leading-relaxed border-t border-gray-200/60 pt-3">
                         {faq.answer}
                       </p>
                     </div>
@@ -91,7 +100,7 @@ export default function FaqSection() {
             
           </div>
 
-          {/* 📸 Right Side: Image */}
+          {/* 📸 Right Side: Image (Desktop Only) */}
           <div className="hidden lg:flex justify-center items-center relative h-full min-h-[400px]">
             {/* Subtle background glow effect behind the image */}
             <div className="absolute w-[300px] h-[300px] bg-[var(--brand-gold)]/5 rounded-full blur-[60px] -z-10"></div>
@@ -99,7 +108,7 @@ export default function FaqSection() {
             <img 
               src="/faqimg.png" 
               alt="FAQ Illustration" 
-              className="w-[80%] max-w-[500px] object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.08)]  transition-transform duration-700" 
+              className="w-[80%] max-w-[500px] object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-transform duration-700" 
             />
           </div>
 

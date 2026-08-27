@@ -138,7 +138,7 @@ const bestSellers = [
 
 export default function BestSellersSection() {
   return (
-    <div className="w-full mt-16 lg:mt-24">
+    <div className="w-full mt-16 lg:mt-24 ">
       
       {/* 📝 Header Section */}
       <div className="relative flex items-center justify-center mb-8">
@@ -150,21 +150,19 @@ export default function BestSellersSection() {
           <span className="text-[var(--brand-gold)] text-xs">✦</span>
         </div>
         
-        <button className="absolute right-0 hidden md:flex items-center gap-1 border border-gray-200 text-gray-500 hover:text-[var(--brand-gold)] hover:border-[var(--brand-gold)] px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-colors">
-          View All <ChevronRight size={14} />
-        </button>
+        
       </div>
 
-      {/* 🍔 Grid Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 lg:gap-5">
+      {/* 🍔 Grid Section - updated to grid-cols-2 for mobile */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 lg:gap-5">
         {bestSellers.map((item) => (
-          <div key={item.id} className="bg-white rounded-2xl border border-[var(--brand-gold)]/20 shadow-sm hover:border-[var(--brand-gold)]/60 hover:shadow-lg transition-all group flex flex-col overflow-hidden h-full">
+          <div key={item.id} className="bg-white rounded-xl lg:rounded-2xl border border-[var(--brand-gold)]/20 shadow-sm hover:border-[var(--brand-gold)]/60 hover:shadow-lg transition-all group flex flex-col overflow-hidden h-full">
             
             {/* 📸 Image Wrapper */}
-            <div className="relative w-full h-[150px] overflow-hidden bg-[var(--brand-cream-soft)]">
+            <div className="relative w-full h-28 sm:h-36 overflow-hidden bg-[var(--brand-cream-soft)]">
               
               {/* 🌟 THEME UPDATE: Discount Badge (Brand Gold & Dark Green) */}
-              <div className="absolute top-3 left-3 bg-[var(--brand-gold)] text-[var(--brand-green-dark)] text-[9px] font-black uppercase px-2 py-1 rounded-md z-10 shadow-sm">
+              <div className="absolute top-2 left-2 bg-[var(--brand-gold)] text-[var(--brand-green-dark)] text-[7px] sm:text-[9px] font-black uppercase px-1.5 py-0.5 rounded shadow-sm z-10">
                 {item.discount}
               </div>
               
@@ -176,29 +174,29 @@ export default function BestSellersSection() {
               />
               
               {/* 🌟 THEME UPDATE: Category Badge (Dark Green & Gold) */}
-              <div className="absolute bottom-2 left-2 bg-[var(--brand-green-dark)]/90 backdrop-blur-sm text-[var(--brand-gold)] text-[8px] font-black uppercase tracking-wider px-2 py-1 rounded-md z-10 shadow-sm border border-[var(--brand-gold)]/20">
+              <div className="absolute bottom-2 left-2 bg-[var(--brand-green-dark)]/90 backdrop-blur-sm text-[var(--brand-gold)] text-[7px] sm:text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-sm border border-[var(--brand-gold)]/20 z-10">
                 {item.category}
               </div>
             </div>
             
             {/* 📝 Content Details */}
-            <div className="p-4 flex flex-col flex-grow bg-white">
+            <div className="p-2.5 sm:p-4 flex flex-col flex-grow bg-white">
               
               {/* Veg/Non-Veg Indicator (Standard colors kept for clarity) */}
-              <div className="flex items-center gap-1.5 mb-2">
-                <div className={`w-2 h-2 rounded-full ${item.type === 'NON-VEG' ? 'bg-red-500' : 'bg-green-500'}`}></div>
-                <span className={`text-[8px] font-black tracking-widest ${item.type === 'NON-VEG' ? 'text-red-600' : 'text-green-600'}`}>
+              <div className="flex items-center gap-1 mb-1.5 sm:mb-2">
+                <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${item.type === 'NON-VEG' ? 'bg-red-500' : 'bg-green-500'}`}></div>
+                <span className={`text-[7px] sm:text-[8px] font-black tracking-widest ${item.type === 'NON-VEG' ? 'text-red-600' : 'text-green-600'}`}>
                   {item.type}
                 </span>
               </div>
               
               {/* Title */}
-              <h3 className="text-[13px] font-black text-slate-900 leading-tight mb-1.5 line-clamp-1">
+              <h3 className="text-[10px] sm:text-[13px] font-black text-slate-900 leading-tight mb-1 sm:mb-1.5 line-clamp-1">
                 {item.name}
               </h3>
               
               {/* Description */}
-              <p className="text-[9px] lg:text-[10px] text-gray-500 line-clamp-2 leading-relaxed mb-4">
+              <p className="text-[8px] sm:text-[9px] lg:text-[10px] text-gray-500 line-clamp-2 leading-relaxed mb-3 sm:mb-4">
                 {item.desc}
               </p>
               
@@ -206,13 +204,13 @@ export default function BestSellersSection() {
               <div className="mt-auto flex items-end justify-between">
                 <div className="flex flex-col">
                   {/* 🌟 THEME UPDATE: Price in Brand Dark Green */}
-                  <span className="text-[16px] font-black text-[var(--brand-green-dark)] leading-none mb-0.5">₹{item.price}</span>
-                  <span className="text-[11px] font-semibold text-gray-400 line-through">₹{item.originalPrice}</span>
+                  <span className="text-[12px] sm:text-[16px] font-black text-[var(--brand-green-dark)] leading-none mb-0.5 sm:mb-1">₹{item.price}</span>
+                  <span className="text-[9px] sm:text-[11px] font-semibold text-gray-400 line-through">₹{item.originalPrice}</span>
                 </div>
                 
                 {/* 🌟 THEME UPDATE: Add Button (Dark Green & Gold) */}
-                <button className="w-8 h-8 rounded-full bg-[var(--brand-green-dark)] hover:bg-[#024532] text-[var(--brand-gold)] flex items-center justify-center shadow-md transition-colors active:scale-95 border border-[var(--brand-gold)]/30">
-                  <Plus size={18} strokeWidth={3} />
+                <button className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[var(--brand-green-dark)] hover:bg-[#024532] text-[var(--brand-gold)] flex items-center justify-center shadow-sm sm:shadow-md transition-colors active:scale-95 border border-[var(--brand-gold)]/30">
+                  <Plus size={14} strokeWidth={3} className="sm:w-[18px] sm:h-[18px]" />
                 </button>
               </div>
               
@@ -223,11 +221,7 @@ export default function BestSellersSection() {
       </div>
       
       {/* Mobile View All Button */}
-      <div className="flex justify-center mt-6 md:hidden">
-        <button className="flex items-center gap-1 border border-[var(--brand-gold)]/50 text-[var(--brand-green-dark)] hover:bg-[var(--brand-gold)] hover:text-[var(--brand-green-dark)] px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-colors">
-          View All <ChevronRight size={14} />
-        </button>
-      </div>
+     
 
     </div>
   );

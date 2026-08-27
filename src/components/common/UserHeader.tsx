@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { 
-  User, MapPin, ChevronDown, ShoppingBag, ShoppingCart, HelpCircle, Package, CalendarDays, ConciergeBell, Search, X
+  User, MapPin, ChevronDown, ShoppingCart, HelpCircle, Package, CalendarDays, ConciergeBell, Search, X, ArrowRight
 } from "lucide-react";
-// Imported beautiful Remix Icons for all Nav Links
+// Imported Remix Icons
 import { 
   RiChatSmile3Line, RiChatSmile3Fill, 
   RiUserStarLine, RiUserStarFill,
@@ -18,19 +18,62 @@ import {
 export default function UserHeader() {
   const pathname = usePathname();
   
-  // State for Expandable Search Bar
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  // Mobile Navigation Links
+  // 🌟 NEW: SCROLL LOGIC FOR MOBILE SEARCH BAR
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  // Detect Scroll Direction
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerWidth >= 768) return; // Only apply on mobile
+      const currentScrollY = window.scrollY;
+      
+      // Hide search bar when scrolling down more than 50px
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setIsScrolled(true);
+      } else if (currentScrollY < lastScrollY) {
+        setIsScrolled(false);
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
+
+  // Push main content (children) up smoothly when search bar hides
+  useEffect(() => {
+    const mainEl = document.querySelector("main");
+    
+    const handleResize = () => {
+      if (window.innerWidth >= 768 && mainEl) {
+        mainEl.style.transform = "translateY(0px)";
+        setIsScrolled(false); // Reset on desktop
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    
+    if (mainEl && window.innerWidth < 768) {
+      mainEl.style.transition = "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
+      // Matches the height of the search box that hides
+      mainEl.style.transform = isScrolled ? "translateY(-56px)" : "translateY(0px)";
+    }
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isScrolled]);
+
+  // 📱 Mobile Navigation Links
   const mobileNavLinks = [
     { name: "Home", path: "/", icon: RiHome5Line, activeIcon: RiHome5Fill, isLucide: false },
     { name: "Menu", path: "/menu", icon: RiRestaurantLine, activeIcon: RiRestaurantFill, isLucide: false },
-    { name: "Reservations", path: "/bookings", icon: CalendarDays, activeIcon: CalendarDays, isLucide: true },
-    { name: "Orders", path: "/orders", icon: Package, activeIcon: Package, isLucide: true },
+    { name: "About Us", path: "/about", icon: RiUserStarLine, activeIcon: RiUserStarFill, isLucide: false },
     { name: "Profile", path: "/profile", icon: User, activeIcon: User, isLucide: true },
   ];
 
-  // Desktop Navigation Links
+  // 🖥️ Desktop Navigation Links
   const desktopNavLinks = [
     { name: "Home", path: "/", icon: RiHome5Line, activeIcon: RiHome5Fill, isLucide: false },
     { name: "Menu", path: "/menu", icon: RiRestaurantLine, activeIcon: RiRestaurantFill, isLucide: false },
@@ -42,11 +85,7 @@ export default function UserHeader() {
     <>
       {/* 🖥️ DESKTOP HEADER */}
       <header className="hidden md:block fixed top-0 left-0 right-0 z-50">
-        
-        {/* 1. TOP GREEN BAR */}
         <div className="bg-brand-green-dark empire-geometric-bg text-[#F4F1EA] h-12 px-8 flex items-center justify-between relative">
-          
-          {/* Left: Location Selector */}
           <div className="flex items-center gap-2 cursor-pointer">
             <MapPin size={20} className="text-[#D4AF37]" />
             <div className="flex flex-col justify-center">
@@ -58,7 +97,6 @@ export default function UserHeader() {
             </div>
           </div>
 
-          {/* 🌟 CENTER LOGO CONTAINER */}
           <div 
             className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-[1px] w-72 h-11 bg-brand-green-light flex items-center justify-center z-10"
             style={{
@@ -66,17 +104,10 @@ export default function UserHeader() {
             }}
           >
             <Link href="/" className="relative w-32 h-30 flex items-center justify-center mt-1">
-              <Image 
-                src="/empireplaza.png" 
-                alt="Empire Plaza Logo" 
-                fill 
-                className="object-contain p-1"
-                priority
-              />
+              <Image src="/empireplaza.png" alt="Empire Plaza Logo" fill className="object-contain p-1" priority />
             </Link>
           </div>
 
-          {/* Right: Track Order & Help */}
           <div className="flex items-center gap-6 text-xs font-semibold">
             <Link href="/reserve-table" className="flex items-center gap-1.5 hover:text-[#D4AF37] transition">
               <ConciergeBell size={16} className="text-[#D4AF37]" /> Book a Table
@@ -88,92 +119,51 @@ export default function UserHeader() {
           </div>
         </div>
 
-        {/* 2. BOTTOM WHITE BAR (Nav Links & Right Icons) */}
         <div className="bg-brand-green-light h-16 px-4 lg:px-8 flex items-center justify-between shadow-sm overflow-hidden">
-          
-          {/* Left spacing - Dynamically shrinks even more when search is open */}
           <div className={`transition-all duration-500 ease-in-out hidden md:block ${isSearchOpen ? 'w-1 lg:w-[2%]' : 'w-[10%] lg:w-1/4'}`} />
-
-          {/* Centered Navigation Links with REDUCED SVG BADGE SIZE */}
           <nav className={`flex items-center gap-1 md:gap-2 xl:gap-4 text-[9px] lg:text-[10px] font-bold uppercase tracking-widest justify-center transition-all duration-500 ${isSearchOpen ? 'flex-1' : 'w-2/4'}`}>
             {desktopNavLinks.map((item) => {
               const isActive = pathname === item.path;
               const Icon = isActive ? item.activeIcon : item.icon;
-              
               const iconProps = item.isLucide ? { fill: isActive ? "currentColor" : "none" } : {};
 
               return (
                 <Link 
-                  key={item.path}
-                  href={item.path}
-                  // REDUCED PADDING HERE: px-3 py-1 for normal, xl:px-5 xl:py-1.5 for large screens
-                  className={`relative isolate flex items-center gap-1 xl:gap-1.5 px-3 py-1 lg:px-4 lg:py-1.5 xl:px-5 xl:py-1.5 transition-all duration-300 ease-in-out whitespace-nowrap ${
-                    isActive 
-                      ? 'scale-105' 
-                      : 'text-brand-green-dark  hover:scale-105 rounded-md'
-                  }`}
+                  key={item.path} href={item.path}
+                  className={`relative isolate flex items-center gap-1 xl:gap-1.5 px-3 py-1 lg:px-4 lg:py-1.5 xl:px-5 xl:py-1.5 transition-all duration-300 ease-in-out whitespace-nowrap ${isActive ? 'scale-105' : 'text-brand-green-dark hover:scale-105 rounded-md'}`}
                 >
-                  {/* The User-Requested SVG Background for Active State */}
+                  {/* 🌟 REDUCED SHARPNESS FOR DESKTOP ACTIVE LINK */}
                   {isActive && (
-                    <svg 
-                      className="absolute inset-0 w-full h-full text-brand-green-dark  drop-shadow-md -z-10" 
-                      viewBox="0 0 100 40" 
-                      fill="currentColor"
-                      preserveAspectRatio="none"
-                    >
-                      <path d="M 15 0 L 85 0 Q 90 0 93 4.5 L 98.5 16.5 Q 100 20 98.5 23.5 L 93 35.5 Q 90 40 85 40 L 15 40 Q 10 40 7 35.5 L 1.5 23.5 Q 0 20 1.5 16.5 L 7 4.5 Q 10 0 15 0 Z" />
+                    <svg className="absolute inset-0 w-full h-full text-brand-green-dark drop-shadow-md -z-10" viewBox="0 0 100 40" fill="currentColor" preserveAspectRatio="none">
+                      <path d="M 8 0 L 92 0 L 100 20 L 92 40 L 8 40 L 0 20 Z" />
                     </svg>
                   )}
-
-                  <Icon 
-                    className={`relative z-10 w-3.5 h-3.5 xl:w-4 xl:h-4 ${isActive ? "text-brand-gold" : "text-brand-green-dark"}`} 
-                    {...iconProps}
-                  />
-                  <span className={`relative z-10 ${isActive ? "text-brand-gold" : "text-brand-green-dark"}`}>
-                    {item.name}
-                  </span>
+                  <Icon className={`relative z-10 w-3.5 h-3.5 xl:w-4 xl:h-4 ${isActive ? "text-brand-gold" : "text-brand-green-dark"}`} {...iconProps} />
+                  <span className={`relative z-10 ${isActive ? "text-brand-gold" : "text-brand-green-dark"}`}>{item.name}</span>
                 </Link>
               );
             })}
           </nav>
 
-          {/* Right Icons (Search, Cart & Profile) */}
           <div className={`flex items-center justify-end gap-2 lg:gap-4 transition-all duration-500 ${isSearchOpen ? 'w-auto' : 'w-[25%] lg:w-1/4'}`}>
-            
-            {/* Expandable Search Bar */}
             <div className={`flex items-center transition-all duration-500 ease-in-out overflow-hidden ${isSearchOpen ? 'w-48 lg:w-56 xl:w-72 bg-gray-100 border border-brand-green-dark/20 rounded-full px-3 py-1.5 lg:py-2' : 'w-9 lg:w-10'}`}>
               {isSearchOpen ? (
                 <>
                   <Search size={16} className="text-brand-green-dark min-w-[16px]" />
-                  <input 
-                    type="text" 
-                    placeholder="Search food..." 
-                    className="bg-transparent border-none outline-none text-xs w-full px-2 text-brand-green-dark placeholder:text-brand-green-dark"
-                    autoFocus
-                  />
-                  <button onClick={() => setIsSearchOpen(false)} className="text-brand-green-dark hover:text-brand-green-dark transition">
-                    <X size={16} />
-                  </button>
+                  <input type="text" placeholder="Search food..." className="bg-transparent border-none outline-none text-xs w-full px-2 text-brand-green-dark placeholder:text-brand-green-dark" autoFocus />
+                  <button onClick={() => setIsSearchOpen(false)} className="text-brand-green-dark transition"><X size={16} /></button>
                 </>
               ) : (
-                <button onClick={() => setIsSearchOpen(true)} className="cursor-pointer  p-2 lg:p-2.5 rounded-full border border-gray-200 hover:border-[#D97706] transition text-gray-700 ml-auto">
+                <button onClick={() => setIsSearchOpen(true)} className="p-2 lg:p-2.5 rounded-full border border-gray-200 hover:border-[#D97706] transition text-gray-700 ml-auto">
                   <Search size={16} className="xl:w-[18px] xl:h-[18px]" />
                 </button>
               )}
             </div>
-
-            {/* Cart Icon */}
             <Link href="/cart" className="relative p-2 lg:p-2.5 rounded-full border border-gray-200 hover:border-[#D97706] transition text-gray-700 shrink-0">
               <ShoppingCart size={16} className="xl:w-[18px] xl:h-[18px]" />
-              <span className="absolute -top-1 -right-1 bg-[#D97706] text-white font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
-                3
-              </span>
+              <span className="absolute -top-1 -right-1 bg-[#D97706] text-white font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center">3</span>
             </Link>
-
-            {/* Vertical Divider Line */}
             <div className="h-4 lg:h-5 w-[1px] bg-gray-300 mx-0.5 lg:mx-1 shrink-0" />
-            
-            {/* Profile Icon with Custom Green Background and Gold Border */}
             <Link href="/profile" className="p-2 lg:p-2.5 rounded-full bg-brand-green-dark empire-geometric-bg border-2 border-brand-gold hover:scale-105 transition text-brand-gold shrink-0">
               <User size={16} className="xl:w-[18px] xl:h-[18px]" />
             </Link>
@@ -181,47 +171,124 @@ export default function UserHeader() {
         </div>
       </header>
 
-      {/* 📱 MOBILE TOP HEADER */}
-      <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-100 h-16 px-4 flex items-center justify-between z-50 md:hidden shadow-sm">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="relative w-8 h-8">
-            <Image src="/empireplaza.png" alt="Logo" fill className="object-contain" priority />
+      {/* 📱 MOBILE HEADER */}
+      <header className="block md:hidden bg-white fixed top-0 left-0 right-0 z-50 shadow-sm">
+        
+        {/* 1. Mobile Top Green Bar */}
+        <div className="bg-brand-green-dark empire-geometric-bg text-[#F4F1EA] h-[56px] px-3 flex items-center justify-between relative z-20">
+          
+          <div className="flex items-center gap-1.5 flex-1">
+            <MapPin size={16} className="text-[var(--brand-gold)] shrink-0" />
+            <div className="flex flex-col justify-center">
+              <span className="text-gray-300 text-[8px] leading-tight uppercase tracking-wider">Location</span>
+              <div className="flex items-center gap-1">
+                <span className="font-bold text-[var(--brand-gold)] text-[9px] truncate max-w-[75px]">Malappuram...</span>
+                <ChevronDown size={12} className="text-[var(--brand-gold)]" />
+              </div>
+            </div>
           </div>
-          <span className="font-serif font-black text-sm tracking-widest text-[#072216]">EMPIRE PLAZA</span>
-        </Link>
-        <div className="flex items-center gap-3">
-          <Link href="/profile" className="p-2 rounded-full bg-gray-100 text-gray-700">
-            <User size={18} />
-          </Link>
+
+          <div 
+            className="absolute left-1/2 -translate-x-1/2 bottom-[-1px] w-[220px] h-[36px] bg-white flex items-center justify-center z-30"
+            style={{
+              clipPath: "path('M 0 36 L 15 36 Q 30 36 40 24 L 50 12 Q 60 0 75 0 L 145 0 Q 160 0 170 12 L 180 24 Q 190 36 205 36 L 220 36 Z')",
+            }}
+          >
+            <Link href="/" className="relative w-[110px] h-[26px] flex items-center justify-center mt-2">
+              <Image src="/empireplaza.png" alt="Logo" fill className="object-contain" priority />
+            </Link>
+          </div>
+
+          <div className="flex items-center justify-end flex-1 z-20">
+            <Link href="/bookings" className="flex items-center gap-1 text-[var(--brand-gold)] hover:opacity-80 transition-opacity">
+              <span className="text-[8px] font-black uppercase tracking-widest mt-0.5 whitespace-nowrap">Book a Table</span>
+              <ConciergeBell size={16} className="shrink-0" />
+            </Link>
+          </div>
         </div>
+
+        {/* 2. Mobile Bottom White Bar (Search) - 🌟 Reduced height to look slim without clipping */}
+        <div className="bg-white w-full relative z-10 px-4 pt-[12px]">
+          
+          <div 
+            className={`w-full transition-all duration-300 ease-in-out overflow-hidden flex items-start ${
+              isScrolled ? "max-h-0 opacity-0 pointer-events-none mb-0" : "max-h-[50px] opacity-100 mb-3"
+            }`}
+          >
+            <div style={{ filter: "drop-shadow(0px 2px 4px rgba(0,0,0,0.05))" }} className="w-full">
+              {/* Green Border Wrapper */}
+              <div 
+                className="w-full bg-[var(--brand-green-dark)]/60 p-[1px]"
+                style={{ clipPath: "polygon(12px 0%, calc(100% - 12px) 0%, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0% 50%)" }}
+              >
+                <div 
+                  className="w-full bg-white flex items-center pl-4 pr-1.5 py-1.5"
+                  style={{ 
+                    clipPath: "polygon(11px 0%, calc(100% - 11px) 0%, 100% 50%, calc(100% - 11px) 100%, 11px 100%, 0% 50%)" 
+                  }}
+                >
+                  <Search size={14} className="text-[var(--brand-green-dark)] mr-2 shrink-0 opacity-80" />
+                  <input 
+                    type="text" 
+                    placeholder="Search for delicious food..." 
+                    className="bg-transparent border-none outline-none text-[11px] font-medium w-full text-gray-700 placeholder:text-gray-400"
+                  />
+                  {/* Slimmer Button */}
+                  <button 
+                    className="bg-[var(--brand-green-dark)] hover:bg-[var(--brand-gold)] transition-colors w-8 h-7 flex items-center justify-center shrink-0 ml-1"
+                    style={{ clipPath: "polygon(6px 0%, calc(100% - 6px) 0%, 100% 50%, calc(100% - 6px) 100%, 6px 100%, 0% 50%)" }}
+                  >
+                    <ArrowRight size={14} className="text-[#F4F1EA]" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
       </header>
 
       {/* 📱 MOBILE BOTTOM NAVIGATION BAR */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] py-2 px-3 z-50 md:hidden flex items-center justify-around">
-        {mobileNavLinks.map((item) => {
-          const isActive = pathname === item.path;
-          const Icon = isActive ? item.activeIcon : item.icon;
-          const iconProps = item.isLucide ? { fill: isActive ? "currentColor" : "none" } : {};
-          
-          return (
-            <Link 
-              key={item.path} 
-              href={item.path}
-              className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all ${
-                isActive 
-                  ? "bg-[#FEF3C7] text-[#D97706] font-bold shadow-sm" 
-                  : "text-gray-500 hover:text-gray-900"
-              }`}
-            >
-              <div className={`${isActive ? "text-[#D97706]" : "text-gray-600"}`}>
-                <Icon size={22} {...iconProps} />
-              </div>
-              <span className="text-[10px] mt-1 tracking-tight">
-                {item.name}
-              </span>
-            </Link>
-          );
-        })}
+      <div className="fixed bottom-3 left-2 right-2 z-50 md:hidden" style={{ filter: "drop-shadow(0px 8px 24px rgba(0,0,0,0.15))" }}>
+        <div 
+          className="w-full bg-[var(--brand-green-dark)]/25 p-[1px]"
+          style={{ clipPath: "polygon(16px 0%, calc(100% - 16px) 0%, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0% 50%)" }}
+        >
+          <div 
+            className="w-full bg-[#F4F1EA] flex items-center justify-between p-1"
+            style={{ clipPath: "polygon(15px 0%, calc(100% - 15px) 0%, 100% 50%, calc(100% - 15px) 100%, 15px 100%, 0% 50%)" }}
+          >
+            {mobileNavLinks.map((item) => {
+              const isActive = pathname === item.path;
+              const Icon = isActive ? item.activeIcon : item.icon;
+              const iconProps = item.isLucide ? { fill: isActive ? "currentColor" : "none" } : {};
+              
+              return (
+                <Link 
+                  key={item.path} 
+                  href={item.path}
+                  style={isActive ? { clipPath: "polygon(15px 0%, calc(100% - 15px) 0%, 100% 50%, calc(100% - 15px) 100%, 15px 100%, 0% 50%)" } : {}}
+                  className={`relative flex flex-col items-center justify-center w-[24%] py-1.5 transition-all duration-300 ${
+                    isActive 
+                      ? "bg-[var(--brand-green-dark)]" 
+                      : "bg-transparent hover:bg-gray-200/50"
+                  }`}
+                >
+                  <div className={`transition-transform duration-300 ${isActive ? "text-[var(--brand-gold)]" : "text-black"}`}>
+                    <Icon size={20} {...iconProps} />
+                  </div>
+                  
+                  <span className={`text-[8px] mt-0.5 tracking-wide font-black transition-colors uppercase ${
+                    isActive ? "text-[#F4F1EA]" : "text-black"
+                  }`}>
+                    {item.name}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </>
   );

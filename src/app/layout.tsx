@@ -25,7 +25,7 @@ export default function RootLayout({
         <UserHeader />
 
         {/* Main Content Area with Bottom Padding on mobile for bottom navigation bar */}
-        <main className="flex-1 w-full mt-24 md:mt-28 pb-20 md:pb-0">
+        <main className="flex-1 w-full mt-31 md:mt-28 pb-20 md:pb-0">
           {children}
         </main>
 

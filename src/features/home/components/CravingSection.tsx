@@ -1,5 +1,7 @@
-import React from 'react';
-import { ChevronRight } from 'lucide-react';
+"use client";
+
+import React, { useRef } from 'react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 
 const categories = [
   { name: "BIRYANI", img: "https://images.unsplash.com/photo-1589302168068-964664d93cb0?w=200&h=200&fit=crop" },
@@ -12,30 +14,64 @@ const categories = [
 ];
 
 export default function CravingSection() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // 🌟 Function to handle smooth scrolling when arrows are clicked
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = direction === 'left' ? -200 : 200;
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="w-full">
-      <div className="flex items-center justify-center gap-3 mb-8">
+      
+      {/* 🌟 Title Section */}
+      <div className="flex items-center justify-center gap-3 mb-6 sm:mb-6 px-2">
         <span className="text-[var(--brand-gold)] opacity-70">✦✧</span>
-        <h2 className="text-lg lg:text-xl font-black text-slate-800 uppercase tracking-widest">
-          What are you <span className="text-[var(--brand-gold)] font-serif">Craving?</span>
+        <h2 className="text-base lg:text-xl font-black text-slate-800 uppercase tracking-widest whitespace-nowrap">
+          Explore Our <span className="text-[var(--brand-gold)] font-serif">Menu</span>
         </h2>
         <span className="text-[var(--brand-gold)] opacity-70">✧✦</span>
       </div>
       
-      <div className="flex items-center gap-4 lg:gap-6 overflow-x-auto no-scrollbar pb-4 justify-start sm:justify-center">
-        {categories.map((cat, idx) => (
-          <div key={idx} className="flex flex-col items-center gap-3 cursor-pointer group min-w-[70px] lg:min-w-[85px]">
-            <div className="w-[70px] h-[70px] lg:w-[85px] lg:h-[85px] rounded-full p-1 bg-white border border-gray-200 shadow-sm group-hover:border-[var(--brand-gold)] group-hover:shadow-md transition-all">
-              <img src={cat.img} alt={cat.name} className="w-full h-full object-cover rounded-full" />
+      {/* 🌟 Carousel Container with px-2 on mobile */}
+      <div className="relative w-full max-w-[1200px] mx-auto px-2 sm:px-12">
+        
+        {/* Left Arrow */}
+        <button 
+          onClick={() => scroll('left')}
+          className="absolute left-1 sm:left-2 top-[35px] lg:top-[42px] -translate-y-1/2 z-10 w-7 h-7 lg:w-9 lg:h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:shadow-md hover:border-[var(--brand-gold)] hover:text-[var(--brand-gold)] transition-all text-gray-600"
+        >
+          <ChevronLeft size={18} className="lg:w-5 lg:h-5" />
+        </button>
+
+        {/* Scrollable Categories List (Sizes reverted to old code) */}
+        <div 
+          ref={scrollRef}
+          className="flex items-center gap-4 lg:gap-6 overflow-x-auto no-scrollbar scroll-smooth pb-4 justify-start sm:justify-center"
+        >
+          {categories.map((cat, idx) => (
+            <div key={idx} className="flex flex-col items-center gap-3 cursor-pointer group min-w-[70px] lg:min-w-[85px] flex-shrink-0">
+              <div className="w-[70px] h-[70px] lg:w-[85px] lg:h-[85px] rounded-full p-1 bg-white border border-gray-200 shadow-sm group-hover:border-[var(--brand-gold)] group-hover:shadow-md transition-all">
+                <img src={cat.img} alt={cat.name} className="w-full h-full object-cover rounded-full" />
+              </div>
+              <span className="text-[9px] lg:text-[10px] font-black text-slate-700 uppercase tracking-widest group-hover:text-[var(--brand-green-dark)]">
+                {cat.name}
+              </span>
             </div>
-            <span className="text-[9px] lg:text-[10px] font-black text-slate-700 uppercase tracking-widest group-hover:text-[var(--brand-green-dark)]">{cat.name}</span>
-          </div>
-        ))}
-        <div className="flex flex-col items-center justify-center gap-3 cursor-pointer group min-w-[70px] lg:min-w-[85px] h-[70px] lg:h-[85px]">
-           <button className="w-full h-full rounded-full border border-gray-300 flex items-center justify-center text-[9px] font-black uppercase text-slate-600 group-hover:border-[var(--brand-gold)] group-hover:text-[var(--brand-gold)] transition-all bg-white">
-             View All <ChevronRight size={12} className="ml-0.5" />
-           </button>
+          ))}
         </div>
+
+        {/* Right Arrow */}
+        <button 
+          onClick={() => scroll('right')}
+          className="absolute right-1 sm:right-2 top-[35px] lg:top-[42px] -translate-y-1/2 z-10 w-7 h-7 lg:w-9 lg:h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:shadow-md hover:border-[var(--brand-gold)] hover:text-[var(--brand-gold)] transition-all text-gray-600"
+        >
+          <ChevronRight size={18} className="lg:w-5 lg:h-5" />
+        </button>
+
       </div>
     </div>
   );
