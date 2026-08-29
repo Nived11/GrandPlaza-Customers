@@ -14,11 +14,13 @@ import {
   RiHome5Line, RiHome5Fill,
   RiRestaurantLine, RiRestaurantFill
 } from "react-icons/ri";
+import ReservationModal from "@/features/reservation/ReservationModal";
 
 export default function UserHeader() {
   const pathname = usePathname();
   
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isReservationOpen, setIsReservationOpen] = useState(false);
 
   // 🌟 NEW: SCROLL LOGIC FOR MOBILE SEARCH BAR
   const [isScrolled, setIsScrolled] = useState(false);
@@ -109,9 +111,15 @@ export default function UserHeader() {
           </div>
 
           <div className="flex items-center gap-6 text-xs font-semibold">
-            <Link href="/reserve-table" className="flex items-center gap-1.5 hover:text-[#D4AF37] transition">
-              <ConciergeBell size={16} className="text-[#D4AF37]" /> Book a Table
-            </Link>
+          <button
+            type="button"
+            onClick={() => setIsReservationOpen(true)}
+            aria-haspopup="dialog"
+            className="flex items-center gap-1.5 transition hover:text-[#D4AF37]"
+          >
+            <ConciergeBell size={16} className="text-[#D4AF37]" />
+            Book a Table
+          </button>
             <div className="h-4 w-[1px] bg-[#D4AF37]/30" />
             <Link href="/contact" className="flex items-center gap-1.5 hover:text-[#D4AF37] transition">
               <HelpCircle size={16} className="text-[#D4AF37]" /> Help
@@ -205,6 +213,25 @@ export default function UserHeader() {
               <ConciergeBell size={16} className="shrink-0" />
             </Link>
           </div>
+<<<<<<< Updated upstream
+=======
+          <span className="font-serif font-black text-sm tracking-widest text-[#072216]">EMPIRE PLAZA</span>
+        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsReservationOpen(true)}
+            aria-label="Book a table"
+            aria-haspopup="dialog"
+            className="rounded-full bg-[#FEF3C7] p-2 text-[#D97706]"
+          >
+            <ConciergeBell size={18} />
+          </button>
+
+          <Link href="/profile" className="p-2 rounded-full bg-gray-100 text-gray-700">
+            <User size={18} />
+          </Link>
+>>>>>>> Stashed changes
         </div>
 
         {/* 2. Mobile Bottom White Bar (Search) - 🌟 Reduced height to look slim without clipping */}
@@ -290,6 +317,11 @@ export default function UserHeader() {
           </div>
         </div>
       </div>
+
+      <ReservationModal
+        isOpen={isReservationOpen}
+        onClose={() => setIsReservationOpen(false)}
+      />
     </>
   );
 }

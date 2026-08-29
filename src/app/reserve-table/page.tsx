@@ -1,9 +1,5 @@
-import React from 'react'
+import { redirect } from "next/navigation";
 
-const page = () => {
-  return (
-    <div>reserve table </div>
-  )
+export default function ReserveTablePage() {
+  redirect("/");
 }
-
-export default page

@@ -1,59 +1,85 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import {
+  useState,
+  type FormEvent,
+  type MouseEvent as ReactMouseEvent,
+  type ReactNode,
+} from "react";
 import Image from "next/image";
 import axios from "axios";
 import {
-  Clock,
-  Leaf,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+  type MotionValue,
+} from "framer-motion";
+import {
   Loader2,
   Mail,
   MapPin,
   MessageSquare,
   Phone,
   Send,
+  Sparkles,
   User,
+  type LucideIcon,
 } from "lucide-react";
-import { FaFacebookF, FaInstagram, FaWhatsapp } from "react-icons/fa6";
 import { toast } from "sonner";
 import axiosInstance from "@/api/axios";
 
 const CONTACT_DETAILS = {
-  phone: "+91 123 456 7890",
-  phoneLink: "tel:+911234567890",
-  email: "hello@empireplaza.com",
-  workingHours: "10:00 AM - 11:00 PM",
   locationName: "Empire Plaza Kochi",
   address: "NH 66, Near Sunrise Hospital, Edappally, Kochi, Kerala 682024",
-  mapUrl:
-    "https://www.google.com/maps?q=Edappally%20Kochi%20Kerala&output=embed",
+  mapsLink:
+    "https://www.google.com/maps/search/?api=1&query=Edappally%20Kochi%20Kerala",
 };
 
-const contactCards = [
-  {
-    label: "Call Us",
-    value: CONTACT_DETAILS.phone,
-    href: CONTACT_DETAILS.phoneLink,
-    icon: Phone,
-  },
-  {
-    label: "Email Us",
-    value: CONTACT_DETAILS.email,
-    href: `mailto:${CONTACT_DETAILS.email}`,
-    icon: Mail,
-  },
-  {
-    label: "Working Hours",
-    value: CONTACT_DETAILS.workingHours,
-    icon: Clock,
-  },
-];
-
 const inputClass =
-  "h-11 w-full rounded-lg border border-[#DDDCD7] bg-white pl-10 pr-3 text-xs text-gray-700 outline-none transition placeholder:text-gray-400 hover:border-[#BFC8C1] focus:border-brand-green-dark focus:ring-4 focus:ring-brand-green-dark/10";
+  "h-12 w-full rounded-xl border border-[#E7A43B]/30 bg-[#F7F9F8] px-4 text-sm text-[#102A2A] outline-none transition placeholder:text-[#94A3B8] hover:border-[#E7A43B]/60 focus:border-[#006B52] focus:bg-white focus:ring-4 focus:ring-[#006B52]/10";
 
 export default function ContactMain() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
+  const pointerX = useMotionValue(0);
+  const pointerY = useMotionValue(0);
+  const smoothX = useSpring(pointerX, {
+    stiffness: 95,
+    damping: 20,
+    mass: 0.6,
+  });
+  const smoothY = useSpring(pointerY, {
+    stiffness: 95,
+    damping: 20,
+    mass: 0.6,
+  });
+
+  const fishX = useTransform(smoothX, [-1, 1], [-5, 5]);
+  const fishY = useTransform(smoothY, [-1, 1], [-3, 3]);
+  const nearX = useTransform(smoothX, [-1, 1], [-24, 24]);
+  const nearY = useTransform(smoothY, [-1, 1], [-18, 18]);
+  const midX = useTransform(smoothX, [-1, 1], [15, -15]);
+  const midY = useTransform(smoothY, [-1, 1], [12, -12]);
+  const farX = useTransform(smoothX, [-1, 1], [-10, 10]);
+  const farY = useTransform(smoothY, [-1, 1], [8, -8]);
+
+  const handleFoodMouseMove = (event: ReactMouseEvent<HTMLDivElement>) => {
+    if (shouldReduceMotion) return;
+
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const normalizedX = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
+    const normalizedY = ((event.clientY - bounds.top) / bounds.height) * 2 - 1;
+
+    pointerX.set(normalizedX);
+    pointerY.set(normalizedY);
+  };
+
+  const resetFoodPosition = () => {
+    pointerX.set(0);
+    pointerY.set(0);
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -74,7 +100,8 @@ export default function ContactMain() {
       await axiosInstance.post("/accounts/contact", payload);
       form.reset();
       toast.success("Message sent successfully!", {
-        description: "Thank you for contacting Empire Plaza. We'll get back to you soon.",
+        description:
+          "Thank you for contacting Empire Plaza. We'll get back to you soon.",
       });
     } catch (error) {
       toast.error("Message could not be sent", {
@@ -86,149 +113,77 @@ export default function ContactMain() {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#F8F3EA]">
-      {/* Contact hero */}
-      <section className="relative overflow-hidden bg-[#FFF8EE]">
-        <div className="grid lg:grid-cols-2">
-          <div className="relative z-10 ml-auto flex w-full max-w-[720px] items-center px-5 py-10 sm:px-8 lg:min-h-[330px] lg:px-12 lg:py-9">
-            <div className="w-full max-w-[610px]">
-              <div className="mb-2 flex items-center gap-2 text-[#E38B1B]">
-                <span className="h-px w-10 bg-[#E8A13E]" />
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em]">
-                  Let&apos;s stay connected
-                </p>
-                <Leaf size={15} fill="currentColor" strokeWidth={1.5} />
-                <span className="h-px w-10 bg-[#E8A13E]" />
-              </div>
+    <div className="min-h-screen overflow-hidden bg-[#FFFDF9]">
+      <section className="relative mx-auto w-full max-w-[1440px] px-5 py-9 sm:px-8 sm:py-12 lg:px-14 lg:py-10 xl:px-20">
+        <div className="pointer-events-none absolute -left-24 top-16 h-72 w-72 rounded-full bg-[#E7A43B]/8 blur-3xl" />
+        <div className="pointer-events-none absolute right-10 top-20 hidden h-96 w-96 rounded-full bg-[#006B52]/6 blur-3xl lg:block" />
 
-              <h1 className="font-serif text-5xl font-black leading-[0.95] text-brand-green-dark sm:text-6xl lg:text-[64px]">
+        <div className="relative grid items-center gap-12 lg:min-h-[680px] lg:grid-cols-[minmax(0,0.88fr)_minmax(430px,1.12fr)] lg:gap-10 xl:gap-16">
+          <div className="w-full max-w-[560px] lg:justify-self-end">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#F1F5F3] px-3 py-1.5 text-[#29483D]">
+              <Sparkles size={13} className="text-[#E7A43B]" />
+              <span className="text-[10px] font-extrabold uppercase tracking-[0.14em]">
                 Contact Us
-              </h1>
-
-              <p className="mt-4 max-w-[500px] text-sm leading-6 text-[#48534E]">
-                We&apos;d love to hear from you! Whether it&apos;s feedback, a
-                suggestion, or a special request — we&apos;re here to help.
-              </p>
-
-              <div className="mt-7 hidden gap-3 md:grid md:grid-cols-3">
-                {contactCards.map((item) => {
-                  const Icon = item.icon;
-                  const content = (
-                    <>
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-green-dark text-white shadow-sm">
-                        <Icon size={16} />
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block text-[11px] font-bold text-brand-green-dark">
-                          {item.label}
-                        </span>
-                        <span className="mt-0.5 block truncate text-[10px] text-gray-600">
-                          {item.value}
-                        </span>
-                      </span>
-                    </>
-                  );
-
-                  if (item.href) {
-                    return (
-                      <a
-                        key={item.label}
-                        href={item.href}
-                        className="flex min-h-[62px] items-center gap-2.5 rounded-xl border border-[#EDE7DC] bg-white px-3 shadow-[0_6px_20px_rgba(75,60,35,0.06)] transition hover:-translate-y-0.5 hover:border-brand-gold/50"
-                      >
-                        {content}
-                      </a>
-                    );
-                  }
-
-                  return (
-                    <div
-                      key={item.label}
-                      className="flex min-h-[62px] items-center gap-2.5 rounded-xl border border-[#EDE7DC] bg-white px-3 shadow-[0_6px_20px_rgba(75,60,35,0.06)]"
-                    >
-                      {content}
-                    </div>
-                  );
-                })}
-              </div>
+              </span>
             </div>
-          </div>
 
-          <div className="relative hidden min-h-[330px] overflow-hidden lg:block">
-            <Image
-              src="/contact-fish-hero.png"
-              alt="Kerala-style whole grilled fish served on a banana leaf"
-              fill
-              priority
-              sizes="(max-width: 1023px) 100vw, 50vw"
-              className="object-cover object-center"
-            />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#FFF8EE] via-[#FFF8EE]/10 to-transparent lg:block" />
-          </div>
-        </div>
-      </section>
+            <h1 className="mt-4 font-serif text-4xl font-black leading-none tracking-tight text-[#0D2238] sm:text-5xl">
+              Let&apos;s <span className="text-[#E7A43B]">Talk.</span>
+            </h1>
 
-      {/* Contact content */}
-      <section className="relative z-10 mx-auto -mt-3 w-full max-w-[1480px] rounded-t-[24px] border border-b-0 border-[#EEE9E0] bg-white px-5 py-7 shadow-[0_-8px_35px_rgba(29,53,42,0.07)] sm:px-8 lg:px-10">
-        <div className="grid gap-9 md:grid-cols-[1.15fr_0.85fr] md:gap-0">
-          {/* Send us a message */}
-          <div className="md:border-r md:border-[#E5E7E3] md:pr-8">
-            <SectionTitle
-              icon={MessageSquare}
-              title="Send us a Message"
-              subtitle="Fill in the form below and we'll get back to you soon!"
-            />
+            <p className="mt-3 max-w-md text-sm leading-6 text-[#66716D]">
+              Have a question, feedback, or a special request? Send us a
+              message and our team will get back to you soon.
+            </p>
 
-            <form onSubmit={handleSubmit} className="mt-5 space-y-3">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <FormField icon={User}>
-                  <input
-                    type="text"
-                    name="name"
-                    required
-                    autoComplete="name"
-                    placeholder="Your Name"
-                    aria-label="Your name"
-                    className={inputClass}
-                  />
-                </FormField>
+            <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+              <FormField label="Full Name" icon={User}>
+                <input
+                  type="text"
+                  name="name"
+                  required
+                  autoComplete="name"
+                  placeholder="Enter your name"
+                  aria-label="Your name"
+                  className={inputClass}
+                />
+              </FormField>
 
-                <FormField icon={Mail}>
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    autoComplete="email"
-                    placeholder="Your Email"
-                    aria-label="Your email"
-                    className={inputClass}
-                  />
-                </FormField>
-              </div>
+              <FormField label="Email Address" icon={Mail}>
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  autoComplete="email"
+                  placeholder="Enter your email"
+                  aria-label="Your email"
+                  className={inputClass}
+                />
+              </FormField>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <FormField icon={Phone}>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField label="Phone Number" icon={Phone}>
                   <input
                     type="tel"
                     name="phone_number"
                     required
                     autoComplete="tel"
-                    placeholder="Phone Number"
+                    placeholder="Phone number"
                     aria-label="Phone number"
                     className={inputClass}
                   />
                 </FormField>
 
-                <FormField icon={User}>
+                <FormField label="Subject" icon={MessageSquare}>
                   <select
                     name="subject"
                     required
                     defaultValue=""
                     aria-label="Select a subject"
-                    className={`${inputClass} appearance-none text-gray-500`}
+                    className={`${inputClass} cursor-pointer appearance-none text-[#66716D]`}
                   >
                     <option value="" disabled>
-                      Select a Subject
+                      Select a subject
                     </option>
                     <option value="order">Order Assistance</option>
                     <option value="reservation">Table Reservation</option>
@@ -239,76 +194,146 @@ export default function ContactMain() {
                 </FormField>
               </div>
 
-              <div className="relative">
-                <MessageSquare
-                  size={15}
-                  className="pointer-events-none absolute left-3.5 top-3.5 text-gray-400"
-                />
+              <FormField label="Message" icon={MessageSquare} multiline>
                 <textarea
                   name="message"
                   required
-                  rows={5}
-                  placeholder="Write your message here..."
+                  rows={4}
+                  placeholder="Type your message here..."
                   aria-label="Your message"
-                  className="w-full resize-none rounded-lg border border-[#DDDCD7] bg-white py-3 pl-10 pr-3 text-xs leading-5 text-gray-700 outline-none transition placeholder:text-gray-400 hover:border-[#BFC8C1] focus:border-brand-green-dark focus:ring-4 focus:ring-brand-green-dark/10"
+                  className="h-24 w-full resize-none rounded-xl border border-[#E7A43B]/30 bg-[#F7F9F8] px-4 py-3 text-sm leading-5 text-[#102A2A] outline-none transition placeholder:text-[#94A3B8] hover:border-[#E7A43B]/60 focus:border-[#006B52] focus:bg-white focus:ring-4 focus:ring-[#006B52]/10"
                 />
-              </div>
+              </FormField>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex min-w-[142px] items-center justify-center gap-2 rounded-full bg-brand-green-dark px-7 py-3 text-xs font-bold text-white shadow-[0_8px_20px_rgba(1,90,65,0.18)] transition hover:-translate-y-0.5 hover:bg-[#014936] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-65 disabled:hover:translate-y-0"
+                className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#006B52] px-7 text-xs font-extrabold uppercase tracking-[0.1em] text-white shadow-[0_10px_24px_rgba(0,107,82,0.18)] transition hover:-translate-y-0.5 hover:bg-[#005A45] hover:shadow-[0_14px_28px_rgba(0,107,82,0.24)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
               >
                 {isSubmitting ? (
                   <>
                     Sending...
-                    <Loader2 size={14} className="animate-spin" />
+                    <Loader2 size={16} className="animate-spin" />
                   </>
                 ) : (
                   <>
                     Send Message
-                    <Send size={14} />
+                    <Send
+                      size={15}
+                      className="text-[#F6C35B] transition-transform group-hover:translate-x-0.5"
+                    />
                   </>
                 )}
               </button>
             </form>
           </div>
 
-          {/* Visit us */}
-          <div className="md:pl-8">
-            <SectionTitle
-              icon={MapPin}
-              title="Visit Us"
-              subtitle="We'd love to serve you in person!"
-            />
+          <div className="relative hidden min-h-[640px] items-center justify-center lg:flex">
+            <div className="pointer-events-none absolute h-[470px] w-[470px] rounded-full border border-[#E7A43B]/15 bg-gradient-to-br from-[#FFF7E8] to-[#F0F7F3]" />
+            <div className="pointer-events-none absolute h-[360px] w-[360px] rounded-full border border-dashed border-[#006B52]/15" />
 
-            <div className="mt-5 flex gap-3 rounded-xl border border-[#D8E0D9] bg-gradient-to-r from-[#EEF3ED] to-[#F8F8F4] p-4">
-              <MapPin
-                size={23}
-                fill="currentColor"
-                className="mt-0.5 shrink-0 text-brand-green-dark"
+            <div
+              className="relative z-10 aspect-[1402/1122] w-full max-w-[650px] cursor-crosshair select-none"
+              onMouseMove={handleFoodMouseMove}
+              onMouseLeave={resetFoodPosition}
+            >
+              <motion.div
+                className="absolute inset-[8%_4%_4%_4%] z-10"
+                style={{ x: fishX, y: fishY }}
+              >
+                <Image
+                  src="/contact-fish-base-v3.png"
+                  alt="Kerala-style grilled fish served on a banana leaf"
+                  fill
+                  draggable={false}
+                  sizes="(max-width: 1023px) 1px, 46vw"
+                  className="object-contain"
+                />
+              </motion.div>
+
+              <FloatingIngredient
+                label="floating red chilli"
+                crop={{ x: 17, y: 7, width: 21, height: 24 }}
+                place={{ left: 12, top: 4, width: 22, height: 25 }}
+                x={nearX}
+                y={nearY}
+                delay={0}
+                reducedMotion={Boolean(shouldReduceMotion)}
               />
-              <div>
-                <h3 className="text-xs font-bold text-brand-green-dark">
+              <FloatingIngredient
+                label="floating onion ring"
+                crop={{ x: 30, y: 4, width: 14, height: 17 }}
+                place={{ left: 31, top: 1, width: 14, height: 17 }}
+                x={midX}
+                y={midY}
+                delay={0.45}
+                reducedMotion={Boolean(shouldReduceMotion)}
+              />
+              <FloatingIngredient
+                label="floating onion ring"
+                crop={{ x: 53, y: 6, width: 18, height: 17 }}
+                place={{ left: 57, top: 5, width: 18, height: 17 }}
+                x={nearX}
+                y={nearY}
+                delay={0.8}
+                reducedMotion={Boolean(shouldReduceMotion)}
+              />
+              <FloatingIngredient
+                label="floating lime"
+                crop={{ x: 72, y: 2, width: 15, height: 18 }}
+                place={{ left: 78, top: 1, width: 15, height: 18 }}
+                x={farX}
+                y={farY}
+                delay={0.25}
+                reducedMotion={Boolean(shouldReduceMotion)}
+              />
+              <FloatingIngredient
+                label="floating lime"
+                crop={{ x: 2, y: 26, width: 16, height: 17 }}
+                place={{ left: 1, top: 31, width: 16, height: 17 }}
+                x={midX}
+                y={midY}
+                delay={1.05}
+                reducedMotion={Boolean(shouldReduceMotion)}
+              />
+              <FloatingIngredient
+                label="floating onion ring"
+                crop={{ x: 1, y: 74, width: 18, height: 20 }}
+                place={{ left: 1, top: 76, width: 18, height: 20 }}
+                x={nearX}
+                y={nearY}
+                delay={0.65}
+                reducedMotion={Boolean(shouldReduceMotion)}
+              />
+              <FloatingIngredient
+                label="floating red chilli"
+                crop={{ x: 70, y: 71, width: 24, height: 25 }}
+                place={{ left: 77, top: 73, width: 21, height: 24 }}
+                x={farX}
+                y={farY}
+                delay={1.2}
+                reducedMotion={Boolean(shouldReduceMotion)}
+              />
+            </div>
+
+            <a
+              href={CONTACT_DETAILS.mapsLink}
+              target="_blank"
+              rel="noreferrer"
+              className="absolute bottom-3 left-1/2 z-20 flex w-[88%] max-w-[460px] -translate-x-1/2 items-center gap-3 rounded-2xl border border-[#DDE7E1] bg-white/90 px-4 py-3 shadow-[0_12px_30px_rgba(16,42,42,0.09)] backdrop-blur-sm transition hover:-translate-y-0.5 hover:border-[#E7A43B]/50"
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#EAF3EF] text-[#006B52]">
+                <MapPin size={18} />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-xs font-extrabold text-[#102A2A]">
                   {CONTACT_DETAILS.locationName}
-                </h3>
-                <p className="mt-1 text-[10px] leading-4 text-gray-600">
+                </span>
+                <span className="mt-0.5 block text-[10px] leading-4 text-[#66716D]">
                   {CONTACT_DETAILS.address}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-3 h-[170px] overflow-hidden rounded-xl border border-[#D3DDD6] bg-[#EDF3EE]">
-              <iframe
-                title="Empire Plaza location"
-                src={CONTACT_DETAILS.mapUrl}
-                width="100%"
-                height="100%"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                className="border-0"
-              />
-            </div>
+                </span>
+              </span>
+            </a>
           </div>
         </div>
       </section>
@@ -316,63 +341,117 @@ export default function ContactMain() {
   );
 }
 
-type SectionTitleProps = {
-  icon: typeof MessageSquare;
-  title: string;
-  subtitle?: string;
+type IngredientRect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 };
 
-function SectionTitle({ icon: Icon, title, subtitle }: SectionTitleProps) {
+type IngredientPlace = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
+
+type FloatingIngredientProps = {
+  label: string;
+  crop: IngredientRect;
+  place: IngredientPlace;
+  x: MotionValue<number>;
+  y: MotionValue<number>;
+  delay: number;
+  reducedMotion: boolean;
+};
+
+function FloatingIngredient({
+  label,
+  crop,
+  place,
+  x,
+  y,
+  delay,
+  reducedMotion,
+}: FloatingIngredientProps) {
+  const backgroundSizeX = (100 / crop.width) * 100;
+  const backgroundSizeY = (100 / crop.height) * 100;
+  const backgroundPositionX =
+    crop.x === 0 ? 0 : (crop.x / (100 - crop.width)) * 100;
+  const backgroundPositionY =
+    crop.y === 0 ? 0 : (crop.y / (100 - crop.height)) * 100;
+
   return (
-    <div>
-      <div className="flex items-center gap-2.5">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-brand-green-dark/20 text-brand-green-dark">
-          <Icon size={15} />
-        </span>
-        <h2 className="font-serif text-base font-bold text-brand-green-dark">
-          {title}
-        </h2>
-      </div>
-      {subtitle ? (
-        <p className="ml-9 mt-1 text-[9px] text-gray-500">{subtitle}</p>
-      ) : null}
-      <span className="ml-9 mt-2 block h-0.5 w-6 bg-brand-gold" />
-    </div>
+    <motion.div
+      role="img"
+      aria-label={label}
+      className="pointer-events-none absolute z-20"
+      style={{
+        left: `${place.left}%`,
+        top: `${place.top}%`,
+        width: `${place.width}%`,
+        height: `${place.height}%`,
+        x,
+        y,
+      }}
+    >
+      <motion.div
+        className="h-full w-full"
+        animate={
+          reducedMotion
+            ? undefined
+            : {
+                y: [0, -8, 0],
+                rotate: [-2, 2, -2],
+              }
+        }
+        transition={{
+          duration: 4.6,
+          delay,
+          ease: "easeInOut",
+          repeat: Infinity,
+        }}
+        style={{
+          backgroundImage: "url('/contact-fish-float-transparent-v4.png')",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: `${backgroundSizeX}% ${backgroundSizeY}%`,
+          backgroundPosition: `${backgroundPositionX}% ${backgroundPositionY}%`,
+        }}
+      />
+    </motion.div>
   );
 }
 
 type FormFieldProps = {
-  icon: typeof User;
-  children: React.ReactNode;
-};
-
-function FormField({ icon: Icon, children }: FormFieldProps) {
-  return (
-    <div className="relative">
-      <Icon
-        size={15}
-        className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-gray-400"
-      />
-      {children}
-    </div>
-  );
-}
-
-type SocialLinkProps = {
   label: string;
-  className: string;
-  children: React.ReactNode;
+  icon: LucideIcon;
+  children: ReactNode;
+  multiline?: boolean;
 };
 
-function SocialLink({ label, className, children }: SocialLinkProps) {
+function FormField({
+  label,
+  icon: Icon,
+  children,
+  multiline = false,
+}: FormFieldProps) {
   return (
-    <a
-      href="#"
-      aria-label={label}
-      className={`flex h-8 w-8 items-center justify-center rounded-full text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${className}`}
-    >
-      {children}
-    </a>
+    <label className="block">
+      <span className="mb-1.5 block text-[11px] font-extrabold text-[#243D34]">
+        {label}
+      </span>
+      <span className="relative block">
+        <Icon
+          size={16}
+          className={`pointer-events-none absolute left-3.5 z-10 text-[#E7A43B] ${
+            multiline ? "top-3.5" : "top-1/2 -translate-y-1/2"
+          }`}
+        />
+        <span className="block [&>input]:pl-10 [&>select]:pl-10 [&>textarea]:pl-10">
+          {children}
+        </span>
+      </span>
+    </label>
   );
 }
 
