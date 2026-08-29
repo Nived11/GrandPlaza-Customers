@@ -47,7 +47,7 @@ const reviews = [
 
 export default function TestimonialsSection() {
   
-  // 🌟 Carousel Settings (Pause on Hover included)
+  // 🌟 Carousel Settings
   const settings = {
     dots: true,
     infinite: true,
@@ -56,33 +56,35 @@ export default function TestimonialsSection() {
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 3000,
-    pauseOnHover: true, // 👈 മൗസ് വെക്കുമ്പോൾ നിൽക്കാൻ
+    pauseOnHover: true, 
     arrows: false,
     responsive: [
       {
         breakpoint: 1024,
         settings: {
           slidesToShow: 2,
+          slidesToScroll: 1,
         }
       },
       {
-        breakpoint: 640,
+        breakpoint: 768, 
         settings: {
-          slidesToShow: 1,
+          slidesToShow: 1, 
+          slidesToScroll: 1,
+          centerMode: false, 
         }
       }
     ]
   };
 
   return (
-    <div className="w-full mt-10 sm:mt-16 lg:mt-24 pb-6 sm:pb-10">
+    <div className="w-full mt-10 sm:mt-16 lg:mt-24 pb-14 sm:pb-10 overflow-hidden">
       
       {/* 📝 Header Section */}
       <div className="relative flex items-center justify-center mb-6 sm:mb-10 px-4">
         <div className="flex items-center gap-1.5 sm:gap-2 z-10 bg-white px-2 sm:px-4">
           <span className="text-[var(--brand-gold)] text-[10px] sm:text-xs">✦</span>
-          {/* 🌟 Mobile Heading size reduced */}
-          <h2 className="text-[18px] sm:text-xl lg:text-2xl font-black text-slate-800 uppercase tracking-widest whitespace-nowrap">
+          <h2 className="text-[14px] sm:text-xl lg:text-2xl font-black text-slate-800 uppercase tracking-widest whitespace-nowrap">
             What Our Customers Say
           </h2>
           <span className="text-[var(--brand-gold)] text-[10px] sm:text-xs">✦</span>
@@ -94,29 +96,30 @@ export default function TestimonialsSection() {
       </div>
 
       {/* 🍔 Carousel Slider */}
-      <div className="max-w-[1400px] mx-auto px-2 lg:px-0 pb-6 sm:pb-0">
+      {/* 🌟 pb-8 കൊടുത്തു, താഴെ ഡോട്ടുകൾക്ക് ഇരിക്കാൻ ആവശ്യമായ സ്പേസ് കിട്ടാൻ */}
+      <div className="max-w-[1400px] mx-auto w-full pb-8 sm:pb-4">
         <Slider {...settings} className="testimonial-slider">
           {reviews.map((review) => (
-            <div key={review.id} className="px-2 sm:px-3 outline-none py-2">
-              {/* 🌟 Reduced padding (p-4) for mobile to decrease height */}
-              <div className="bg-[#fdfbf7] rounded-[1.25rem] sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-[var(--brand-gold)]/10 h-full flex flex-col transition-transform hover:-translate-y-1 duration-300">
+            <div key={review.id} className="px-4 py-2 outline-none">
+              
+              <div className="bg-[#fdfbf7] rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-8 shadow-[0_4px_15px_rgba(0,0,0,0.05)] border border-[var(--brand-gold)]/20 flex flex-col transition-transform hover:-translate-y-1 duration-300 min-h-[160px] sm:min-h-[180px]">
                 
-                {/* 🌟 Stars - slightly smaller on mobile */}
-                <div className="flex items-center gap-1 mb-2.5 sm:mb-4">
+                {/* 🌟 Stars */}
+                <div className="flex items-center gap-1 mb-2.5 sm:mb-3 lg:mb-4">
                   {[...Array(review.rating)].map((_, i) => (
                     <Star key={i} size={12} className="sm:w-[14px] sm:h-[14px] fill-[var(--brand-gold)] text-[var(--brand-gold)]" />
                   ))}
                 </div>
                 
-                {/* 📝 Review Text - smaller size on mobile */}
-                <p className="text-slate-700 text-[10px] sm:text-[12px] lg:text-[14px] font-medium leading-relaxed mb-4 sm:mb-8 flex-grow">
-                  {review.text}
+                {/* 📝 Review Text */}
+                <p className="text-slate-700 text-[11px] sm:text-[12px] lg:text-[14px] font-medium leading-relaxed mb-4 sm:mb-5 lg:mb-6 flex-grow">
+                  "{review.text}"
                 </p>
                 
-                {/* 👤 User Info with Custom Icon */}
-                <div className="flex items-center gap-2.5 sm:gap-3 mt-auto pt-1 sm:pt-2">
+                {/* 👤 User Info */}
+                <div className="flex items-center gap-2.5 sm:gap-3 mt-auto pt-3 sm:pt-4 border-t border-[var(--brand-gold)]/10">
                   
-                  {/* Custom Icon - Scaled down for mobile */}
+                  {/* Custom Icon */}
                   <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[var(--brand-gold)]/10 flex items-center justify-center text-[var(--brand-gold)] shrink-0">
                     <User size={16} strokeWidth={2.5} className="sm:w-5 sm:h-5" />
                     <div className="absolute bottom-0 right-0 bg-[#fdfbf7] rounded-full p-[1px] sm:p-0.5">
@@ -125,10 +128,10 @@ export default function TestimonialsSection() {
                   </div>
                   
                   <div className="flex flex-col">
-                    <h4 className="text-[9px] sm:text-[11px] lg:text-[12px] font-black text-slate-900 leading-tight">
+                    <h4 className="text-[11px] sm:text-[12px] font-black text-slate-900 leading-tight">
                       {review.name}
                     </h4>
-                    <p className="text-[7.5px] sm:text-[9px] lg:text-[10px] text-gray-400 font-medium">
+                    <p className="text-[9px] sm:text-[10px] text-gray-400 font-medium mt-0.5">
                       {review.location}
                     </p>
                   </div>
@@ -140,13 +143,23 @@ export default function TestimonialsSection() {
         </Slider>
       </div>
       
-      {/* 🛠 Custom CSS for Dots */}
+      {/* 🛠 Custom CSS for Dots & Slider Reset */}
       <style dangerouslySetInnerHTML={{__html: `
-        /* 🌟 Adjusted dot position for mobile */
-        @media (max-width: 640px) {
-          .testimonial-slider .slick-dots { bottom: -15px !important; }
+        .testimonial-slider .slick-track {
+          display: flex !important;
+          align-items: stretch;
         }
-        .testimonial-slider .slick-dots { bottom: -30px; }
+        .testimonial-slider .slick-slide {
+          height: auto;
+        }
+        .testimonial-slider .slick-slide > div {
+          height: 100%;
+        }
+
+        @media (max-width: 768px) {
+          .testimonial-slider .slick-dots { bottom: -45px !important; }
+        }
+        .testimonial-slider .slick-dots { bottom: -40px; }
         .testimonial-slider .slick-dots li button:before { color: var(--brand-gold); opacity: 0.3; font-size: 10px; }
         .testimonial-slider .slick-dots li.slick-active button:before { color: var(--brand-gold); opacity: 1; font-size: 12px; }
       `}} />
