@@ -208,10 +208,11 @@ export default function UserHeader() {
           </div>
 
           <div className="flex items-center justify-end flex-1 z-20">
-            <Link href="/bookings" className="flex items-center gap-1 text-[var(--brand-gold)] hover:opacity-80 transition-opacity">
+            <button  type="button"
+            onClick={() => setIsReservationOpen(true)}className="flex items-center gap-1 text-[var(--brand-gold)] hover:opacity-80 transition-opacity">
               <span className="text-[8px] font-black uppercase tracking-widest mt-0.5 whitespace-nowrap">Book a Table</span>
               <ConciergeBell size={16} className="shrink-0" />
-            </Link>
+            </button>
           </div>
         </div>
 
