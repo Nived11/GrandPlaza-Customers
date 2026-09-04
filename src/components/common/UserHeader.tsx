@@ -14,7 +14,7 @@ import {
   RiHome5Line, RiHome5Fill,
   RiRestaurantLine, RiRestaurantFill
 } from "react-icons/ri";
-import ReservationModal from "@/features/reservation/ReservationModal";
+import ReservationModal from "@/features/reservation/ReservationMain";
 
 export default function UserHeader() {
   const pathname = usePathname();
