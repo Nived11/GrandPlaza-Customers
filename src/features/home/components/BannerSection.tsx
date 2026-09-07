@@ -19,10 +19,11 @@ interface BannerItem {
 
 interface BannerSectionProps {
   data?: BannerItem[];
+  onBannerClick?: (item: BannerItem) => void; // 🌟 ഫിക്സ് ചെയ്തത്: ഈ ലൈൻ മിസ്സിങ് ആയിരുന്നു!
 }
 
-
-const BannerSection = ({ data = [] }: BannerSectionProps) => {
+// 🌟 ഫിക്സ് ചെയ്തത്: onBannerClick ഇവിടെ എടുത്തു (Destructure ചെയ്തു)
+const BannerSection = ({ data = [], onBannerClick }: BannerSectionProps) => {
   const sliderRef = useRef<Slider | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
@@ -137,7 +138,7 @@ const BannerSection = ({ data = [] }: BannerSectionProps) => {
                         borderLeft: isMobile ? "3px solid var(--brand-gold)" : "6px solid var(--brand-gold)" 
                       }}
                     >
-                      <img src={item.image || item.banner_image} alt="Banner" className="w-full h-full object-cover" />
+                      <img src={item.image || item.banner_image || undefined} alt="Banner" className="w-full h-full object-cover" />
                     </div>
                   </div>
 
