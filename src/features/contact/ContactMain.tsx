@@ -28,8 +28,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import axiosInstance from "@/api/axios";
-
+import axiosInstance from "@/lib/axios";
 const CONTACT_DETAILS = {
   locationName: "Empire Plaza Kochi",
   address: "NH 66, Near Sunrise Hospital, Edappally, Kochi, Kerala 682024",
