@@ -10,43 +10,19 @@ import "slick-carousel/slick/slick-theme.css";
 
 interface BannerItem {
   id: number | string;
-  category?: string;
-  title: string;
+  category_name?: string;
+  name: string;
   description: string;
-  banner_image?: string;
-  image?: string;
+  banner_image?: string | null;
+  image?: string | null;
 }
 
 interface BannerSectionProps {
   data?: BannerItem[];
-  onBannerClick?: (item: BannerItem) => void;
 }
 
-const dummyBanners: BannerItem[] = [
-  {
-    id: 1,
-    category: "FLAVORS THAT DELIGHT",
-    title: "Good Food, Great Moments.",
-    description: "From our kitchen to your doorstep – crafted with passion, delivered with care.",
-    image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=2070&auto=format&fit=crop",
-  },
-  {
-    id: 2,
-    category: "AUTHENTIC RECIPES",
-    title: "Taste the Authentic, Royal Biryani.",
-    description: "Cooked with premium spices and long-grain basmati rice. A royal treat for your taste buds.",
-    image: "https://images.unsplash.com/photo-1589302168068-964664d93cb0?q=80&w=2070&auto=format&fit=crop",
-  },
-  {
-    id: 3,
-    category: "HOT & CRISPY",
-    title: "Craving Something Crispy & Spicy?",
-    description: "Try our signature broasted chicken and fiery wings. Perfectly crispy on the outside.",
-    image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?q=80&w=2070&auto=format&fit=crop",
-  }
-];
 
-const BannerSection = ({ data, onBannerClick }: BannerSectionProps) => {
+const BannerSection = ({ data = [] }: BannerSectionProps) => {
   const sliderRef = useRef<Slider | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
@@ -58,8 +34,7 @@ const BannerSection = ({ data, onBannerClick }: BannerSectionProps) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const banners = data && data.length > 0 ? data : dummyBanners;
-
+  const banners = data ;
   const settings = {
     infinite: banners.length > 1,
     slidesToShow: 1,
@@ -127,11 +102,11 @@ const BannerSection = ({ data, onBannerClick }: BannerSectionProps) => {
                           transition={{ duration: 0.5, ease: "easeOut" }}
                         >
                           <h4 className="text-[var(--brand-gold)] text-[7px] sm:text-[9px] md:text-xs font-bold uppercase tracking-[0.1em] lg:tracking-[0.2em] mb-1.5 lg:mb-3 drop-shadow-sm">
-                            {item.category}
+                            {item.category_name}
                           </h4>
 
                           <h1 className="text-[17px] sm:text-[24px] lg:text-[38px] font-serif font-black leading-[1.15] text-[var(--brand-green-dark)] mb-2 lg:mb-4">
-                            {item.title}
+                            {item.name}
                           </h1>
                           
                           <p className="text-[9px] sm:text-[12px] md:text-[15px] font-medium mb-4 lg:mb-8 max-w-[180px] sm:max-w-[220px] lg:max-w-md leading-relaxed text-gray-700 line-clamp-3 lg:line-clamp-none pr-1 lg:pr-0">
