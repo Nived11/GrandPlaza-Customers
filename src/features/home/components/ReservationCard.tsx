@@ -3,21 +3,19 @@ import { Calendar, Star, Gift } from 'lucide-react';
 
 export default function ReservationCard() {
   return (
-    <div className="relative w-full bg-[var(--brand-green-dark)] border border-[var(--brand-gold)]/40 rounded-xl overflow-hidden flex flex-col shadow-xl">
+    <div className="relative w-full bg-black border border-[var(--brand-gold)]/40 rounded-xl overflow-hidden flex flex-col shadow-xl">
 
-      {/* 📸 BACKGROUND IMAGE */}
+      {/* 📸 BACKGROUND IMAGE - Updated to Food & Table */}
       <div className="absolute right-0 top-0 w-full h-full z-0">
         <img 
-          src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1000&fit=crop" 
+          src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1000&q=80" 
           className="w-full h-full object-cover" 
-          alt="Restaurant Ambience" 
+          alt="Restaurant Food and Table" 
         />
-        {/* 🌟 THEME UPDATE: Mobile uses Bottom-to-Top gradient. Desktop uses Left-to-Right gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--brand-green-dark)] via-[var(--brand-green-dark)]/80 to-[var(--brand-green-dark)]/40 md:bg-gradient-to-r md:from-[var(--brand-green-dark)] md:via-[var(--brand-green-dark)]/20 md:to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/40 md:bg-gradient-to-r md:from-black md:via-black/70 md:to-transparent"></div>
       </div>
 
       {/* 📝 TOP CONTENT (Text & Button) */}
-      {/* 🌟 Height reduced in mobile by decreasing padding (p-3.5) and margins */}
       <div className="relative z-10 flex-grow p-3.5 sm:p-5 lg:p-10 w-full md:w-[60%] flex flex-col justify-center items-start">
         <h3 className="text-white text-lg sm:text-2xl lg:text-[32px] font-serif font-black leading-tight drop-shadow-md">
           Reserve Your Table
@@ -34,7 +32,6 @@ export default function ReservationCard() {
       </div>
 
       {/* ✨ BOTTOM FEATURE STRIP */}
-      {/* 🌟 3 items in 1 row on mobile */}
       <div className="relative z-10 w-full bg-black/40 backdrop-blur-md border-t border-white/5 px-2 py-2 sm:px-4 md:px-6 md:py-4 lg:px-10 flex flex-row items-center justify-between gap-1 sm:gap-2 md:gap-4 lg:gap-8 overflow-hidden">
 
         {/* Feature 1 */}

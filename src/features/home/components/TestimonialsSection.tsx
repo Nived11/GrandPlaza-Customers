@@ -156,10 +156,11 @@ export default function TestimonialsSection() {
           height: 100%;
         }
 
+        /* 🌟 ഡോട്ടുകൾ കുറച്ചുകൂടി താഴേക്ക് ഇറക്കി വെച്ചു (-25px) */
         @media (max-width: 768px) {
-          .testimonial-slider .slick-dots { bottom: -45px !important; }
+          .testimonial-slider .slick-dots { bottom: -25px !important; }
         }
-        .testimonial-slider .slick-dots { bottom: -40px; }
+        .testimonial-slider .slick-dots { bottom: -30px; }
         .testimonial-slider .slick-dots li button:before { color: var(--brand-gold); opacity: 0.3; font-size: 10px; }
         .testimonial-slider .slick-dots li.slick-active button:before { color: var(--brand-gold); opacity: 1; font-size: 12px; }
       `}} />
