@@ -39,11 +39,9 @@ const useLogin = () => {
 
       return data;
     } catch (error) {
-      const messages = extractErrorMessages(error);
-
-      messages.forEach((message) => {
-        toast.error(message);
-      });
+      const message = extractErrorMessages(error);
+          
+      toast.error(message);
 
       return null;
     } finally {

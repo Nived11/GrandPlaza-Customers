@@ -6,10 +6,12 @@ import type { HomeMenuItem } from "../hooks/useHomeHook";
 
 interface BestSellersSectionProps {
   data?: HomeMenuItem[];
+  onProductClick?: (product: HomeMenuItem) => void;
 }
 
 export default function BestSellersSection({
   data = [],
+  onProductClick,
 }: BestSellersSectionProps) {
   return (
     <div className="w-full mt-16 lg:mt-24">
@@ -137,7 +139,10 @@ export default function BestSellersSection({
                   </div>
 
                   {/* Add Button */}
-                  <button className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[var(--brand-green-dark)] hover:bg-[#024532] text-[var(--brand-gold)] flex items-center justify-center shadow-sm sm:shadow-md transition-colors active:scale-95 border border-[var(--brand-gold)]/30">
+                  <button
+                    onClick={() => onProductClick?.(item)}
+                    className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[var(--brand-green-dark)] hover:bg-[#024532] text-[var(--brand-gold)] flex items-center justify-center shadow-sm sm:shadow-md transition-colors active:scale-95 border border-[var(--brand-gold)]/30"
+                  >
                     <Plus
                       size={14}
                       strokeWidth={3}

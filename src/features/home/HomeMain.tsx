@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import BannerSection from "./components/BannerSection";
 import CravingSection from "./components/CravingSection";
 import HotPicksSection from "./components/HotPicksSection";
@@ -16,9 +16,15 @@ import TestimonialsSection from "./components/TestimonialsSection";
 import FaqSection from "./components/FaqSection";
 import { useHomeHook } from "./hooks/useHomeHook";
 import HomeSkeleton from "./components/HomeSkeleton";
+import ProductQuickViewModal from "@/features/product/components/ProductQuickViewModal";
+import type { HomeMenuItem } from "./hooks/useHomeHook";
+
 
 const HomeMain = () => {
   const { homeData, loading, error } = useHomeHook();
+
+  const [selectedProduct, setSelectedProduct] =
+    useState<HomeMenuItem | null>(null);
 
   if (loading) {
     return <HomeSkeleton />;
@@ -39,8 +45,11 @@ const HomeMain = () => {
             </div>
 
             <CravingSection data={homeData?.categories ?? []} />
-            <HotPicksSection data={homeData?.todays_special ?? []} />
-          </div>
+
+            <HotPicksSection
+              data={homeData?.todays_special ?? []}
+              onProductClick={setSelectedProduct}
+            />          </div>
 
           <div className="lg:col-span-4 flex flex-col gap-6 lg:-mt-[80px] relative z-20">
             
@@ -62,14 +71,18 @@ const HomeMain = () => {
           <ReservationCard />
         </div>
 
-        <BestSellersSection data={homeData?.best_sellers ?? []} />
-
+        <BestSellersSection
+          data={homeData?.best_sellers ?? []}
+          onProductClick={setSelectedProduct}
+        />
         <div className="w-full mt-4 block lg:hidden">
           <ReservationCard />
         </div>
 
-        <ComboOffersSection data={homeData?.combo_menu ?? []} />
-
+        <ComboOffersSection
+          data={homeData?.combo_menu ?? []}
+          onProductClick={setSelectedProduct}
+        />
         <div className="w-full mt-6 block lg:hidden">
           <WhyChooseUsCard />
         </div>
@@ -77,6 +90,11 @@ const HomeMain = () => {
         <CallToActionSection />
         <TestimonialsSection />
         <FaqSection />
+
+        <ProductQuickViewModal
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+        />
 
       </section>
     </div>

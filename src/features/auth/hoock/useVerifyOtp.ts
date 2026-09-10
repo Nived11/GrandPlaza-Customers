@@ -93,14 +93,11 @@ const useVerifyOtp = () => {
           }
         );
       } else {
-        const messages =
-          extractErrorMessages(error);
+        const message = extractErrorMessages(error);
 
-        if (messages?.length) {
-          messages.forEach((message: string) => {
-            toast.error(message, {
-              duration: 5000,
-            });
+        if (message) {
+          toast.error(message, {
+            duration: 5000,
           });
         } else {
           toast.error(

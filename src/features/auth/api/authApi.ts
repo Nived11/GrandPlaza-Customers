@@ -1,6 +1,6 @@
 import axiosInstance from "@/lib/axios";
 
-export const loginApi = async (phone_number: number) => {
+export const loginApi = async (phone_number: string) => {
   const response = await axiosInstance.post("/accounts/send-otp", {
     phone_number
   });

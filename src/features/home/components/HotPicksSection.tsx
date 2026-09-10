@@ -6,10 +6,12 @@ import type { HomeMenuItem } from "../hooks/useHomeHook";
 
 interface HotPicksSectionProps {
   data?: HomeMenuItem[];
+  onProductClick?: (product: HomeMenuItem) => void;
 }
 
 export default function HotPicksSection({
   data = [],
+  onProductClick,
 }: HotPicksSectionProps) {
   return (
     <div className="w-full">
@@ -117,7 +119,10 @@ export default function HotPicksSection({
                       )}
                   </div>
 
-                  <button className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[var(--brand-green-dark)] hover:bg-[var(--brand-gold)] text-white flex items-center justify-center shadow-sm hover:scale-110 transition-all">
+                  <button
+                    onClick={() => onProductClick?.(item)}
+                    className="w-5 h-5 cursor-pointer sm:w-6 sm:h-6 rounded-full bg-[var(--brand-green-dark)] hover:bg-[var(--brand-gold)] text-white flex items-center justify-center shadow-sm hover:scale-110 transition-all"
+                  >
                     <Plus
                       size={12}
                       strokeWidth={3}
