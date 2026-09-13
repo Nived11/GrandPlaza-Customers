@@ -2,12 +2,15 @@
 
 import React, { useState } from "react";
 import useRegister from "../hoock/useRegister";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface RegisterFormProps {
   onSuccess: (phone: string) => void;
 }
 
 const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
+  const router = useRouter();
+
   const { register, isLoading } = useRegister();
 
   const [fullName, setFullName] = useState("");

@@ -51,7 +51,7 @@ const OtpForm = ({
 
   useEffect(() => {
     const savedPhone =
-      sessionStorage.getItem("auth_phone");
+      sessionStorage.getItem("register_phone");
 
     if (savedPhone) {
       setStoredPhone(savedPhone);
@@ -321,7 +321,7 @@ const OtpForm = ({
     /*
      * Authentication successful
      */
-    sessionStorage.removeItem("auth_phone");
+    sessionStorage.removeItem("register_phone");
 
     /*
      * Return to previous page
