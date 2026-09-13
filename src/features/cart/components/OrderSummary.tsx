@@ -56,7 +56,8 @@ const OrderSummary = () => {
 
         if (!response?.status) {
           throw new Error(
-            response?.message || "Failed to add item to cart."
+            // 🌟 FIX 1: Added (response as any) to bypass TS error
+            (response as any)?.message || "Failed to add item to cart."
           );
         }
       }
@@ -69,7 +70,8 @@ const OrderSummary = () => {
 
       if (!cartResponse?.status) {
         throw new Error(
-          cartResponse?.message || "Failed to fetch cart."
+          // 🌟 FIX 2: Added (cartResponse as any) to bypass TS error
+          (cartResponse as any)?.message || "Failed to fetch cart."
         );
       }
 
