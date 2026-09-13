@@ -2,40 +2,39 @@
 
 import React, { useRef, useState } from 'react';
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-motion';
-import { Mouse } from 'lucide-react';
 
 const timelineData = [
   {
     year: "1927",
-    subtitle: "THE BEGINNING",
-    title: "Roots of Tradition",
-    exp: "A humble start",
-    desc: "It all started with a small family recipe and a big dream. The foundation of our hospitality journey began here, focusing on pure ingredients and authentic taste.",
-    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80"
+    subtitle: "FAMILY ROOTS",
+    title: "The Legacy Begins",
+    exp: "A hospitality journey starts in Nashik.",
+    desc: "Our connection with hospitality stems from a family legacy that began in 1927, when our grandfather started his restaurant business in Nashik, Maharashtra, laying the foundation for generations to come.",
+    image: "/img1927.png" 
   },
   {
     year: "2000",
-    subtitle: "EXPANSION",
-    title: "Scaling New Heights",
-    exp: "Entering new markets",
-    desc: "Over the years, the journey expanded across hospitality, real estate, and strategic management, creating a strong footprint in the industry.",
-    image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80"
+    subtitle: "NEW CHAPTER",
+    title: "Entrepreneurial Vision",
+    exp: "Guided by discipline and hard work.",
+    desc: "Inspired by the dedication and perseverance of a farmer father, the independent entrepreneurial journey began. It was built on the core values of consistency, patience, and a strong desire to create lasting value.",
+    image: "/img2000.png"
   },
   {
     year: "2026",
-    subtitle: "GROWTH",
-    title: "Building Through Experience",
-    exp: "26+ Years of Business Experience",
-    desc: "Today, we lead with purpose and innovation. Learning, adapting, and building businesses with a people-first approach.",
-    image: "https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&w=800&q=80"
+    subtitle: "PRESENT",
+    title: "26+ Years of Experience",
+    exp: "Leading a team of 220+ professionals.",
+    desc: "Today, as leaders of Empire Plaza and HUYS Global Ventures, our journey spans hospitality, real estate, and construction. We focus on building strong teams, innovation, and continuous human development.",
+    image: "/img2026.png"
   },
   {
     year: "FUTURE",
-    subtitle: "BEYOND",
-    title: "A Global Vision",
-    exp: "Looking ahead",
-    desc: "Our vision for the future spans continents. We aim to bring our unique blend of hospitality and culture to the global stage.",
-    image: "https://images.unsplash.com/photo-1600891964092-4316c288032e?auto=format&fit=crop&w=800&q=80"
+    subtitle: "GLOBAL VISION",
+    title: "A Lasting Legacy",
+    exp: "Taking authentic flavours to the world.",
+    desc: "Our ambition is to establish a strong global presence, introducing diverse cuisines across continents. We aim to create ventures recognized for quality, purpose, and a positive impact on society.",
+    image: "/future2000.png"
   }
 ];
 
@@ -63,33 +62,21 @@ export default function AboutTimeline() {
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center">
         
         {/* =========================================
-            🌟 BACKGROUND DECORATIONS (Animated Leaf)
-        ========================================== */}
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <AnimatePresence mode="wait">
-            <motion.img
-              key={activeIndex}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 0.5, y: 0 }} // 0.5 opacity for the blended look
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-              src="/leaf1.png"
-              alt="Leaf"
-              className="absolute top-[30%] left-[40%] w-[120px] object-contain"
-            />
-          </AnimatePresence>
-        </div>
-
-        {/* =========================================
-            ⬅️ LEFT SIDE: STATIC INNER CIRCLE (കറങ്ങില്ല)
+            ⬅️ LEFT SIDE: STATIC INNER CIRCLE 
         ========================================== */}
         <div className="hidden lg:flex absolute left-[-280px] xl:left-[-350px] top-1/2 -translate-y-1/2 w-[600px] xl:w-[700px] h-[600px] xl:h-[700px] rounded-full z-0 pointer-events-none overflow-hidden">
           
+          {/* 🌟 1. Updated with imgcorner.png */}
           <img 
-            src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80" 
+            src="/imgcorner.png" 
             alt="Timeline Background" 
-            className="absolute inset-0 w-full h-full object-cover opacity-15 grayscale"
+            className="absolute inset-0 w-full h-full object-contain opacity-30 left-[-280px] xl:left-[150px] "
           />
+          
+          {/* 🌟 2. Faded white on top */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/10 to-transparent" />
+          
+          {/* 🌟 3. Side fade to match background */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[var(--brand-cream-soft)]/60 to-[var(--brand-cream-soft)]" />
           
           {/* A Journey Of Goodness Badge */}
@@ -105,7 +92,6 @@ export default function AboutTimeline() {
         {/* =========================================
             ⬅️ LEFT SIDE: ROTATING TIMELINE BORDER & DOTS
         ========================================== */}
-        {/* 🌟 Static റൗണ്ടിന്റെ കൃത്യം അതേ സൈസും പൊസിഷനും കൊടുത്തു */}
         <motion.div 
           animate={{ rotate: targetRotation }}
           transition={{ type: "spring", stiffness: 60, damping: 15 }}
@@ -121,13 +107,12 @@ export default function AboutTimeline() {
                 className="absolute inset-0 origin-center" 
                 style={{ transform: `rotate(${angle}deg)` }}
               >
-                {/* 🌟 ഈ റാപ്പർ (wrapper) ലൈനിന്റെ കൃത്യം നടുവിലായിരിക്കാൻ `right-0` ഉം `translate-x-1/2` ഉം കൊടുത്തു */}
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 flex items-center justify-center w-6 h-6">
                   
-                  {/* Dot (Active ആണെങ്കിൽ വലുതാവുകയും Glow വരുകയും ചെയ്യും) */}
+                  {/* Dot */}
                   <div className={`rounded-full transition-all duration-500 ${isActive ? 'w-5 h-5 bg-[var(--brand-gold)] ring-[6px] ring-[var(--brand-gold)]/20 shadow-md' : 'w-3 h-3 bg-[var(--brand-gold)]/60'}`} />
 
-                  {/* Text Container (ഡോട്ടിൽ നിന്നും അല്പം വലത്തോട്ട് മാറ്റി വെച്ചു) */}
+                  {/* Text Container */}
                   <motion.div 
                     animate={{ rotate: (activeIndex - i) * 30 }}
                     transition={{ type: "spring", stiffness: 60, damping: 15 }}
@@ -164,14 +149,14 @@ export default function AboutTimeline() {
               transition={{ duration: 0.4, ease: "easeInOut" }}
             >
               <span className="text-[10px] font-black text-[var(--brand-gold)] uppercase tracking-[0.25em] mb-4 block">
-                The Journey
+                {timelineData[activeIndex].subtitle}
               </span>
               
-              <h2 className="text-3xl sm:text-4xl lg:text-[46px] font-serif font-black text-[var(--brand-green-dark)] leading-[1.1] mb-5">
+              <h2 className="text-3xl sm:text-4xl lg:text-[38px] font-serif font-black text-[var(--brand-green-dark)] leading-[1.1] mb-5">
                 {timelineData[activeIndex].title}
               </h2>
               
-              <p className="text-[12px] sm:text-[13px] text-[var(--brand-gold)] font-bold mb-4">
+              <p className="text-[12px] sm:text-[13px] text-[var(--brand-gold)] font-semibold mb-4">
                 {timelineData[activeIndex].exp}
               </p>
               
@@ -186,7 +171,7 @@ export default function AboutTimeline() {
         {/* =========================================
             📸 RIGHT SIDE: DYNAMIC IMAGE
         ========================================== */}
-        <div className="hidden lg:flex relative z-20 w-[280px] xl:w-[320px] h-[350px] xl:h-[300px] mr-[8%] items-center justify-center">
+        <div className="hidden lg:flex relative z-20 w-[320px] xl:w-[400px] h-[400px] xl:h-[400px] mr-[6%] items-center justify-center">
           <AnimatePresence mode="wait">
             <motion.img
               key={activeIndex}
@@ -196,7 +181,7 @@ export default function AboutTimeline() {
               transition={{ duration: 0.5, ease: "easeInOut" }}
               src={timelineData[activeIndex].image}
               alt={timelineData[activeIndex].title}
-              className="absolute inset-0 w-full h-full object-cover rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-[var(--brand-gold)]/20"
+              className="absolute inset-0 w-full h-full object-contain drop-shadow-2xl"
             />
           </AnimatePresence>
         </div>
