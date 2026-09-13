@@ -62,9 +62,7 @@ const LoginPhoneForm = ({
     const response = await login(phone);
     
     if (!response) return;
-    
-    sessionStorage.setItem("auth_phone", phone);
-    
+        
     onSuccess(phone);
   };
 

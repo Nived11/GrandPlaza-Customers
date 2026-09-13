@@ -1,18 +1,48 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import RegisterForm from "./components/RegisterForm";
 import RegisterOtpForm from "./components/RegisterOtpForm";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const RegisterMain = () => {
-  const [showOtp, setShowOtp] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const showOtp = searchParams.get("step") === "otp";
+
   const [phone, setPhone] = useState("");
 
+  useEffect(() => {
+    const savedPhone = sessionStorage.getItem("register_phone");
+
+    if (savedPhone) {
+      setPhone(savedPhone);
+    }
+  }, []);
+
   const handleRegisterSuccess = (mobileNumber: string) => {
-    console.log("REGISTER SUCCESS - SHOWING OTP:", mobileNumber);
+    console.log(
+      "REGISTER SUCCESS - SHOWING OTP:",
+      mobileNumber
+    );
+
+    sessionStorage.setItem(
+      "register_phone",
+      mobileNumber
+    );
 
     setPhone(mobileNumber);
-    setShowOtp(true);
+
+    router.push("/signup?step=otp");
+  };
+
+  const handleEditNumber = () => {
+    sessionStorage.removeItem("register_phone");
+
+    setPhone("");
+
+    router.push("/register");
   };
 
   return (
@@ -153,7 +183,7 @@ const RegisterMain = () => {
             ) : (
               <RegisterOtpForm
                 phone={phone}
-                onEditNumber={() => setShowOtp(false)}
+                onEditNumber={handleEditNumber}
               />
             )}
           </div>
