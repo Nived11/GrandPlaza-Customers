@@ -88,7 +88,7 @@ export default function VerifyOtpPage() {
                   value={data}
                   onKeyDown={(e) => handleKeyDown(e, index)}
                   onChange={(e) => handleOtpChange(e.target.value, index)}
-                  className="w-full h-12 lg:h-14 bg-white/5 border border-white/10 rounded-xl text-center font-black text-lg text-[#f9a602] focus:border-[#f9a602] outline-none"
+                  className="w-full appearance-none h-12 lg:h-14 bg-white/5 border border-white/10 rounded-xl text-center font-black text-lg text-[#f9a602] focus:border-[#f9a602] outline-none"
                 />
               ))}
             </div>

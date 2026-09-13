@@ -158,7 +158,7 @@ export default function UserHeader() {
               {isSearchOpen ? (
                 <>
                   <Search size={16} className="text-brand-green-dark min-w-[16px]" />
-                  <input type="text" placeholder="Search food..." className="bg-transparent border-none outline-none text-xs w-full px-2 text-brand-green-dark placeholder:text-brand-green-dark" autoFocus />
+                  <input type="text" placeholder="Search food..." className="bg-transparent appearance-none border-none outline-none text-xs w-full px-2 text-brand-green-dark placeholder:text-brand-green-dark" autoFocus />
                   <button onClick={() => setIsSearchOpen(false)} className="text-brand-green-dark transition"><X size={16} /></button>
                 </>
               ) : (
@@ -240,7 +240,7 @@ export default function UserHeader() {
                   <input 
                     type="text" 
                     placeholder="Search for delicious food..." 
-                    className="bg-transparent border-none outline-none text-[11px] font-medium w-full text-gray-700 placeholder:text-gray-400"
+                    className="bg-transparent appearance-none border-none outline-none text-[11px] font-medium w-full text-gray-700 placeholder:text-gray-400"
                   />
                   {/* Slimmer Button */}
                   <button 

@@ -1,14 +1,24 @@
 "use client";
 
-import React from "react";
-import LoginForm from "./components/LoginForm";
+import React, { useState } from "react";
+import RegisterForm from "./components/RegisterForm";
+import RegisterOtpForm from "./components/RegisterOtpForm";
 
-const LoginMain = () => {
+const RegisterMain = () => {
+  const [showOtp, setShowOtp] = useState(false);
+  const [phone, setPhone] = useState("");
+
+  const handleRegisterSuccess = (mobileNumber: string) => {
+    console.log("REGISTER SUCCESS - SHOWING OTP:", mobileNumber);
+
+    setPhone(mobileNumber);
+    setShowOtp(true);
+  };
+
   return (
     <div className="min-h-screen lg:h-screen bg-[#FBF6EC] text-[#1E2A22] flex flex-col antialiased overflow-hidden">
       {/* Header */}
       <header className="relative z-30 shrink-0 w-full px-4 sm:px-8 lg:px-12 xl:px-16 py-3 sm:py-4 flex items-center justify-between border-b border-[#0F3D2E]/10">
-        {/* Brand */}
         <div className="flex items-center gap-2.5 sm:gap-3">
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#0F3D2E] text-white flex items-center justify-center shadow-md">
             <span className="text-xs sm:text-sm">✦</span>
@@ -31,7 +41,6 @@ const LoginMain = () => {
           </div>
         </div>
 
-        {/* Back */}
         <a
           href="/"
           className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-medium text-[#1E2A22]/75 hover:text-[#0F3D2E] transition-colors tracking-wide bg-white/70 backdrop-blur-md border border-[#0F3D2E]/10 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full shadow-sm"
@@ -47,12 +56,11 @@ const LoginMain = () => {
       </header>
 
       {/* Main */}
-      <main className="relative z-20 w-full flex-1 min-h-0 flex flex-col lg:flex-row max-w-[1720px] mx-auto">
+      <main className="relative z-20 w-full flex-1 flex flex-col lg:flex-row max-w-[1720px] mx-auto">
 
         {/* LEFT SIDE */}
         <section className="hidden lg:flex lg:w-[58%] xl:w-[60%] min-h-0 px-5 sm:px-8 lg:px-10 xl:px-14 py-5 sm:py-7 lg:py-8 flex-col justify-between relative">
 
-          {/* Heading */}
           <div className="shrink-0">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 border border-[#D9A441]/25 text-[#0F3D2E] text-[10px] font-semibold tracking-[0.18em] uppercase mb-3 sm:mb-4 shadow-sm">
               <span className="text-[9px] text-[#D9A441]">
@@ -90,7 +98,6 @@ const LoginMain = () => {
             </div>
           </div>
 
-          {/* Food Image */}
           <div className="relative overflow-hidden rounded-[28px] sm:rounded-[36px] rounded-tr-[80px] sm:rounded-tr-[100px] rounded-bl-[12px] shadow-xl border-4 border-white/80 mt-5 lg:mt-6 flex-1 min-h-[180px] max-h-[350px]">
             <img
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3izQc3URBcJbaVgXCejNt2T4NcBuSiqT16d8zzVYXXcNpOcQeYe3RLw_TmrH_csA2c1HSK5-uNd69Wk_UVQeujlggNUgzFo2zZ6xD2zZyK8Vr9xc-2OG5Brv-QMywIn9YjW6KdD56pFCpVudeyGImvAhmE_YYg3ehUwNkYFXIRO5VRuIZ6laJnaWl57wFEDQYg-MG-9MSqaNXrlhev9APE30O9B829QoxS1AL98uiR3h2qX7fxOzx"
@@ -103,7 +110,7 @@ const LoginMain = () => {
         </section>
 
         {/* RIGHT SIDE */}
-        <section className="w-full lg:w-[42%] xl:w-[40%] bg-[#F4ECE0]/70 border-t lg:border-t-0 lg:border-l border-[#0F3D2E]/10 px-4 sm:px-8 lg:px-10 xl:px-14 py-6 sm:py-7 lg:py-8 flex-1 lg:min-h-0 flex items-center justify-center relative overflow-hidden">
+        <section className="w-full lg:w-[42%] xl:w-[40%] bg-[#F4ECE0]/70 border-t lg:border-t-0 lg:border-l border-[#0F3D2E]/10 px-4 sm:px-8 lg:px-10 xl:px-14 py-6 sm:py-7 lg:py-8 flex items-center justify-center relative flex-1 lg:min-h-0 overflow-hidden">
 
           {/* Decorative circles */}
           <div className="absolute -top-16 -right-16 w-56 h-56 opacity-[0.04] pointer-events-none text-[#0F3D2E]">
@@ -137,9 +144,18 @@ const LoginMain = () => {
             </svg>
           </div>
 
-          {/* Login Form */}
+          {/* FORM / OTP */}
           <div className="w-full max-w-md relative z-10">
-            <LoginForm />
+            {!showOtp ? (
+              <RegisterForm
+                onSuccess={handleRegisterSuccess}
+              />
+            ) : (
+              <RegisterOtpForm
+                phone={phone}
+                onEditNumber={() => setShowOtp(false)}
+              />
+            )}
           </div>
         </section>
       </main>
@@ -175,4 +191,4 @@ const LoginMain = () => {
   );
 };
 
-export default LoginMain;
+export default RegisterMain;

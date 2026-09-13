@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
+import { createPortal } from "react-dom";import {
   X,
   Heart,
   Minus,
@@ -20,11 +20,17 @@ interface ProductQuickViewModalProps {
   onClose: () => void;
 }
 
-const ProductQuickViewModal = ({
-  product,
-  onClose,
-}: ProductQuickViewModalProps) => {
+const ProductQuickViewModal = ({  product,  onClose,}: ProductQuickViewModalProps) => {
   const dispatch = useDispatch<AppDispatch>();
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+
+    return () => {
+      setMounted(false);
+    };
+  }, []);
 
   const [selectedVariant, setSelectedVariant] =
     useState<HomeVariant | null>(null);
@@ -90,9 +96,9 @@ const ProductQuickViewModal = ({
     };
   }, [product, onClose]);
 
-  if (!product) {
-    return null;
-  }
+if (!product || !mounted) {
+  return null;
+}
 
   /*
    * Get the selected price.
@@ -225,9 +231,9 @@ const handleAddToCart = () => {
     }
   };
 
-  return (
+  return createPortal (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#09281E]/60 p-3 backdrop-blur-[6px] sm:p-5"
+      className="fixed inset-0 z-[99999] flex items-center justify-center bg-[#09281E]/60 p-3 backdrop-blur-[6px] sm:p-5"
       onMouseDown={handleBackdropClick}
       role="dialog"
       aria-modal="true"
@@ -272,7 +278,7 @@ const handleAddToCart = () => {
         </div>
 
         {/* RIGHT — INFORMATION */}
-        <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex min-h-0 flex-1 flex-col ">
           {/* Close */}
           <div className="flex justify-end px-4 pt-4 sm:px-5">
             <button
@@ -479,7 +485,8 @@ const handleAddToCart = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

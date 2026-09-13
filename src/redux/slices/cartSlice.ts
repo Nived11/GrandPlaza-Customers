@@ -52,7 +52,8 @@ const cartSlice = createSlice({
       const existingItem = state.items.find(
         (item) =>
           item.id === newItem.id &&
-          item.variant?.id === newItem.variant?.id
+          (item.variant?.id ?? null) ===
+            (newItem.variant?.id ?? null)
       );
 
       if (existingItem) {
@@ -65,12 +66,16 @@ const cartSlice = createSlice({
           existingItem.unit_price *
           existingItem.quantity;
       } else {
+        const quantity = Math.min(
+          newItem.quantity,
+          20
+        );
+
         state.items.push({
           ...newItem,
-          quantity: Math.min(newItem.quantity, 20),
+          quantity,
           total_price:
-            newItem.unit_price *
-            Math.min(newItem.quantity, 20),
+            newItem.unit_price * quantity,
         });
       }
     },
@@ -87,7 +92,8 @@ const cartSlice = createSlice({
       const item = state.items.find(
         (cartItem) =>
           cartItem.id === id &&
-          cartItem.variant?.id === variantId
+          (cartItem.variant?.id ?? null) ===
+            (variantId ?? null)
       );
 
       if (!item) return;
@@ -112,7 +118,8 @@ const cartSlice = createSlice({
       const itemIndex = state.items.findIndex(
         (cartItem) =>
           cartItem.id === id &&
-          cartItem.variant?.id === variantId
+          (cartItem.variant?.id ?? null) ===
+            (variantId ?? null)
       );
 
       if (itemIndex === -1) return;
@@ -142,7 +149,8 @@ const cartSlice = createSlice({
         (item) =>
           !(
             item.id === id &&
-            item.variant?.id === variantId
+            (item.variant?.id ?? null) ===
+              (variantId ?? null)
           )
       );
     },

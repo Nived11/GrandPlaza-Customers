@@ -10,7 +10,7 @@ type ReservationModalProps = {
 };
 
 const inputClass =
-  "h-9 sm:h-11 md:h-12 w-full min-w-0 rounded-lg sm:rounded-[10px] border border-[#DDE5E1] bg-[#F7F9F8] px-2.5 pl-8 sm:px-3 sm:pl-10 text-xs sm:text-sm text-[#102A2A] outline-none transition placeholder:text-[#94A3B8] hover:border-[#BCCBC4] focus:border-[#006B52] focus:bg-white focus:ring-4 focus:ring-[#006B52]/10";
+  "h-9 appearance-none sm:h-11 md:h-12 w-full min-w-0 rounded-lg sm:rounded-[10px] border border-[#DDE5E1] bg-[#F7F9F8] px-2.5 pl-8 sm:px-3 sm:pl-10 text-xs sm:text-sm text-[#102A2A] outline-none transition placeholder:text-[#94A3B8] hover:border-[#BCCBC4] focus:border-[#006B52] focus:bg-white focus:ring-4 focus:ring-[#006B52]/10";
 
 export default function ReservationMain({ isOpen, onClose }: ReservationModalProps) {
   const { isSubmitting, handleSubmit, minimumDate } = useReservation(isOpen, onClose);

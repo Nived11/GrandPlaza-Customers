@@ -127,7 +127,7 @@ const LoginPhoneForm = ({
               onChange={handlePhoneChange}
               onBlur={validatePhone}
               placeholder="Enter 10 digit number"
-              className="w-full py-3 px-3 bg-transparent text-[#1E2A22] text-sm sm:text-base font-medium placeholder-[#1E2A22]/35 focus:outline-none tracking-wider"
+              className="w-full appearance-none py-3 px-3 bg-transparent text-[#1E2A22] text-sm sm:text-base font-medium placeholder-[#1E2A22]/35 focus:outline-none tracking-wider"
             />
 
             {/* Phone Icon */}
