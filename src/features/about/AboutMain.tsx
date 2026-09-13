@@ -1,5 +1,8 @@
 import React from 'react';
-import AboutHero from './components/AboutHero'; // നിന്റെ ഫയൽ പാത്ത് അനുസരിച്ച് മാറ്റുക
+import AboutHero from './components/AboutHero';
+import AboutJourney from './components/AboutJourney' 
+import AboutTimeline from './components/AboutTimeline';
+
 
 const AboutMain = () => {
   return (
@@ -7,9 +10,9 @@ const AboutMain = () => {
       {/* 🌟 First Section */}
       <AboutHero />
       
-      {/* ബാക്കി സെക്ഷനുകൾ ഇതിനു താഴെയായി വിളിക്കാം */}
-      {/* <OurVisionSection /> */}
-      {/* <TeamSection /> */}
+      <AboutJourney />
+
+      <AboutTimeline />
     </div>
   );
 };

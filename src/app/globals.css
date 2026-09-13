@@ -1,5 +1,6 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+/* 🌟 പഴയ Cinzel ഫോണ്ട് ഇമ്പോർട്ട് പൂർണ്ണമായും ഒഴിവാക്കി */
 
 :root {
   --brand-green-dark: #015a41;
@@ -17,14 +18,15 @@
   --color-brand-gold: var(--brand-gold);
   --color-brand-cream: var(--brand-cream);
   --color-brand-cream-soft: var(--brand-cream-soft);
-  --font-serif: 'Cinzel', serif;
-  --font-sans: 'Inter', sans-serif;
+  
+  /* 🌟 font-sans ഉം font-serif ഉം വിളിക്കുമ്പോൾ പുതിയ മോഡേൺ ഫോണ്ട് വരും */
+  --font-sans: var(--font-jakarta), sans-serif;
+  --font-serif: var(--font-jakarta), sans-serif; 
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
