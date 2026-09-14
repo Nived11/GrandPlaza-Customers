@@ -4,16 +4,12 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/redux/store";
-import useCartHook from "../hook/useCartHook";
-
-const GST_RATE = 0.18;
 
 const OrderSummary = () => {
   const router = useRouter();
 
-  const { addToCart, getCart } = useCartHook();
-
-  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+  const [isCheckoutLoading, setIsCheckoutLoading] =
+    useState(false);
 
   const cartItems = useSelector(
     (state: RootState) => state.cart.items
@@ -24,65 +20,49 @@ const OrderSummary = () => {
     0
   );
 
-  const gstAmount = itemsTotal * GST_RATE;
-
-  const totalPayable = itemsTotal + gstAmount;
+  const totalPayable = itemsTotal;
 
   const handleCheckout = async () => {
+    /*
+     * If cart is empty, do nothing.
+     */
+    if (cartItems.length === 0) {
+      return;
+    }
+
+    /*
+     * Check login status.
+     */
     const isLoggedIn =
       localStorage.getItem("isLoggedIn") === "true";
 
+    /*
+     * Guest user:
+     * Send user to login first.
+     */
     if (!isLoggedIn) {
       router.push("/login?redirect=/cart");
       return;
     }
 
-    if (cartItems.length === 0) {
-      return;
-    }
-
+    /*
+     * Logged-in user:
+     * Cart is already synchronized with backend
+     * by CartMain.
+     *
+     * Move to address page where the user can
+     * select or add an address.
+     */
     try {
       setIsCheckoutLoading(true);
 
-      /*
-       * Send every Redux cart item to backend
-       */
-      for (const item of cartItems) {
-        const response = await addToCart({
-          menu_item_id: item.id,
-          variant_id: item.variant?.id ?? null,
-          quantity: item.quantity,
-        });
-
-        if (!response?.status) {
-          throw new Error(
-            // 🌟 FIX 1: Added (response as any) to bypass TS error
-            (response as any)?.message || "Failed to add item to cart."
-          );
-        }
-      }
-
-      /*
-       * Get the latest cart from backend
-       * only after all items are successfully added.
-       */
-      const cartResponse = await getCart();
-
-      if (!cartResponse?.status) {
-        throw new Error(
-          // 🌟 FIX 2: Added (cartResponse as any) to bypass TS error
-          (cartResponse as any)?.message || "Failed to fetch cart."
-        );
-      }
-
-      /*
-       * Cart is successfully synchronized.
-       * Address page will be implemented next.
-       */
       router.push("/address");
     } catch (error) {
-      console.error("CHECKOUT ERROR:", error);
-    } finally {
+      console.error(
+        "CHECKOUT NAVIGATION ERROR:",
+        error
+      );
+
       setIsCheckoutLoading(false);
     }
   };
@@ -123,15 +103,6 @@ const OrderSummary = () => {
             </span>
           </div>
 
-          {/* GST */}
-          <div className="flex justify-between text-[#1E2A22]/75">
-            <span>GST (18%)</span>
-
-            <span className="font-medium text-[#0F3D2E]">
-              ₹{gstAmount.toFixed(2)}
-            </span>
-          </div>
-
           {/* Grand Total */}
           <div className="border-t-2 border-dashed border-[#0F3D2E]/10 pt-3 flex justify-between items-baseline">
             <div>
@@ -140,7 +111,7 @@ const OrderSummary = () => {
               </span>
 
               <p className="text-[10px] text-[#1E2A22]/50">
-                Includes 18% GST
+                Final amount for your order
               </p>
             </div>
 
@@ -158,7 +129,10 @@ const OrderSummary = () => {
             className="w-full py-3.5 px-6 rounded-full bg-[#0F3D2E] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center space-x-2 shadow-lg hover:bg-[#165742] hover:shadow-xl transition-all duration-200 transform active:scale-[0.99] group border border-[#D9A441]/30 disabled:opacity-70 disabled:cursor-not-allowed"
             type="button"
             onClick={handleCheckout}
-            disabled={isCheckoutLoading}
+            disabled={
+              isCheckoutLoading ||
+              cartItems.length === 0
+            }
           >
             <svg
               className="w-4 h-4 text-[#D9A441] group-hover:scale-110 transition shrink-0"
@@ -227,7 +201,9 @@ const OrderSummary = () => {
           />
         </svg>
 
-        <span>Guaranteed Safe &amp; Secure Checkout</span>
+        <span>
+          Guaranteed Safe &amp; Secure Checkout
+        </span>
       </div>
     </section>
   );

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";import {
+import { createPortal } from "react-dom";
+import {
   X,
   Heart,
   Minus,
@@ -11,19 +12,47 @@ import { createPortal } from "react-dom";import {
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 
-import { addToCart } from "@/redux/slices/cartSlice";
+import {
+  addToCart,
+  setCart,
+} from "@/redux/slices/cartSlice";
 import type { AppDispatch } from "@/redux/store";
-import { HomeMenuItem, HomeVariant } from "@/features/home/hooks/useHomeHook";
+
+import {
+  HomeMenuItem,
+  HomeVariant,
+} from "@/features/home/hooks/useHomeHook";
+
+import useCartHook from "@/features/cart/hook/useCartHook";
 
 interface ProductQuickViewModalProps {
   product: HomeMenuItem | null;
   onClose: () => void;
 }
 
-const ProductQuickViewModal = ({  product,  onClose,}: ProductQuickViewModalProps) => {
+const ProductQuickViewModal = ({
+  product,
+  onClose,
+}: ProductQuickViewModalProps) => {
   const dispatch = useDispatch<AppDispatch>();
 
+  const {
+    addToCart: addToCartApi,
+    getCart,
+  } = useCartHook();
+
   const [mounted, setMounted] = useState(false);
+
+  const [selectedVariant, setSelectedVariant] =
+    useState<HomeVariant | null>(null);
+
+  const [quantity, setQuantity] = useState(1);
+
+  const [isAdding, setIsAdding] = useState(false);
+
+  /*
+   * Mount modal portal.
+   */
   useEffect(() => {
     setMounted(true);
 
@@ -31,12 +60,6 @@ const ProductQuickViewModal = ({  product,  onClose,}: ProductQuickViewModalProp
       setMounted(false);
     };
   }, []);
-
-  const [selectedVariant, setSelectedVariant] =
-    useState<HomeVariant | null>(null);
-
-  const [quantity, setQuantity] = useState(1);
-  const [isAdding, setIsAdding] = useState(false);
 
   /*
    * Reset modal state whenever a different
@@ -51,12 +74,18 @@ const ProductQuickViewModal = ({  product,  onClose,}: ProductQuickViewModalProp
 
     setQuantity(1);
 
-    if (product.has_variants && product.variants?.length > 0) {
-      const firstAvailableVariant = product.variants.find(
-        (variant) => variant.is_available
-      );
+    if (
+      product.has_variants &&
+      product.variants?.length > 0
+    ) {
+      const firstAvailableVariant =
+        product.variants.find(
+          (variant) => variant.is_available
+        );
 
-      setSelectedVariant(firstAvailableVariant ?? null);
+      setSelectedVariant(
+        firstAvailableVariant ?? null
+      );
     } else {
       setSelectedVariant(null);
     }
@@ -68,12 +97,14 @@ const ProductQuickViewModal = ({  product,  onClose,}: ProductQuickViewModalProp
   useEffect(() => {
     if (!product) return;
 
-    const previousOverflow = document.body.style.overflow;
+    const previousOverflow =
+      document.body.style.overflow;
 
     document.body.style.overflow = "hidden";
 
     return () => {
-      document.body.style.overflow = previousOverflow;
+      document.body.style.overflow =
+        previousOverflow;
     };
   }, [product]);
 
@@ -83,22 +114,30 @@ const ProductQuickViewModal = ({  product,  onClose,}: ProductQuickViewModalProp
   useEffect(() => {
     if (!product) return;
 
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (
+      event: KeyboardEvent
+    ) => {
       if (event.key === "Escape") {
         onClose();
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
     };
   }, [product, onClose]);
 
-if (!product || !mounted) {
-  return null;
-}
+  if (!product || !mounted) {
+    return null;
+  }
 
   /*
    * Get the selected price.
@@ -127,7 +166,9 @@ if (!product || !mounted) {
    * Original price.
    */
   const originalPrice = selectedVariant
-    ? Number(selectedVariant.actual_price || 0)
+    ? Number(
+        selectedVariant.actual_price || 0
+      )
     : Number(product.actual_price || 0);
 
   const hasDiscount =
@@ -140,85 +181,301 @@ if (!product || !mounted) {
   const totalPrice = currentPrice * quantity;
 
   /*
-   * Add product to Redux cart.
+   * Map backend cart response into Redux cart format.
+   *
+   * Backend CartItem ID:
+   * item.id
+   *
+   * Menu Item ID:
+   * item.menu_item.id
    */
-const handleAddToCart = () => {
-  if (!product) return;
-
-  if (
-    product.has_variants &&
-    !selectedVariant
-  ) {
-    toast.error("Please select a size");
-    return;
-  }
-
-  if (
-    product.has_variants &&
-    selectedVariant &&
-    !selectedVariant.is_available
-  ) {
-    toast.error(
-      "Selected size is currently unavailable"
-    );
-    return;
-  }
-
-  const priceValue = product.has_variants
-    ? selectedVariant?.offer_price ||
-      selectedVariant?.actual_price
-    : product.offer_price ||
-      product.actual_price;
-
-  const unitPrice = Number(priceValue || 0);
-
-  if (unitPrice <= 0) {
-    toast.error("Price is unavailable");
-    return;
-  }
-
-  dispatch(
-    addToCart({
-      id: product.id,
-
-      name: product.name,
-
-      description: product.description,
-
-      image: product.image,
-
-      dietary_preference:
-        product.dietary_preference,
-
-      has_variants:
-        product.has_variants,
-
-      actual_price:
-        product.actual_price,
-
-      offer_price:
-        product.offer_price,
-
-      variant: selectedVariant,
-
-      quantity,
-
-      unit_price: unitPrice,
-
-      total_price:
-        unitPrice * quantity,
-    })
-  );
-
-  toast.success(
-    `${product.name} added to cart`,
-    {
-      duration: 3000,
+  const syncBackendCartToRedux = (
+    cartResponse: any
+  ) => {
+    if (
+      !cartResponse?.status ||
+      !cartResponse?.data
+    ) {
+      return;
     }
-  );
 
-  onClose();
-};
+    const backendItems =
+      cartResponse.data.items ?? [];
+
+    const cartItems = backendItems.map(
+      (item: any) => {
+        const unitPrice = Number(
+          item.unit_price
+        );
+
+        return {
+          cart_item_id: item.id,
+
+          id: item.menu_item.id,
+
+          name: item.menu_item.name,
+
+          description: "",
+
+          image:
+            item.menu_item.image ?? null,
+
+          dietary_preference:
+            item.menu_item
+              .dietary_preference,
+
+          has_variants:
+            item.menu_item.has_variants,
+
+          actual_price:
+            item.menu_item.actual_price ??
+            null,
+
+          offer_price:
+            item.menu_item.offer_price ??
+            null,
+
+          variant: item.variant
+            ? {
+                id: item.variant.id,
+
+                size_name:
+                  item.variant.size_name,
+
+                actual_price:
+                  item.variant
+                    .actual_price,
+
+                offer_price:
+                  item.variant
+                    .offer_price,
+
+                is_available:
+                  item.variant
+                    .is_available,
+              }
+            : null,
+
+          quantity: item.quantity,
+
+          unit_price: unitPrice,
+
+          total_price:
+            unitPrice * item.quantity,
+        };
+      }
+    );
+
+    dispatch(setCart(cartItems));
+  };
+
+  /*
+   * Add product to cart.
+   *
+   * Logged out:
+   * Redux only.
+   *
+   * Logged in:
+   * POST Add Cart API
+   * → GET Cart API
+   * → Sync Redux
+   */
+  const handleAddToCart = async () => {
+    if (!product) return;
+
+    /*
+     * Validate variant.
+     */
+    if (
+      product.has_variants &&
+      !selectedVariant
+    ) {
+      toast.error("Please select a size");
+      return;
+    }
+
+    /*
+     * Validate variant availability.
+     */
+    if (
+      product.has_variants &&
+      selectedVariant &&
+      !selectedVariant.is_available
+    ) {
+      toast.error(
+        "Selected size is currently unavailable"
+      );
+      return;
+    }
+
+    /*
+     * Get current unit price.
+     */
+    const priceValue = product.has_variants
+      ? selectedVariant?.offer_price ||
+        selectedVariant?.actual_price
+      : product.offer_price ||
+        product.actual_price;
+
+    const unitPrice = Number(
+      priceValue || 0
+    );
+
+    if (unitPrice <= 0) {
+      toast.error("Price is unavailable");
+      return;
+    }
+
+    try {
+      setIsAdding(true);
+
+      /*
+       * Check login status.
+       */
+      const isLoggedIn =
+        localStorage.getItem(
+          "isLoggedIn"
+        ) === "true";
+
+      /*
+       * ==================================================
+       * GUEST USER
+       * ==================================================
+       *
+       * Do NOT call the backend.
+       * Store the item only in Redux.
+       */
+      if (!isLoggedIn) {
+        dispatch(
+          addToCart({
+            /*
+             * No backend CartItem ID exists
+             * for a guest cart item.
+             */
+            cart_item_id: 0,
+
+            /*
+             * Menu item ID.
+             */
+            id: product.id,
+
+            name: product.name,
+
+            description:
+              product.description || "",
+
+            image:
+              product.image ?? null,
+
+            dietary_preference:
+              product.dietary_preference,
+
+            has_variants:
+              product.has_variants,
+
+            actual_price:
+              product.has_variants
+                ? selectedVariant?.actual_price ??
+                  null
+                : product.actual_price ??
+                  null,
+
+            offer_price:
+              product.has_variants
+                ? selectedVariant?.offer_price ??
+                  null
+                : product.offer_price ??
+                  null,
+
+            variant: selectedVariant
+              ? {
+                  id: selectedVariant.id,
+
+                  size_name:
+                    selectedVariant.size_name,
+
+                  actual_price:
+                    selectedVariant.actual_price,
+
+                  offer_price:
+                    selectedVariant.offer_price,
+
+                  is_available:
+                    selectedVariant.is_available,
+                }
+              : null,
+
+            quantity,
+
+            unit_price: unitPrice,
+
+            total_price:
+              unitPrice * quantity,
+          })
+        );
+
+        toast.success(
+          `${product.name} added to cart`,
+          {
+            duration: 3000,
+          }
+        );
+
+        onClose();
+
+        return;
+      }
+
+      /*
+       * ==================================================
+       * LOGGED-IN USER
+       * ==================================================
+       *
+       * POST → GET → Redux
+       */
+
+      const response =
+        await addToCartApi({
+          menu_item_id: product.id,
+
+          variant_id:
+            selectedVariant?.id ?? null,
+
+          quantity,
+        });
+
+      /*
+       * Stop if Add Cart API failed.
+       */
+      if (!response?.status) {
+        return;
+      }
+
+      /*
+       * Get the complete backend cart.
+       */
+      const cartResponse =
+        await getCart();
+
+      /*
+       * Sync backend cart into Redux.
+       */
+      syncBackendCartToRedux(
+        cartResponse
+      );
+
+      toast.success(
+        `${product.name} added to cart`,
+        {
+          duration: 3000,
+        }
+      );
+
+      onClose();
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   /*
    * Close when clicking the backdrop.
@@ -226,12 +483,15 @@ const handleAddToCart = () => {
   const handleBackdropClick = (
     event: React.MouseEvent<HTMLDivElement>
   ) => {
-    if (event.target === event.currentTarget) {
+    if (
+      event.target ===
+      event.currentTarget
+    ) {
       onClose();
     }
   };
 
-  return createPortal (
+  return createPortal(
     <div
       className="fixed inset-0 z-[99999] flex items-center justify-center bg-[#09281E]/60 p-3 backdrop-blur-[6px] sm:p-5"
       onMouseDown={handleBackdropClick}
@@ -241,7 +501,9 @@ const handleAddToCart = () => {
     >
       <div
         className="relative flex max-h-[94vh] w-full max-w-[640px] flex-col overflow-hidden rounded-[22px] border border-[#0F3D2E]/10 bg-white shadow-[0_25px_80px_rgba(9,40,30,0.28)] md:min-h-[400px] md:flex-row"
-        onMouseDown={(event) => event.stopPropagation()}
+        onMouseDown={(event) =>
+          event.stopPropagation()
+        }
       >
         {/* LEFT — IMAGE */}
         <div className="relative h-[260px] shrink-0 overflow-hidden bg-[#FBF6EC] md:h-auto md:w-[45%]">
@@ -255,7 +517,8 @@ const handleAddToCart = () => {
           <div className="absolute left-4 top-4">
             <span
               className={`inline-flex items-center rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] ${
-                product.dietary_preference === "VEG"
+                product.dietary_preference ===
+                "VEG"
                   ? "bg-green-100 text-green-800"
                   : "bg-red-100 text-red-800"
               }`}
@@ -278,7 +541,7 @@ const handleAddToCart = () => {
         </div>
 
         {/* RIGHT — INFORMATION */}
-        <div className="flex min-h-0 flex-1 flex-col ">
+        <div className="flex min-h-0 flex-1 flex-col">
           {/* Close */}
           <div className="flex justify-end px-4 pt-4 sm:px-5">
             <button
@@ -324,7 +587,8 @@ const handleAddToCart = () => {
                   </span>
 
                   <span className="pb-0.5 text-[11px] font-bold uppercase tracking-wide text-[#16533F]">
-                    Save ₹{savingAmount.toFixed(0)}
+                    Save ₹
+                    {savingAmount.toFixed(0)}
                   </span>
                 </>
               )}
@@ -341,7 +605,9 @@ const handleAddToCart = () => {
 
                     {selectedVariant && (
                       <span className="text-[11px] text-[#1E2320]/50">
-                        {selectedVariant.size_name}
+                        {
+                          selectedVariant.size_name
+                        }
                       </span>
                     )}
                   </div>

@@ -9,22 +9,21 @@ export interface CartVariant {
 }
 
 export interface CartItem {
+  // Backend CartItem ID
+  cart_item_id: number;
+
+  // Menu item ID
   id: number;
+
   name: string;
   description: string;
   image: string | null;
   dietary_preference: string;
-
   has_variants: boolean;
-
   actual_price: string | null;
   offer_price: string | null;
-
   variant: CartVariant | null;
-
   quantity: number;
-
-  // Calculated numeric values used by cart totals
   unit_price: number;
   total_price: number;
 }
@@ -39,14 +38,10 @@ const initialState: CartState = {
 
 const cartSlice = createSlice({
   name: "cart",
-
   initialState,
 
   reducers: {
-    addToCart: (
-      state,
-      action: PayloadAction<CartItem>
-    ) => {
+    addToCart(state, action: PayloadAction<CartItem>) {
       const newItem = action.payload;
 
       const existingItem = state.items.find(
@@ -63,30 +58,25 @@ const cartSlice = createSlice({
         );
 
         existingItem.total_price =
-          existingItem.unit_price *
-          existingItem.quantity;
+          existingItem.unit_price * existingItem.quantity;
       } else {
-        const quantity = Math.min(
-          newItem.quantity,
-          20
-        );
+        const quantity = Math.min(newItem.quantity, 20);
 
         state.items.push({
           ...newItem,
           quantity,
-          total_price:
-            newItem.unit_price * quantity,
+          total_price: newItem.unit_price * quantity,
         });
       }
     },
 
-    increaseQuantity: (
+    increaseQuantity(
       state,
       action: PayloadAction<{
         id: number;
         variantId?: number | null;
       }>
-    ) => {
+    ) {
       const { id, variantId } = action.payload;
 
       const item = state.items.find(
@@ -100,19 +90,18 @@ const cartSlice = createSlice({
 
       if (item.quantity < 20) {
         item.quantity += 1;
-
         item.total_price =
           item.unit_price * item.quantity;
       }
     },
 
-    decreaseQuantity: (
+    decreaseQuantity(
       state,
       action: PayloadAction<{
         id: number;
         variantId?: number | null;
       }>
-    ) => {
+    ) {
       const { id, variantId } = action.payload;
 
       const itemIndex = state.items.findIndex(
@@ -136,13 +125,13 @@ const cartSlice = createSlice({
       }
     },
 
-    removeFromCart: (
+    removeFromCart(
       state,
       action: PayloadAction<{
         id: number;
         variantId?: number | null;
       }>
-    ) => {
+    ) {
       const { id, variantId } = action.payload;
 
       state.items = state.items.filter(
@@ -155,7 +144,14 @@ const cartSlice = createSlice({
       );
     },
 
-    clearCart: (state) => {
+    setCart(
+      state,
+      action: PayloadAction<CartItem[]>
+    ) {
+      state.items = action.payload;
+    },
+
+    clearCart(state) {
       state.items = [];
     },
   },
@@ -166,6 +162,7 @@ export const {
   increaseQuantity,
   decreaseQuantity,
   removeFromCart,
+  setCart,
   clearCart,
 } = cartSlice.actions;
 

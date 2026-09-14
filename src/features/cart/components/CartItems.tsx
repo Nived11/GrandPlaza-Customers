@@ -1,13 +1,17 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "@/redux/store";
 import {
   increaseQuantity,
   decreaseQuantity,
   removeFromCart,
+  clearCart as clearCartRedux,
+  CartItem,
 } from "@/redux/slices/cartSlice";
+
+import useCartHook from "../hook/useCartHook";
 
 const CartItems = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -15,6 +19,111 @@ const CartItems = () => {
   const cartItems = useSelector(
     (state: RootState) => state.cart.items
   );
+
+  const {
+    updateCart,
+    clearCart,
+    isUpdatingCart,
+    isClearingCart,
+  } = useCartHook();
+
+  const [showClearCartModal, setShowClearCartModal] =
+    useState(false);
+
+  const [clearCartError, setClearCartError] = useState("");
+
+  // Increase Quantity
+  const handleIncrease = async (item: CartItem) => {
+    if (item.quantity >= 20 || isUpdatingCart) {
+      return;
+    }
+
+    const newQuantity = item.quantity + 1;
+
+    const response = await updateCart({
+      menu_item_id: item.cart_item_id,
+      variant_id: item.variant?.id ?? null,
+      quantity: newQuantity,
+    });
+
+    if (response) {
+      dispatch(
+        increaseQuantity({
+          id: item.id,
+          variantId: item.variant?.id ?? null,
+        })
+      );
+    }
+  };
+
+  // Decrease Quantity
+  const handleDecrease = async (item: CartItem) => {
+    if (isUpdatingCart) {
+      return;
+    }
+
+    const newQuantity = item.quantity - 1;
+
+    if (newQuantity < 1) {
+      return;
+    }
+
+    const response = await updateCart({
+      menu_item_id: item.cart_item_id,
+      variant_id: item.variant?.id ?? null,
+      quantity: newQuantity,
+    });
+
+    if (response) {
+      dispatch(
+        decreaseQuantity({
+          id: item.id,
+          variantId: item.variant?.id ?? null,
+        })
+      );
+    }
+  };
+
+  // Open Clear Cart Modal
+  const handleOpenClearCartModal = () => {
+    if (isClearingCart || cartItems.length === 0) {
+      return;
+    }
+
+    setClearCartError("");
+    setShowClearCartModal(true);
+  };
+
+  // Close Clear Cart Modal
+  const handleCloseClearCartModal = () => {
+    if (isClearingCart) {
+      return;
+    }
+
+    setClearCartError("");
+    setShowClearCartModal(false);
+  };
+
+  // Clear Cart
+  const handleClearCart = async () => {
+    if (isClearingCart || cartItems.length === 0) {
+      return;
+    }
+
+    setClearCartError("");
+
+    const response = await clearCart();
+
+    if (response) {
+      dispatch(clearCartRedux());
+      setShowClearCartModal(false);
+      setClearCartError("");
+    } else {
+      setClearCartError(
+        "Unable to clear your cart. Please try again."
+      );
+    }
+  };
 
   return (
     <section
@@ -31,9 +140,21 @@ const CartItems = () => {
         <div className="px-6 py-4 bg-[#FBF6EC]/50 border-b border-[#0F3D2E]/5 flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-[#0F3D2E]/80">
           <span>Dish Description</span>
 
-          <div className="flex items-center space-x-12 sm:space-x-16">
+          <div className="flex items-center space-x-4 sm:space-x-8">
             <span className="hidden sm:inline">Quantity</span>
+
             <span>Total Price</span>
+
+            <button
+              type="button"
+              onClick={handleOpenClearCartModal}
+              disabled={
+                isClearingCart || cartItems.length === 0
+              }
+              className="text-xs font-semibold text-rose-600 hover:text-rose-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Clear Cart
+            </button>
           </div>
         </div>
 
@@ -103,7 +224,8 @@ const CartItems = () => {
                         dispatch(
                           removeFromCart({
                             id: item.id,
-                            variantId: item.variant?.id ?? null,
+                            variantId:
+                              item.variant?.id ?? null,
                           })
                         )
                       }
@@ -145,16 +267,10 @@ const CartItems = () => {
                 <div className="flex items-center space-x-2 border border-[#0F3D2E]/15 rounded-full px-2 py-1 bg-[#FBF6EC]/30">
                   <button
                     aria-label="Decrease quantity"
-                    className="stepper-btn w-6 h-6 rounded-full border border-[#0F3D2E]/20 flex items-center justify-center text-xs text-[#0F3D2E] font-bold"
+                    className="stepper-btn w-6 h-6 rounded-full border border-[#0F3D2E]/20 flex items-center justify-center text-xs text-[#0F3D2E] font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                     type="button"
-                    onClick={() =>
-                      dispatch(
-                        decreaseQuantity({
-                          id: item.id,
-                          variantId: item.variant?.id ?? null,
-                        })
-                      )
-                    }
+                    onClick={() => handleDecrease(item)}
+                    disabled={isUpdatingCart}
                   >
                     −
                   </button>
@@ -168,15 +284,11 @@ const CartItems = () => {
 
                   <button
                     aria-label="Increase quantity"
-                    className="stepper-btn w-6 h-6 rounded-full border border-[#0F3D2E]/20 flex items-center justify-center text-xs text-[#0F3D2E] font-bold"
+                    className="stepper-btn w-6 h-6 rounded-full border border-[#0F3D2E]/20 flex items-center justify-center text-xs text-[#0F3D2E] font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                     type="button"
-                    onClick={() =>
-                      dispatch(
-                        increaseQuantity({
-                          id: item.id,
-                          variantId: item.variant?.id ?? null,
-                        })
-                      )
+                    onClick={() => handleIncrease(item)}
+                    disabled={
+                      isUpdatingCart || item.quantity >= 20
                     }
                   >
                     +
@@ -193,7 +305,8 @@ const CartItems = () => {
                     <div className="text-[11px] text-[#1E2A22]/40 line-through">
                       ₹
                       {(
-                        Number(item.actual_price) * item.quantity
+                        Number(item.actual_price) *
+                        item.quantity
                       ).toFixed(2)}
                     </div>
                   )}
@@ -203,6 +316,93 @@ const CartItems = () => {
           ))
         )}
       </div>
+
+      {/* Clear Cart Confirmation Modal */}
+      {showClearCartModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center px-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="clear-cart-title"
+        >
+          {/* Overlay */}
+          <div
+            className="absolute inset-0 bg-[#1E2A22]/40"
+            onClick={handleCloseClearCartModal}
+          />
+
+          {/* Modal */}
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-warm-md border border-[#0F3D2E]/10 overflow-hidden">
+            <div className="p-6 sm:p-7">
+              {/* Icon */}
+              <div className="w-11 h-11 rounded-full bg-rose-50 flex items-center justify-center mb-4">
+                <svg
+                  className="w-5 h-5 text-rose-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                  />
+                </svg>
+              </div>
+
+              {/* Heading */}
+              <h3
+                id="clear-cart-title"
+                className="text-lg sm:text-xl font-serif font-bold text-[#0F3D2E]"
+              >
+                Clear your cart?
+              </h3>
+
+              {/* Description */}
+              <p className="mt-2 text-sm text-[#1E2A22]/65 leading-relaxed">
+                Are you sure you want to remove all items
+                from your cart? This action cannot be undone.
+              </p>
+
+              {/* Error */}
+              {clearCartError && (
+                <p
+                  className="mt-4 text-xs font-medium text-rose-600"
+                  role="alert"
+                >
+                  {clearCartError}
+                </p>
+              )}
+
+              {/* Actions */}
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 mt-6">
+                {/* Cancel */}
+                <button
+                  type="button"
+                  onClick={handleCloseClearCartModal}
+                  disabled={isClearingCart}
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-full border border-[#0F3D2E]/15 text-sm font-semibold text-[#0F3D2E] hover:bg-[#FBF6EC] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+
+                {/* Clear Cart */}
+                <button
+                  type="button"
+                  onClick={handleClearCart}
+                  disabled={isClearingCart}
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-[#0F3D2E] text-white text-sm font-semibold hover:bg-[#0F3D2E]/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isClearingCart
+                    ? "Clearing..."
+                    : "Clear Cart"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
