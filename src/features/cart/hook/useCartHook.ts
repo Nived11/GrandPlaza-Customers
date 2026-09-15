@@ -156,11 +156,13 @@ const useCartHook = () => {
   // =========================
   // DELETE CART ITEM
   // =========================
-  const deleteCart = async (menuItemId: number) => {
+  const deleteCart = async (cartItemId: number) => {
     try {
       setIsDeletingCart(true);
 
-      const response = await deleteCartApi(menuItemId);
+      console.log("DELETE CART ITEM ID:", cartItemId);
+
+      const response = await deleteCartApi(cartItemId);
 
       console.log("DELETE CART API DATA:", response);
 

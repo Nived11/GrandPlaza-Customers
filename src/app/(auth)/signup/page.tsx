@@ -1,8 +1,12 @@
 "use client";
 
-import React from 'react';
-import RegisterMain from '@/features/auth/RegisterMain';
+import RegisterMain from "@/features/auth/RegisterMain";
+import useAuthGuard from "@/hooks/useAuthGuard";
 
 export default function SignupPage() {
+  useAuthGuard({
+    redirectIfAuthenticated: true,
+  });
+
   return <RegisterMain />;
 }

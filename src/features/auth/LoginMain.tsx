@@ -2,8 +2,12 @@
 
 import React from "react";
 import LoginForm from "./components/LoginForm";
+import { useRouter } from "next/navigation";
 
 const LoginMain = () => {
+
+  const router = useRouter();
+
   return (
     <div className="min-h-screen lg:h-screen bg-[#FBF6EC] text-[#1E2A22] flex flex-col antialiased overflow-hidden">
       {/* Header */}
@@ -140,6 +144,13 @@ const LoginMain = () => {
           {/* Login Form */}
           <div className="w-full max-w-md relative z-10">
             <LoginForm />
+            <button
+                type="button"
+                onClick={() => router.push("/signup")}
+                className="text-sm text-[#0F3D2E] mt-2 hover:underline"
+            >
+                Don't have an account? <span className="font-semibold">Sign Up</span>
+            </button>
           </div>
         </section>
       </main>

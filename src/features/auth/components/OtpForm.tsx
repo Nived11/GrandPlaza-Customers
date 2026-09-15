@@ -317,16 +317,32 @@ const OtpForm = ({
      * API failed
      */
     if (!response) return;
-
+      
     /*
      * Authentication successful
      */
     sessionStorage.removeItem("auth_phone");
-
+      
     /*
-     * Return to previous page
+     * Get the page the user originally wanted.
      */
-    router.back();
+    const redirect = new URLSearchParams(
+      window.location.search
+    ).get("redirect");
+    
+    /*
+     * Go back to the requested internal page.
+     * If there is no redirect, go to home.
+     */
+    if (
+      redirect &&
+      redirect.startsWith("/") &&
+      !redirect.startsWith("//")
+    ) {
+      router.replace(redirect);
+    } else {
+      router.replace("/");
+    }
   };
 
   /*

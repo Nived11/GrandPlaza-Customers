@@ -1,7 +1,12 @@
+"use client";
+
 import LoginMain from "@/features/auth/LoginMain";
+import useAuthGuard from "@/hooks/useAuthGuard";
 
-const LoginPage = () => {
+export default function LoginPage() {
+  useAuthGuard({
+    redirectIfAuthenticated: true,
+  });
+
   return <LoginMain />;
-};
-
-export default LoginPage;
+}

@@ -317,16 +317,9 @@ const OtpForm = ({
      * API failed
      */
     if (!response) return;
-
-    /*
-     * Authentication successful
-     */
+      
     sessionStorage.removeItem("register_phone");
-
-    /*
-     * Return to previous page
-     */
-    router.back();
+    router.replace("/");
   };
 
   /*

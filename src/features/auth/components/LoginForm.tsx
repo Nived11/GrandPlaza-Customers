@@ -23,10 +23,24 @@ const LoginForm = () => {
 
   const handleOtpStep = (mobileNumber: string) => {
     sessionStorage.setItem("auth_phone", mobileNumber);
-
+  
     setPhone(mobileNumber);
-
-    router.push("/login?step=otp");
+  
+    const redirect = searchParams.get("redirect");
+  
+    if (
+      redirect &&
+      redirect.startsWith("/") &&
+      !redirect.startsWith("//")
+    ) {
+      router.push(
+        `/login?step=otp&redirect=${encodeURIComponent(
+          redirect
+        )}`
+      );
+    } else {
+      router.push("/login?step=otp");
+    }
   };
 
   const handleEditNumber = () => {

@@ -186,6 +186,13 @@ const RegisterMain = () => {
                 onEditNumber={handleEditNumber}
               />
             )}
+            <button
+                type="button"
+                onClick={() => router.push("/login")}
+                className="text-sm text-[#0F3D2E] mt-2 hover:underline"
+            >
+                Already have an account? <span className="font-semibold">Login</span>
+            </button>
           </div>
         </section>
       </main>

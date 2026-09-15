@@ -22,10 +22,14 @@ const CartItems = () => {
 
   const {
     updateCart,
+    deleteCart,
     clearCart,
     isUpdatingCart,
+    isDeletingCart,
     isClearingCart,
   } = useCartHook();
+  const [deletingItemId, setDeletingItemId] =
+    useState<number | null>(null);
 
   const [showClearCartModal, setShowClearCartModal] =
     useState(false);
@@ -83,6 +87,51 @@ const CartItems = () => {
       );
     }
   };
+
+  const handleRemove = async (item: CartItem) => {
+  if (isDeletingCart) {
+    return;
+  }
+
+  /*
+   * item.cart_item_id = Backend CartItem ID
+   * item.id           = Menu Item ID
+   *
+   * Example:
+   * cart_item_id = 23
+   * id = 25
+   *
+   * DELETE must use 23.
+   */
+  setDeletingItemId(item.cart_item_id);
+
+  try {
+    console.log(
+      "DELETE - CART ITEM ID:",
+      item.cart_item_id
+    );
+
+    console.log(
+      "DELETE - MENU ITEM ID:",
+      item.id
+    );
+
+    const response = await deleteCart(
+      item.cart_item_id
+    );
+
+    if (response) {
+      dispatch(
+        removeFromCart({
+          id: item.id,
+          variantId: item.variant?.id ?? null,
+        })
+      );
+    }
+  } finally {
+    setDeletingItemId(null);
+  }
+};
 
   // Open Clear Cart Modal
   const handleOpenClearCartModal = () => {
@@ -218,33 +267,53 @@ const CartItems = () => {
                   <div className="flex items-center gap-3 pt-1">
                     <button
                       aria-label={`Remove ${item.name} from cart`}
-                      className="text-xs font-semibold text-rose-600 hover:text-rose-800 transition flex items-center gap-1"
+                      className="text-xs font-semibold text-rose-600 hover:text-rose-800 transition flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                       type="button"
-                      onClick={() =>
-                        dispatch(
-                          removeFromCart({
-                            id: item.id,
-                            variantId:
-                              item.variant?.id ?? null,
-                          })
-                        )
+                      onClick={() => handleRemove(item)}
+                      disabled={
+                        isDeletingCart && deletingItemId === item.cart_item_id
                       }
                     >
-                      <svg
-                        className="w-3.5 h-3.5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                        />
-                      </svg>
+                      {isDeletingCart && deletingItemId === item.cart_item_id ? (
+                        <svg
+                          className="w-3.5 h-3.5 animate-spin"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                          />
 
-                      Remove
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          className="w-3.5 h-3.5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                          />
+                        </svg>
+                      )}
+
+                      {isDeletingCart && deletingItemId === item.cart_item_id
+                        ? "Removing..."
+                        : "Remove"}
                     </button>
 
                     <span className="text-xs text-[#1E2A22]/30">
