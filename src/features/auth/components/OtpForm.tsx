@@ -1,22 +1,16 @@
 "use client";
 
-import React, {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useRef, useState,} from "react";
 import { useRouter } from "next/navigation";
-import useVerifyOtp from "../hoock/useVerifyOtp";
+import useVerifyOtp from "../hook/useVerifyOtp";
+import useLogin from "../hook/useLogin";
 
 interface OtpFormProps {
   phone: string;
   onEditNumber: () => void;
 }
 
-const OtpForm = ({
-  phone,
-  onEditNumber,
-}: OtpFormProps) => {
+const OtpForm = ({ phone, onEditNumber,}: OtpFormProps) => {
   const router = useRouter();
 
   const [otp, setOtp] = useState([
@@ -35,6 +29,11 @@ const OtpForm = ({
     verifyOtp,
     isLoading: isVerifying,
   } = useVerifyOtp();
+
+  const {
+    login,
+    isLoading: isResending,
+  } = useLogin();
 
   const otpRefs = useRef<
     (HTMLInputElement | null)[]
@@ -350,7 +349,17 @@ const OtpForm = ({
    *
    * Actual resend API can be connected later.
    */
-  const handleResend = () => {
+  const handleResend = async () => {
+    if (isResending || !storedPhone) {
+      return;
+    }
+
+    const response = await login(storedPhone);
+
+    if (!response) {
+      return;
+    }
+
     setSeconds(24);
 
     setOtp([
@@ -508,9 +517,10 @@ const OtpForm = ({
             <button
               type="button"
               onClick={handleResend}
-              className="text-[#0F3D2E] font-semibold hover:text-[#D9A441] underline"
+              disabled={isResending}
+              className="text-[#0F3D2E] font-semibold hover:text-[#D9A441] underline disabled:opacity-50 disabled:pointer-events-none"
             >
-              Resend OTP Now
+              {isResending ? "SENDING..." : "Resend OTP Now"}
             </button>
           )}
         </div>

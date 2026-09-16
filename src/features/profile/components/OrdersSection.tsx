@@ -5,6 +5,7 @@ import { Package, ChevronRight } from "lucide-react";
 import type { Order } from "../hooks/useProfileHook";
 import { getStatusBadgeClass, formatStatusLabel } from "../utils/orderStatus";
 import OrderDetailModal from "./OrderDetailModal";
+import OrdersSkeleton from "./OrdersSkeleton";
 
 interface OrdersSectionProps {
   orders: Order[];
@@ -15,16 +16,7 @@ export default function OrdersSection({ orders, loading }: OrdersSectionProps) {
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
 
   if (loading) {
-    return (
-      <div className="flex flex-col gap-4">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="h-24 rounded-2xl bg-white border border-gray-100 animate-pulse"
-          />
-        ))}
-      </div>
-    );
+    return <OrdersSkeleton />;
   }
 
   if (orders.length === 0) {

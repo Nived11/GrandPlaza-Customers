@@ -58,8 +58,16 @@ export const useProfileHook = () => {
     setError(null);
     try {
       const response = await getProfileApi();
+          
       if (response?.status && response?.data) {
-        setProfile(response.data);
+        setProfile({
+          id: response.data.id,
+          name: response.data.first_name || "",
+          email: response.data.email || "",
+          phone: response.data.phone_number || "",
+          avatar: null,
+          joined_at: "",
+        });
       } else {
         setProfile(null);
       }
@@ -86,19 +94,30 @@ export const useProfileHook = () => {
     }
   };
 
-  const updateProfile = async (payload: {
-    name: string;
-    email: string;
-    phone: string;
-  }) => {
+  const updateProfile = async (payload: { name: string; email: string; phone: string;}) => {
     setSaving(true);
+
     try {
-      const response = await updateProfileApi(payload);
+      const response = await updateProfileApi({
+        first_name: payload.name,
+        email: payload.email,
+        phone_number: payload.phone,
+      });
+
       if (response?.status && response?.data) {
-        setProfile(response.data);
+        setProfile({
+          id: response.data.id,
+          name: response.data.first_name || "",
+          email: response.data.email || "",
+          phone: response.data.phone_number || "",
+          avatar: null,
+          joined_at: "",
+        });
+
         toast.success("Profile updated");
         return true;
       }
+
       return false;
     } catch (err: any) {
       toast.error(extractErrorMessages(err));

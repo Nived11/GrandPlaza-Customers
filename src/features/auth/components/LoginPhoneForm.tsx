@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import useLogin from "../hoock/useLogin";
+import useLogin from "../hook/useLogin";
 
 interface LoginPhoneFormProps {
   onSuccess: (phone: string) => void;

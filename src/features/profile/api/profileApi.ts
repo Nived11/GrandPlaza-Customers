@@ -6,16 +6,16 @@ import axiosInstance from "@/lib/axios";
 
 // ---- Profile ----
 export const getProfileApi = async () => {
-  const response = await axiosInstance.get("/user/profile");
+  const response = await axiosInstance.get("/accounts/profile");
   return response.data;
 };
 
 export const updateProfileApi = async (payload: {
-  name: string;
+  first_name: string;
   email: string;
-  phone: string;
+  phone_number: string;
 }) => {
-  const response = await axiosInstance.put("/user/profile", payload);
+  const response = await axiosInstance.patch("/accounts/profile", payload);
   return response.data;
 };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import useRegister from "../hoock/useRegister";
+import useRegister from "../hook/useRegister";
 import { useRouter, useSearchParams } from "next/navigation";
 
 interface RegisterFormProps {
