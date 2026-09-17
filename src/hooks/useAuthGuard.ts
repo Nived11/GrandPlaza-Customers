@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 interface UseAuthGuardOptions {
@@ -14,6 +14,8 @@ const useAuthGuard = ({
 }: UseAuthGuardOptions = {}) => {
   const router = useRouter();
   const pathname = usePathname();
+
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
     const isLoggedIn =
@@ -29,18 +31,26 @@ const useAuthGuard = ({
         `/login?redirect=${encodeURIComponent(redirectPath)}`
       );
 
+      setIsAuthorized(false);
       return;
     }
 
     if (redirectIfAuthenticated && isLoggedIn) {
       router.replace("/");
+      return;
     }
+
+    setIsAuthorized(true);
   }, [
     requireAuth,
     redirectIfAuthenticated,
     pathname,
     router,
   ]);
+
+  return {
+    isAuthorized,
+  };
 };
 
 export default useAuthGuard;
