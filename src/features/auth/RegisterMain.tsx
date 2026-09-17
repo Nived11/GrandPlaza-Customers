@@ -1,32 +1,39 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useRouter, useSearchParams } from "next/navigation";
+
 import RegisterForm from "./components/RegisterForm";
 import RegisterOtpForm from "./components/RegisterOtpForm";
-import { useRouter, useSearchParams } from "next/navigation";
 
 const RegisterMain = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const showOtp = searchParams.get("step") === "otp";
+  const showOtp =
+    searchParams.get("step") === "otp";
 
   const [phone, setPhone] = useState("");
 
+  /*
+   * Restore registered phone number
+   */
   useEffect(() => {
-    const savedPhone = sessionStorage.getItem("register_phone");
+    const savedPhone =
+      sessionStorage.getItem("register_phone");
 
     if (savedPhone) {
       setPhone(savedPhone);
     }
   }, []);
 
-  const handleRegisterSuccess = (mobileNumber: string) => {
-    console.log(
-      "REGISTER SUCCESS - SHOWING OTP:",
-      mobileNumber
-    );
-
+  /*
+   * Registration successful
+   */
+  const handleRegisterSuccess = (
+    mobileNumber: string
+  ) => {
     sessionStorage.setItem(
       "register_phone",
       mobileNumber
@@ -37,194 +44,499 @@ const RegisterMain = () => {
     router.push("/signup?step=otp");
   };
 
+  /*
+   * Edit phone number from OTP screen
+   */
   const handleEditNumber = () => {
-    sessionStorage.removeItem("register_phone");
+    sessionStorage.removeItem(
+      "register_phone"
+    );
 
     setPhone("");
 
-    router.push("/register");
+    router.push("/signup");
   };
 
   return (
-    <div className="min-h-screen lg:h-screen bg-[#FBF6EC] text-[#1E2A22] flex flex-col antialiased overflow-hidden">
-      {/* Header */}
-      <header className="relative z-30 shrink-0 w-full px-4 sm:px-8 lg:px-12 xl:px-16 py-3 sm:py-4 flex items-center justify-between border-b border-[#0F3D2E]/10">
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#0F3D2E] text-white flex items-center justify-center shadow-md">
-            <span className="text-xs sm:text-sm">✦</span>
-          </div>
+    <main className="relative min-h-screen overflow-hidden">
 
-          <div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-[#1E2A22] tracking-[0.2em] text-sm sm:text-lg font-bold uppercase">
-                EMPIRE
-              </span>
+      {/* =====================================================
+          BACKGROUND
+      ===================================================== */}
 
-              <span className="text-[#D9A441] text-[9px] sm:text-xs tracking-[0.25em] font-semibold uppercase">
-                PLAZA
-              </span>
-            </div>
+      <div className="fixed inset-0 -z-10 overflow-hidden">
 
-            <p className="hidden sm:block text-[8px] text-[#1E2A22]/50 tracking-[0.2em] uppercase font-medium -mt-0.5">
-              AUTHENTIC FLAVORS • MALAPPURAM
-            </p>
-          </div>
-        </div>
+        {/* Desktop Background */}
+        <img
+          src="/images/auth/authbg.png"
+          alt=""
+          aria-hidden="true"
+          className="
+            absolute
+            inset-0
+            hidden
+            h-full
+            w-full
+            object-cover
+            object-center
+            lg:block
+          "
+        />
 
-        <a
-          href="/"
-          className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-medium text-[#1E2A22]/75 hover:text-[#0F3D2E] transition-colors tracking-wide bg-white/70 backdrop-blur-md border border-[#0F3D2E]/10 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full shadow-sm"
+        {/* Mobile Background */}
+        <div
+          className="
+            absolute
+            inset-0
+            overflow-hidden
+            lg:hidden
+          "
         >
-          <span className="w-4 h-4 rounded-full bg-[#0F3D2E]/10 flex items-center justify-center text-[11px] text-[#0F3D2E] font-bold">
-            ←
-          </span>
-
-          <span className="hidden sm:inline">
-            Back to Menu
-          </span>
-        </a>
-      </header>
-
-      {/* Main */}
-      <main className="relative z-20 w-full flex-1 flex flex-col lg:flex-row max-w-[1720px] mx-auto">
-
-        {/* LEFT SIDE */}
-        <section className="hidden lg:flex lg:w-[58%] xl:w-[60%] min-h-0 px-5 sm:px-8 lg:px-10 xl:px-14 py-5 sm:py-7 lg:py-8 flex-col justify-between relative">
-
-          <div className="shrink-0">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 border border-[#D9A441]/25 text-[#0F3D2E] text-[10px] font-semibold tracking-[0.18em] uppercase mb-3 sm:mb-4 shadow-sm">
-              <span className="text-[9px] text-[#D9A441]">
-                ✦
-              </span>
-
-              <span>EMPIRE PLAZA</span>
-
-              <span className="text-[9px] text-[#D9A441]">
-                ✦
-              </span>
-            </div>
-
-            <h1 className="text-[#1E2A22] uppercase tracking-tight text-4xl sm:text-5xl lg:text-6xl xl:text-[70px] leading-[0.95] font-bold">
-              Your Table.
-              <br />
-
-              <span className="italic font-serif font-normal lowercase tracking-normal text-[#0F3D2E] block mt-1">
-                Your Feast.
-              </span>
-            </h1>
-
-            <p className="text-[#1E2A22]/65 text-xs sm:text-sm lg:text-base mt-3 sm:mt-4 max-w-lg leading-relaxed">
-              Authentic Arab-Kerala flavours, freshly prepared in Malappuram.
-            </p>
-
-            <div className="flex items-center gap-2.5 mt-4 opacity-60">
-              <div className="w-10 sm:w-14 h-[2px] bg-[#D9A441]" />
-
-              <span className="text-[#D9A441] text-[10px]">
-                ✦
-              </span>
-
-              <div className="w-20 sm:w-28 h-[1px] bg-[#0F3D2E]/30" />
-            </div>
-          </div>
-
-          <div className="relative overflow-hidden rounded-[28px] sm:rounded-[36px] rounded-tr-[80px] sm:rounded-tr-[100px] rounded-bl-[12px] shadow-xl border-4 border-white/80 mt-5 lg:mt-6 flex-1 min-h-[180px] max-h-[350px]">
-            <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3izQc3URBcJbaVgXCejNt2T4NcBuSiqT16d8zzVYXXcNpOcQeYe3RLw_TmrH_csA2c1HSK5-uNd69Wk_UVQeujlggNUgzFo2zZ6xD2zZyK8Vr9xc-2OG5Brv-QMywIn9YjW6KdD56pFCpVudeyGImvAhmE_YYg3ehUwNkYFXIRO5VRuIZ6laJnaWl57wFEDQYg-MG-9MSqaNXrlhev9APE30O9B829QoxS1AL98uiR3h2qX7fxOzx"
-              alt="Empire Plaza signature gourmet delicacy"
-              className="w-full h-full object-cover object-center"
-            />
-
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0A291E]/70 via-transparent to-black/5" />
-          </div>
-        </section>
-
-        {/* RIGHT SIDE */}
-        <section className="w-full lg:w-[42%] xl:w-[40%] bg-[#F4ECE0]/70 border-t lg:border-t-0 lg:border-l border-[#0F3D2E]/10 px-4 sm:px-8 lg:px-10 xl:px-14 py-6 sm:py-7 lg:py-8 flex items-center justify-center relative flex-1 lg:min-h-0 overflow-hidden">
-
-          {/* Decorative circles */}
-          <div className="absolute -top-16 -right-16 w-56 h-56 opacity-[0.04] pointer-events-none text-[#0F3D2E]">
-            <svg
-              fill="none"
-              viewBox="0 0 200 200"
-            >
-              <circle
-                cx="100"
-                cy="100"
-                r="90"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-
-              <circle
-                cx="100"
-                cy="100"
-                r="60"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-
-              <circle
-                cx="100"
-                cy="100"
-                r="30"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-            </svg>
-          </div>
-
-          {/* FORM / OTP */}
-          <div className="w-full max-w-md relative z-10">
-            {!showOtp ? (
-              <RegisterForm
-                onSuccess={handleRegisterSuccess}
+          <AnimatePresence
+            mode="sync"
+            initial={false}
+          >
+            {showOtp ? (
+              <motion.img
+                key="otp-mobile-background"
+                src="/images/auth/authbg_mobile_otp.png"
+                alt=""
+                aria-hidden="true"
+                initial={{
+                  x: "-100%",
+                }}
+                animate={{
+                  x: "0%",
+                }}
+                exit={{
+                  x: "100%",
+                }}
+                transition={{
+                  duration: 0.65,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="
+                  absolute
+                  inset-0
+                  h-full
+                  w-full
+                  object-cover
+                  object-center
+                "
               />
             ) : (
-              <RegisterOtpForm
-                phone={phone}
-                onEditNumber={handleEditNumber}
+              <motion.img
+                key="register-mobile-background"
+                src="/images/auth/authbg_mobile.png"
+                alt=""
+                aria-hidden="true"
+                initial={{
+                  x: "-100%",
+                }}
+                animate={{
+                  x: "0%",
+                }}
+                exit={{
+                  x: "100%",
+                }}
+                transition={{
+                  duration: 0.65,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="
+                  absolute
+                  inset-0
+                  h-full
+                  w-full
+                  object-cover
+                  object-center
+                "
               />
             )}
-            <button
-                type="button"
-                onClick={() => router.push("/login")}
-                className="text-sm text-[#0F3D2E] mt-2 hover:underline"
-            >
-                Already have an account? <span className="font-semibold">Login</span>
-            </button>
-          </div>
-        </section>
-      </main>
-
-      {/* Footer */}
-      <footer className="hidden sm:flex relative z-20 shrink-0 w-full px-5 sm:px-8 lg:px-12 xl:px-16 py-2.5 border-t border-[#0F3D2E]/10 items-center justify-between text-[10px] text-[#1E2A22]/45">
-        <span>© 2026 Empire Plaza</span>
-
-        <div className="flex gap-4 sm:gap-5">
-          <a
-            href="#"
-            className="hover:text-[#0F3D2E] transition-colors"
-          >
-            Privacy
-          </a>
-
-          <a
-            href="#"
-            className="hover:text-[#0F3D2E] transition-colors"
-          >
-            Terms
-          </a>
-
-          <a
-            href="#"
-            className="hover:text-[#0F3D2E] transition-colors"
-          >
-            Help
-          </a>
+          </AnimatePresence>
         </div>
-      </footer>
-    </div>
+      </div>
+
+      {/* =====================================================
+          BACK TO HOME
+      ===================================================== */}
+
+      <motion.button
+        type="button"
+        onClick={() => router.push("/")}
+        initial={{
+          opacity: 0,
+          x: -10,
+        }}
+        animate={{
+          opacity: 1,
+          x: 0,
+        }}
+        transition={{
+          duration: 0.4,
+        }}
+        className="
+          absolute
+          left-4
+          top-4
+          z-30
+          flex
+          items-center
+          gap-2
+          rounded-full
+          bg-white/80
+          px-4
+          py-2
+          text-[10px]
+          font-semibold
+          uppercase
+          tracking-wider
+          text-[#0F3D2E]
+          shadow-sm
+          backdrop-blur-md
+          transition-all
+          duration-300
+          hover:bg-white
+          hover:text-[#D9A441]
+          sm:left-6
+          sm:top-6
+          sm:text-xs
+        "
+      >
+        <span>←</span>
+        <span>Back to Home</span>
+      </motion.button>
+
+      {/* =====================================================
+          MAIN CONTENT
+      ===================================================== */}
+
+      <div
+        className="
+          relative
+          z-10
+          flex
+          min-h-screen
+          w-full
+          items-center
+          justify-center
+          px-4
+          py-20
+          lg:block
+          lg:px-0
+          lg:py-0
+        "
+      >
+        <div
+          className="
+            w-full
+            max-w-[440px]
+            lg:absolute
+            lg:right-[8%]
+            lg:top-1/2
+            lg:-translate-y-1/2
+          "
+        >
+
+          {/* =================================================
+              LOGO + HEADING
+          ================================================= */}
+
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: 15,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              duration: 0.5,
+              ease: "easeOut",
+            }}
+            className="
+              mb-6
+              flex
+              flex-col
+              items-center
+              text-center
+              sm:mb-7
+            "
+          >
+
+            {/* Leaf */}
+            <motion.img
+              src="/images/auth/leaficon.png"
+              alt=""
+              aria-hidden="true"
+              initial={{
+                opacity: 0,
+                scale: 0.8,
+                y: 8,
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                y: 0,
+              }}
+              transition={{
+                duration: 0.45,
+                delay: 0.1,
+                ease: "easeOut",
+              }}
+              className="
+                mb-2
+                h-7
+                w-auto
+                object-contain
+                sm:h-8
+              "
+            />
+
+            {/* Logo */}
+            <motion.img
+              src="/empireplaza.png"
+              alt="Empire Plaza"
+              initial={{
+                opacity: 0,
+                y: 8,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{
+                duration: 0.45,
+                delay: 0.18,
+                ease: "easeOut",
+              }}
+              className="
+                h-auto
+                w-[150px]
+                object-contain
+                sm:w-[175px]
+              "
+            />
+
+            {/* Heading */}
+            <motion.h1
+              initial={{
+                opacity: 0,
+                y: 8,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{
+                duration: 0.45,
+                delay: 0.25,
+                ease: "easeOut",
+              }}
+              className="
+                mt-4
+                text-2xl
+                font-semibold
+                tracking-tight
+                text-[#1E2A22]
+                sm:text-3xl
+              "
+            >
+              Create Account
+            </motion.h1>
+
+            <motion.p
+              initial={{
+                opacity: 0,
+                y: 8,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{
+                duration: 0.45,
+                delay: 0.32,
+                ease: "easeOut",
+              }}
+              className="
+                mt-2
+                text-xs
+                leading-relaxed
+                text-[#1E2A22]/60
+                sm:text-sm
+              "
+            >
+              Your food journey starts here.
+            </motion.p>
+
+            {/* Gold Divider */}
+            <motion.div
+              initial={{
+                width: 0,
+                opacity: 0,
+              }}
+              animate={{
+                width: 48,
+                opacity: 1,
+              }}
+              transition={{
+                duration: 0.45,
+                delay: 0.4,
+                ease: "easeOut",
+              }}
+              className="
+                mt-4
+                h-[2px]
+                bg-[#D9A441]
+              "
+            />
+          </motion.div>
+
+          {/* =================================================
+              LOGIN / REGISTER SWITCH
+          ================================================= */}
+
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: 10,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              duration: 0.4,
+              delay: 0.45,
+            }}
+            className="
+              mb-6
+              flex
+              items-center
+              justify-center
+              gap-1
+              rounded-full
+              border
+              border-[#0F3D2E]/10
+              bg-white/60
+              p-1
+              shadow-sm
+              backdrop-blur-sm
+            "
+          >
+            <button
+              type="button"
+              onClick={() => router.push("/login")}
+              className="
+                flex-1
+                rounded-full
+                px-4
+                py-2.5
+                text-[10px]
+                font-semibold
+                uppercase
+                tracking-[0.15em]
+                text-[#1E2A22]/50
+                transition-all
+                duration-300
+                hover:text-[#0F3D2E]
+                sm:text-xs
+              "
+            >
+              Sign In
+            </button>
+
+            <button
+              type="button"
+              className="
+                flex-1
+                rounded-full
+                bg-[#0F3D2E]
+                px-4
+                py-2.5
+                text-[10px]
+                font-semibold
+                uppercase
+                tracking-[0.15em]
+                text-white
+                shadow-sm
+                sm:text-xs
+              "
+            >
+              Create Account
+            </button>
+          </motion.div>
+
+          {/* =================================================
+              FORM TRANSITION
+          ================================================= */}
+
+          <div className="relative">
+            <AnimatePresence
+              mode="sync"
+              initial={false}
+            >
+              {showOtp ? (
+                <motion.div
+                  key="register-otp-form"
+                  initial={{
+                    x: -40,
+                    opacity: 0,
+                  }}
+                  animate={{
+                    x: 0,
+                    opacity: 1,
+                  }}
+                  exit={{
+                    x: 40,
+                    opacity: 0,
+                  }}
+                  transition={{
+                    duration: 0.5,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                >
+                  <RegisterOtpForm
+                    phone={phone}
+                    onEditNumber={
+                      handleEditNumber
+                    }
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="register-form"
+                  initial={{
+                    x: -40,
+                    opacity: 0,
+                  }}
+                  animate={{
+                    x: 0,
+                    opacity: 1,
+                  }}
+                  exit={{
+                    x: 40,
+                    opacity: 0,
+                  }}
+                  transition={{
+                    duration: 0.5,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                >
+                  <RegisterForm
+                    onSuccess={
+                      handleRegisterSuccess
+                    }
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 };
 

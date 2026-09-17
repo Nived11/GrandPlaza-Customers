@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import LoginPhoneForm from "./LoginPhoneForm";
 import OtpForm from "./OtpForm";
 
@@ -52,16 +53,32 @@ const LoginForm = () => {
   };
 
   return (
-    <>
+    <AnimatePresence mode="wait">
       {!showOtp ? (
-        <LoginPhoneForm onSuccess={handleOtpStep} />
+        <motion.div
+          key="phone"
+          initial={{ opacity: 0, x: 16 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -16 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+        >
+          <LoginPhoneForm onSuccess={handleOtpStep} />
+        </motion.div>
       ) : (
-        <OtpForm
-          phone={phone}
-          onEditNumber={handleEditNumber}
-        />
+        <motion.div
+          key="otp"
+          initial={{ opacity: 0, x: 16 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -16 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+        >
+          <OtpForm
+            phone={phone}
+            onEditNumber={handleEditNumber}
+          />
+        </motion.div>
       )}
-    </>
+    </AnimatePresence>
   );
 };
 

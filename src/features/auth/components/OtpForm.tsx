@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState,} from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import useVerifyOtp from "../hook/useVerifyOtp";
 import useLogin from "../hook/useLogin";
 
@@ -24,6 +25,9 @@ const OtpForm = ({ phone, onEditNumber,}: OtpFormProps) => {
 
   const [seconds, setSeconds] = useState(24);
   const [otpError, setOtpError] = useState("");
+
+  // NEW: brief success beat before the redirect fires, instead of an instant cut
+  const [justVerified, setJustVerified] = useState(false);
 
   const {
     verifyOtp,
@@ -321,27 +325,31 @@ const OtpForm = ({ phone, onEditNumber,}: OtpFormProps) => {
      * Authentication successful
      */
     sessionStorage.removeItem("auth_phone");
-      
+
+    /*
+     * NEW: hold on a success state briefly so the checkmark
+     * morph is actually visible before we navigate away.
+     */
+    setJustVerified(true);
+
     /*
      * Get the page the user originally wanted.
      */
     const redirect = new URLSearchParams(
       window.location.search
     ).get("redirect");
-    
-    /*
-     * Go back to the requested internal page.
-     * If there is no redirect, go to home.
-     */
-    if (
-      redirect &&
-      redirect.startsWith("/") &&
-      !redirect.startsWith("//")
-    ) {
-      router.replace(redirect);
-    } else {
-      router.replace("/");
-    }
+
+    setTimeout(() => {
+      if (
+        redirect &&
+        redirect.startsWith("/") &&
+        !redirect.startsWith("//")
+      ) {
+        router.replace(redirect);
+      } else {
+        router.replace("/");
+      }
+    }, 650);
   };
 
   /*
@@ -397,7 +405,12 @@ const OtpForm = ({ phone, onEditNumber,}: OtpFormProps) => {
   return (
     <>
       {/* Heading */}
-      <div className="mb-5 sm:mb-6">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="mb-5 sm:mb-6"
+      >
         <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] font-semibold text-[#D9A441] mb-2">
           <span>✦</span>
 
@@ -417,14 +430,18 @@ const OtpForm = ({ phone, onEditNumber,}: OtpFormProps) => {
           Enter the verification code sent to
           your mobile number.
         </p>
-      </div>
+      </motion.div>
 
       <form
         onSubmit={handleVerifyOtp}
         className="space-y-4"
       >
         {/* Verification Code */}
-        <div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.08, ease: "easeOut" }}
+        >
           <div className="flex items-center justify-between mb-2">
             <label className="block text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[#1E2A22]">
               Verification Code
@@ -433,7 +450,8 @@ const OtpForm = ({ phone, onEditNumber,}: OtpFormProps) => {
             <button
               type="button"
               onClick={handleEditNumber}
-              className="text-[10px] sm:text-[11px] text-[#0F3D2E] hover:text-[#D9A441] font-semibold underline"
+              disabled={justVerified}
+              className="text-[10px] sm:text-[11px] text-[#0F3D2E] hover:text-[#D9A441] font-semibold underline disabled:opacity-40 disabled:pointer-events-none"
             >
               Edit Number
             </button>
@@ -446,10 +464,18 @@ const OtpForm = ({ phone, onEditNumber,}: OtpFormProps) => {
             </span>
           </p>
 
-          {/* OTP Boxes */}
-          <div className="flex items-center justify-between gap-1 sm:gap-1.5">
+          {/* OTP Boxes — row shakes on validation error */}
+          <motion.div
+            animate={
+              otpError
+                ? { x: [0, -8, 8, -6, 6, 0] }
+                : { x: 0 }
+            }
+            transition={{ duration: 0.4 }}
+            className="flex items-center justify-between gap-1 sm:gap-1.5"
+          >
             {otp.map((digit, index) => (
-              <input
+              <motion.input
                 key={index}
                 ref={(element) => {
                   otpRefs.current[index] =
@@ -483,23 +509,30 @@ const OtpForm = ({ phone, onEditNumber,}: OtpFormProps) => {
                     index
                   )
                 }
-                disabled={isVerifying}
-                className={`w-9 h-11 appearance-none sm:w-11 sm:h-12 text-center text-lg font-bold text-[#1E2A22] bg-white rounded-xl border shadow-sm transition-all focus:outline-none focus:border-[#D9A441] focus:ring-4 focus:ring-[#D9A441]/10 ${
+                disabled={isVerifying || justVerified}
+                whileFocus={{ scale: 1.06 }}
+                className={`w-9 h-11 appearance-none sm:w-11 sm:h-12 text-center text-lg font-bold text-[#1E2A22] bg-white rounded-xl border shadow-sm transition-all duration-200 focus:outline-none focus:border-[#D9A441] focus:ring-4 focus:ring-[#D9A441]/10 ${
+                  digit ? "border-[#D9A441]/70 scale-[1.02]" : ""
+                } ${
                   otpError
                     ? "border-red-500"
                     : "border-[#0F3D2E]/15"
-                }`}
+                } ${justVerified ? "border-green-500 bg-green-50" : ""}`}
               />
             ))}
-          </div>
+          </motion.div>
 
           {/* Error */}
           {otpError && (
-            <p className="mt-2 text-[10px] sm:text-[11px] text-red-600">
+            <motion.p
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-2 text-[10px] sm:text-[11px] text-red-600"
+            >
               {otpError}
-            </p>
+            </motion.p>
           )}
-        </div>
+        </motion.div>
 
         {/* Countdown */}
         <div className="flex items-center justify-between text-[11px] sm:text-xs">
@@ -517,7 +550,7 @@ const OtpForm = ({ phone, onEditNumber,}: OtpFormProps) => {
             <button
               type="button"
               onClick={handleResend}
-              disabled={isResending}
+              disabled={isResending || justVerified}
               className="text-[#0F3D2E] font-semibold hover:text-[#D9A441] underline disabled:opacity-50 disabled:pointer-events-none"
             >
               {isResending ? "SENDING..." : "Resend OTP Now"}
@@ -525,20 +558,42 @@ const OtpForm = ({ phone, onEditNumber,}: OtpFormProps) => {
           )}
         </div>
 
-        {/* Verify Button */}
-        <button
+        {/* Verify Button — morphs to a checkmark and holds briefly before redirect */}
+        <motion.button
           type="submit"
-          disabled={isVerifying}
-          className="w-full bg-[#0F3D2E] hover:bg-[#0A291E] disabled:opacity-70 disabled:pointer-events-none text-white py-3.5 px-6 rounded-2xl font-medium text-xs sm:text-sm tracking-[0.15em] uppercase flex items-center justify-center gap-3 shadow-lg shadow-[#0F3D2E]/20 hover:shadow-xl transition-all duration-300 active:scale-[0.99]"
+          disabled={isVerifying || justVerified}
+          whileHover={!justVerified ? { y: -1 } : {}}
+          whileTap={!justVerified ? { scale: 0.98 } : {}}
+          animate={
+            justVerified
+              ? { backgroundColor: "#15803d" }
+              : { backgroundColor: "#0F3D2E" }
+          }
+          transition={{ duration: 0.3 }}
+          className="w-full text-white py-3.5 px-6 rounded-2xl font-medium text-xs sm:text-sm tracking-[0.15em] uppercase flex items-center justify-center gap-3 shadow-lg shadow-[#0F3D2E]/20 hover:shadow-xl transition-shadow duration-300 disabled:pointer-events-none"
         >
-          <span>
-            {isVerifying
-              ? "AUTHENTICATING..."
-              : "VERIFY & CONTINUE"}
-          </span>
-
-          <span>✓</span>
-        </button>
+          {justVerified ? (
+            <>
+              <motion.span
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+              >
+                ✓
+              </motion.span>
+              <span>VERIFIED</span>
+            </>
+          ) : (
+            <>
+              <span>
+                {isVerifying
+                  ? "AUTHENTICATING..."
+                  : "VERIFY & CONTINUE"}
+              </span>
+              <span>✓</span>
+            </>
+          )}
+        </motion.button>
       </form>
     </>
   );
