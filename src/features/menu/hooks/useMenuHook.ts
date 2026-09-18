@@ -2,7 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { getMenuItemsApi } from "../api/menuApi";
+
+import {
+  getMenuItemsApi,
+  type MenuQueryParams,
+} from "../api/menuApi";
+
 import { extractErrorMessages } from "@/utils/extractErrorMessages";
 import type { HomeMenuItem } from "@/features/home/hooks/useHomeHook";
 
@@ -11,32 +16,121 @@ export interface MenuCategory {
   name: string;
 }
 
-export const useMenuHook = () => {
-  const [menuItems, setMenuItems] = useState<HomeMenuItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export type MenuDiet = "ALL" | "VEG" | "NON-VEG";
 
-  const fetchMenu = async () => {
+export type MenuSection =
+  | "ALL"
+  | "BEST SELLER"
+  | "COMBO MENU"
+  | "TODAY'S SPECIAL"
+  | "OTHERS";
+
+export interface UseMenuFilters {
+  search?: string;
+  category?: number | "ALL";
+  diet?: MenuDiet;
+  section?: MenuSection;
+}
+
+export const useMenuHook = (
+  filters: UseMenuFilters = {}
+) => {
+  const [menuItems, setMenuItems] =
+    useState<HomeMenuItem[]>([]);
+
+  const [categories, setCategories] =
+    useState<MenuCategory[]>([]);
+
+  const [loading, setLoading] = useState(true);
+
+  const [error, setError] =
+    useState<string | null>(null);
+
+  const fetchMenu = async (
+    customFilters: UseMenuFilters = filters
+  ) => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await getMenuItemsApi();
+      const params: MenuQueryParams = {};
 
-      console.log("MENU API RESPONSE:", response);
+      if (
+        customFilters.search &&
+        customFilters.search.trim()
+      ) {
+        params.search =
+          customFilters.search.trim();
+      }
 
-      // Earlier sample response was a raw array. Falling back to
-      // response.data in case this ever gets wrapped like Home's
-      // { status, data } shape.
-      const items: HomeMenuItem[] = Array.isArray(response)
-        ? response
-        : response?.data ?? [];
+      params.category =
+        customFilters.category ?? "ALL";
+
+      if (
+        customFilters.diet &&
+        customFilters.diet !== "ALL"
+      ) {
+        params.diet = customFilters.diet;
+      }
+
+      if (
+        customFilters.section &&
+        customFilters.section !== "ALL"
+      ) {
+        params.section = customFilters.section;
+      }
+
+      const response = await getMenuItemsApi(params);
+
+      /*
+       * API returns the array directly.
+       *
+       * [
+       *   { id, category, category_name, ... }
+       * ]
+       */
+      const items: HomeMenuItem[] =
+        Array.isArray(response)
+          ? response
+          : [];
 
       setMenuItems(items);
-    } catch (err: any) {
-      console.error("Error fetching menu data:", err);
 
-      const message = extractErrorMessages(err);
+      /*
+       * Build categories from the API response.
+       */
+      const categoryMap =
+        new Map<number, string>();
+
+      items.forEach((item) => {
+        if (
+          !categoryMap.has(item.category)
+        ) {
+          categoryMap.set(
+            item.category,
+            item.category_name
+          );
+        }
+      });
+
+      setCategories(
+        Array.from(
+          categoryMap,
+          ([id, name]) => ({
+            id,
+            name,
+          })
+        )
+      );
+    } catch (err: any) {
+      console.error(
+        "Error fetching menu data:",
+        err
+      );
+
+      const message =
+        extractErrorMessages(err);
+
       setError(message);
       toast.error(message);
     } finally {
@@ -45,23 +139,23 @@ export const useMenuHook = () => {
   };
 
   useEffect(() => {
-    fetchMenu();
-  }, []);
+    const timer = setTimeout(() => {
+      fetchMenu(filters);
+    }, 350);
 
-  // Derived from the item list itself (category id + category_name).
-  // There's no confirmed standalone categories-with-image endpoint for
-  // Menu yet — if one exists (matching HomeCategory { id, name, image }
-  // the way homeData.categories does for CravingSection), swap this out
-  // for that instead.
-  const categories: MenuCategory[] = useMemo(() => {
-    const seen = new Map<number, string>();
-    menuItems.forEach((item) => {
-      if (!seen.has(item.category)) {
-        seen.set(item.category, item.category_name);
-      }
-    });
-    return Array.from(seen, ([id, name]) => ({ id, name }));
-  }, [menuItems]);
+    return () => clearTimeout(timer);
+  }, [
+    filters.search,
+    filters.category,
+    filters.diet,
+    filters.section,
+  ]);
 
-  return { menuItems, categories, loading, error, fetchMenu };
+  return {
+    menuItems,
+    categories,
+    loading,
+    error,
+    fetchMenu,
+  };
 };

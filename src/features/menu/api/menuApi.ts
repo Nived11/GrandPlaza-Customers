@@ -1,8 +1,26 @@
 import axiosInstance from "@/lib/axios";
 
-// Mirrors homeApi.ts's pattern (shared axiosInstance from "@/lib/axios").
-// Endpoint confirmed earlier: GET /api/menu/public/menu-items
-export const getMenuItemsApi = async () => {
-  const response = await axiosInstance.get("/menu/public/menu-items");
+export interface MenuQueryParams {
+  search?: string;
+  category?: number | "ALL";
+  diet?: "VEG" | "NON-VEG";
+  section?:
+    | "ALL"
+    | "BEST SELLER"
+    | "COMBO MENU"
+    | "TODAY'S SPECIAL"
+    | "OTHERS";
+}
+
+export const getMenuItemsApi = async (
+  params?: MenuQueryParams
+) => {
+  const response = await axiosInstance.get(
+    "/menu/public/menu-items",
+    {
+      params,
+    }
+  );
+
   return response.data;
 };
