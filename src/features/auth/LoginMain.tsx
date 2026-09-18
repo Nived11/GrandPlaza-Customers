@@ -1,39 +1,157 @@
 "use client";
 
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import LoginForm from "./components/LoginForm";
-
 
 const LoginMain = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const showOtp = searchParams.get("step") === "otp";
+
+  /*
+   * Preload BOTH mobile backgrounds immediately.
+   * This prevents the OTP image from waiting for the
+   * Send OTP button to be clicked before downloading.
+   */
+  useEffect(() => {
+    const defaultMobileImage = new Image();
+    const otpMobileImage = new Image();
+
+    defaultMobileImage.src = "/images/auth/authbg_mobile.png";
+    otpMobileImage.src = "/images/auth/authbg_mobile_otp.png";
+  }, []);
 
   return (
     <main className="relative min-h-screen w-full overflow-hidden bg-[#FBF6EC]">
 
       {/* Full Screen Background */}
-      <picture className="fixed inset-0 z-0 block h-full w-full">
-        <source
-          media="(max-width: 767px)"
-          srcSet="/images/auth/authbg_mobile.png"
-        />
+      <div className="fixed inset-0 z-0 h-full w-full">
 
+        {/* Desktop Background */}
         <img
           src="/images/auth/authbg.png"
           alt=""
-          className="h-full w-full object-cover object-center"
+          aria-hidden="true"
+          className="
+            absolute
+            inset-0
+            hidden
+            h-full
+            w-full
+            object-cover
+            object-center
+            lg:block
+          "
         />
-      </picture>
+
+        {/* Mobile Background */}
+        <div
+          className="
+            absolute
+            inset-0
+            overflow-hidden
+            lg:hidden
+          "
+        >
+          <AnimatePresence
+            mode="sync"
+            initial={false}
+          >
+            {showOtp ? (
+              <motion.img
+                key="otp-mobile-background"
+                src="/images/auth/authbg_mobile_otp.png"
+                alt=""
+                aria-hidden="true"
+                initial={{
+                  x: "-100%",
+                }}
+                animate={{
+                  x: "0%",
+                }}
+                exit={{
+                  x: "100%",
+                }}
+                transition={{
+                  duration: 0.65,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="
+                  absolute
+                  inset-0
+                  h-full
+                  w-full
+                  object-cover
+                  object-center
+                "
+              />
+            ) : (
+              <motion.img
+                key="login-mobile-background"
+                src="/images/auth/authbg_mobile.png"
+                alt=""
+                aria-hidden="true"
+                initial={{
+                  x: "-100%",
+                }}
+                animate={{
+                  x: "0%",
+                }}
+                exit={{
+                  x: "100%",
+                }}
+                transition={{
+                  duration: 0.65,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="
+                  absolute
+                  inset-0
+                  h-full
+                  w-full
+                  object-cover
+                  object-center
+                "
+              />
+            )}
+          </AnimatePresence>
+
+          {/* Preload both images */}
+          <img
+            src="/images/auth/authbg_mobile.png"
+            alt=""
+            aria-hidden="true"
+            className="hidden"
+          />
+
+          <img
+            src="/images/auth/authbg_mobile_otp.png"
+            alt=""
+            aria-hidden="true"
+            className="hidden"
+          />
+        </div>
+      </div>
 
       {/* Back to Home */}
       <motion.button
         type="button"
         onClick={() => router.push("/")}
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        initial={{
+          opacity: 0,
+          y: -8,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
+        transition={{
+          duration: 0.5,
+        }}
         className="
           absolute
           right-5
@@ -69,18 +187,21 @@ const LoginMain = () => {
           relative
           z-20
           flex
-          min-h-screen
+          min-h-[100svh]
           w-full
-          items-end
+          items-center
           justify-center
           px-5
+          pt-64
           pb-8
-          pt-24
           sm:px-8
-          sm:pb-10
+          sm:pt-20
+          sm:pb-0
+          lg:min-h-screen
           lg:items-center
           lg:justify-end
           lg:px-14
+          lg:py-0
           xl:px-20
           2xl:px-28
         "
@@ -325,4 +446,4 @@ const LoginMain = () => {
   );
 };
 
-export default LoginMain;
+export default LoginMain; 

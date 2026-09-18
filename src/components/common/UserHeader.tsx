@@ -4,9 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { 
-  User, MapPin, ChevronDown, ShoppingCart, HelpCircle, Package, CalendarDays, ConciergeBell, Search, X, ArrowRight
-} from "lucide-react";
+import {  User, MapPin, ChevronDown, ShoppingCart, HelpCircle, Package, CalendarDays, ConciergeBell, Search, X, ArrowRight} from "lucide-react";
 // Imported Remix Icons
 import { 
   RiChatSmile3Line, RiChatSmile3Fill, 
@@ -15,10 +13,20 @@ import {
   RiRestaurantLine, RiRestaurantFill
 } from "react-icons/ri";
 import ReservationModal from "@/features/reservation/ReservationMain";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
 
 export default function UserHeader() {
   const pathname = usePathname();
-  
+  const cartItems = useSelector(
+    (state: RootState) => state.cart.items
+  );
+
+  const cartCount = cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isReservationOpen, setIsReservationOpen] = useState(false);
 
@@ -169,7 +177,9 @@ export default function UserHeader() {
             </div>
             <Link href="/cart" className="relative p-2 lg:p-2.5 rounded-full border border-gray-200 hover:border-[#D97706] transition text-gray-700 shrink-0">
               <ShoppingCart size={16} className="xl:w-[18px] xl:h-[18px]" />
-              <span className="absolute -top-1 -right-1 bg-[#D97706] text-white font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center">3</span>
+              <span className="absolute -top-1 -right-1 bg-[#D97706] text-white font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+                {cartCount}
+              </span>
             </Link>
             <div className="h-4 lg:h-5 w-[1px] bg-gray-300 mx-0.5 lg:mx-1 shrink-0" />
             <Link href="/profile" className="p-2 lg:p-2.5 rounded-full bg-brand-green-dark empire-geometric-bg border-2 border-brand-gold hover:scale-105 transition text-brand-gold shrink-0">

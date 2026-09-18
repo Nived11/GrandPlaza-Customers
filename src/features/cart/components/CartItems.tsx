@@ -35,6 +35,9 @@ const CartItems = () => {
     useState(false);
 
   const [clearCartError, setClearCartError] = useState("");
+  const isUserLoggedIn = () => {
+    return localStorage.getItem("isLoggedIn") === "true";
+  };
 
   // Increase Quantity
   const handleIncrease = async (item: CartItem) => {
@@ -42,6 +45,29 @@ const CartItems = () => {
       return;
     }
 
+    /*
+     * GUEST USER
+     *
+     * Do not call the backend.
+     * Redux is the cart source.
+     */
+    if (!isUserLoggedIn()) {
+      dispatch(
+        increaseQuantity({
+          id: item.id,
+          variantId: item.variant?.id ?? null,
+        })
+      );
+
+      return;
+    }
+
+    /*
+     * LOGGED-IN USER
+     *
+     * Update backend first.
+     * Update Redux only after API success.
+     */
     const newQuantity = item.quantity + 1;
 
     const response = await updateCart({
@@ -72,6 +98,29 @@ const CartItems = () => {
       return;
     }
 
+    /*
+     * GUEST USER
+     *
+     * Do not call the backend.
+     * Update Redux only.
+     */
+    if (!isUserLoggedIn()) {
+      dispatch(
+        decreaseQuantity({
+          id: item.id,
+          variantId: item.variant?.id ?? null,
+        })
+      );
+
+      return;
+    }
+
+    /*
+     * LOGGED-IN USER
+     *
+     * Backend first.
+     * Redux only after successful API response.
+     */
     const response = await updateCart({
       menu_item_id: item.cart_item_id,
       variant_id: item.variant?.id ?? null,
@@ -89,49 +138,52 @@ const CartItems = () => {
   };
 
   const handleRemove = async (item: CartItem) => {
-  if (isDeletingCart) {
-    return;
-  }
+    if (isDeletingCart) {
+      return;
+    }
 
-  /*
-   * item.cart_item_id = Backend CartItem ID
-   * item.id           = Menu Item ID
-   *
-   * Example:
-   * cart_item_id = 23
-   * id = 25
-   *
-   * DELETE must use 23.
-   */
-  setDeletingItemId(item.cart_item_id);
-
-  try {
-    console.log(
-      "DELETE - CART ITEM ID:",
-      item.cart_item_id
-    );
-
-    console.log(
-      "DELETE - MENU ITEM ID:",
-      item.id
-    );
-
-    const response = await deleteCart(
-      item.cart_item_id
-    );
-
-    if (response) {
+    /*
+     * GUEST USER
+     *
+     * No API call.
+     * Remove directly from Redux.
+     */
+    if (!isUserLoggedIn()) {
       dispatch(
         removeFromCart({
           id: item.id,
           variantId: item.variant?.id ?? null,
         })
       );
+
+      return;
     }
-  } finally {
-    setDeletingItemId(null);
-  }
-};
+
+    /*
+     * LOGGED-IN USER
+     *
+     * Backend first.
+     * Redux only after successful API response.
+     */
+    setDeletingItemId(item.cart_item_id);
+
+    try {
+      const response = await deleteCart(
+        item.cart_item_id
+      );
+
+      if (response) {
+        dispatch(
+          removeFromCart({
+            id: item.id,
+            variantId: item.variant?.id ?? null,
+          })
+        );
+      }
+    } finally {
+      setDeletingItemId(null);
+    }
+  };
 
   // Open Clear Cart Modal
   const handleOpenClearCartModal = () => {
@@ -155,14 +207,37 @@ const CartItems = () => {
 
   // Clear Cart
   const handleClearCart = async () => {
-    if (isClearingCart || cartItems.length === 0) {
+    if (
+      isClearingCart ||
+      cartItems.length === 0
+    ) {
       return;
     }
-
+  
     setClearCartError("");
-
+  
+    /*
+     * GUEST USER
+     *
+     * No backend API.
+     * Clear Redux directly.
+     */
+    if (!isUserLoggedIn()) {
+      dispatch(clearCartRedux());
+      setShowClearCartModal(false);
+      setClearCartError("");
+    
+      return;
+    }
+  
+    /*
+     * LOGGED-IN USER
+     *
+     * Clear backend first.
+     * Clear Redux only after successful API response.
+     */
     const response = await clearCart();
-
+  
     if (response) {
       dispatch(clearCartRedux());
       setShowClearCartModal(false);

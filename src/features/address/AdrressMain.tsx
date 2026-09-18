@@ -17,8 +17,17 @@ import { useAddressHook, AddressData } from "./hook/useAddressHook";
 import { useOrderHook } from "../order/hook/useOrderHook";
 import OrderSuccessModal from "../order/components/OrderSuccessModal";
 import type { OrderData } from "../order/components/OrderSuccessModal";
+import useAuthGuard from "@/hooks/useAuthGuard";
+import AccessDenied from "@/components/common/AccessDenied";
 
 export default function AddressMain() {
+     const { isAuthorized } = useAuthGuard({
+    requireAuth: true,
+  });
+  
+  if (!isAuthorized) {
+    return <AccessDenied />;
+}
     const dispatch = useDispatch<AppDispatch>();
     const router = useRouter();
 
