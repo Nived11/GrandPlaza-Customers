@@ -14,7 +14,7 @@ import {
 } from "react-icons/ri";
 import ReservationModal from "@/features/reservation/ReservationMain";
 import { useSelector } from "react-redux";
-import { RootState } from "@/store";
+import { RootState } from "@/redux/store";
 
 export default function UserHeader() {
   const pathname = usePathname();
