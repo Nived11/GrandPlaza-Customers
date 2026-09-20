@@ -60,7 +60,7 @@ const BannerSection = ({ data = [], onBannerClick }: BannerSectionProps) => {
   if (banners.length === 0) return null;
 
   return (
-    <div className="relative w-full bg-white pb-24 lg:pb-12 pt-0 overflow-visible group font-sans">
+    <div className="relative w-full bg-gradient-to-b from-[var(--brand-cream-soft)] via-[var(--brand-cream-soft)] to-white pb-24 lg:pb-12 pt-0 overflow-visible group font-sans">
       
       {banners.length > 1 && (
         <>
@@ -86,7 +86,7 @@ const BannerSection = ({ data = [], onBannerClick }: BannerSectionProps) => {
           return (
             <div key={item.id || index} className="outline-none">
               
-              <div className="relative w-full h-[220px] sm:h-[260px] lg:h-[460px] bg-[var(--brand-cream-soft)] overflow-visible flex flex-row items-center">
+              <div className="relative w-full h-[220px] sm:h-[260px] lg:h-[460px] bg-gradient-to-b from-[var(--brand-cream-soft)] via-[var(--brand-cream-soft)] to-transparent overflow-visible flex flex-row items-center">
                 
                 <div className="hidden lg:block absolute inset-0 w-[55%] z-0 pointer-events-none overflow-hidden">
                   <div className="absolute -left-[10%] top-[-20%] w-[600px] h-[600px] bg-[var(--brand-gold)] opacity-[0.07] rounded-full blur-[100px]" />
@@ -154,8 +154,9 @@ const BannerSection = ({ data = [], onBannerClick }: BannerSectionProps) => {
           );
         })}
       </Slider>
-
+      <div className="absolute bottom-0 left-0 right-0 h-24 sm:h-32 lg:h-44 bg-gradient-to-b from-transparent via-[var(--brand-cream-soft)]/50 to-white pointer-events-none z-20" />
       <div className="absolute -bottom-[-40px] lg:bottom-10 left-[0px] lg:left-[-200px] w-full pointer-events-none z-30">
+        
         <div className="max-w-[1000px] mx-auto px-2 lg:px-10 w-full flex justify-center lg:justify-start">
           
           <div className="w-full lg:w-[90%] bg-white rounded-lg sm:rounded-xl shadow-[0_12px_40px_rgb(0,0,0,0.08)] border border-[var(--brand-gold)]/10 py-0.5 lg:py-1 pointer-events-auto">

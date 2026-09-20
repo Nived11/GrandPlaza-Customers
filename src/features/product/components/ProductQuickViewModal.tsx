@@ -9,14 +9,14 @@ import {
   Plus,
   ShoppingBag,
 } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 
 import {
   addToCart,
   setCart,
 } from "@/redux/slices/cartSlice";
-import type { AppDispatch } from "@/redux/store";
+import type { AppDispatch, RootState } from "@/redux/store";
 
 import {
   HomeMenuItem,
@@ -35,6 +35,7 @@ const ProductQuickViewModal = ({
   onClose,
 }: ProductQuickViewModalProps) => {
   const dispatch = useDispatch<AppDispatch>();
+  const cartItems = useSelector((state: RootState) => state.cart.items);
 
   const {
     addToCart: addToCartApi,
@@ -326,6 +327,23 @@ const ProductQuickViewModal = ({
       return;
     }
 
+    // 🛡️ Limit Check: നിലവിലുള്ള quantity + പുതിയ quantity 20-ൽ കൂടുമോ എന്ന് നോക്കുന്നു
+    const existingCartItem = cartItems.find(
+      (cItem) =>
+        cItem.id === product.id &&
+        (cItem.variant?.id ?? null) === (selectedVariant?.id ?? null)
+    );
+
+    const currentQty = existingCartItem ? existingCartItem.quantity : 0;
+    if (currentQty + quantity > 20) {
+      toast.error(
+        currentQty >= 20
+          ? `Maximum limit of 20 already reached for ${product.name}`
+          : `You can only add ${20 - currentQty} more of ${product.name} (Max: 20)`
+      );
+      return;
+    }
+
     try {
       setIsAdding(true);
 
@@ -345,133 +363,62 @@ const ProductQuickViewModal = ({
        * Do NOT call the backend.
        * Store the item only in Redux.
        */
+      // 1. Instant Optimistic Update: Redux / LocalStorage update (0ms)
+      dispatch(
+        addToCart({
+          cart_item_id: 0,
+          id: product.id,
+          name: product.name,
+          description: product.description || "",
+          image: product.image ?? null,
+          dietary_preference: product.dietary_preference,
+          has_variants: product.has_variants,
+          actual_price: product.has_variants
+            ? selectedVariant?.actual_price ?? null
+            : product.actual_price ?? null,
+          offer_price: product.has_variants
+            ? selectedVariant?.offer_price ?? null
+            : product.offer_price ?? null,
+          variant: selectedVariant
+            ? {
+                id: selectedVariant.id,
+                size_name: selectedVariant.size_name,
+                actual_price: selectedVariant.actual_price,
+                offer_price: selectedVariant.offer_price,
+                is_available: selectedVariant.is_available,
+              }
+            : null,
+          quantity,
+          unit_price: unitPrice,
+          total_price: unitPrice * quantity,
+        })
+      );
+
+      toast.success(`${product.name} added to cart`, {
+        duration: 3000,
+      });
+
+      onClose();
+
       if (!isLoggedIn) {
-        dispatch(
-          addToCart({
-            /*
-             * No backend CartItem ID exists
-             * for a guest cart item.
-             */
-            cart_item_id: 0,
-
-            /*
-             * Menu item ID.
-             */
-            id: product.id,
-
-            name: product.name,
-
-            description:
-              product.description || "",
-
-            image:
-              product.image ?? null,
-
-            dietary_preference:
-              product.dietary_preference,
-
-            has_variants:
-              product.has_variants,
-
-            actual_price:
-              product.has_variants
-                ? selectedVariant?.actual_price ??
-                  null
-                : product.actual_price ??
-                  null,
-
-            offer_price:
-              product.has_variants
-                ? selectedVariant?.offer_price ??
-                  null
-                : product.offer_price ??
-                  null,
-
-            variant: selectedVariant
-              ? {
-                  id: selectedVariant.id,
-
-                  size_name:
-                    selectedVariant.size_name,
-
-                  actual_price:
-                    selectedVariant.actual_price,
-
-                  offer_price:
-                    selectedVariant.offer_price,
-
-                  is_available:
-                    selectedVariant.is_available,
-                }
-              : null,
-
-            quantity,
-
-            unit_price: unitPrice,
-
-            total_price:
-              unitPrice * quantity,
-          })
-        );
-
-        toast.success(
-          `${product.name} added to cart`,
-          {
-            duration: 3000,
-          }
-        );
-
-        onClose();
-
         return;
       }
 
-      /*
-       * ==================================================
-       * LOGGED-IN USER
-       * ==================================================
-       *
-       * POST → GET → Redux
-       */
-
-      const response =
-        await addToCartApi({
+      // 2. Logged-in User: Background API sync
+      try {
+        const response = await addToCartApi({
           menu_item_id: product.id,
-
-          variant_id:
-            selectedVariant?.id ?? null,
-
+          variant_id: selectedVariant?.id ?? null,
           quantity,
         });
 
-      /*
-       * Stop if Add Cart API failed.
-       */
-      if (!response?.status) {
-        return;
+        if (!response?.status) return;
+
+        const cartResponse = await getCart();
+        syncBackendCartToRedux(cartResponse);
+      } catch (err) {
+        console.error("Failed to sync modal cart to backend:", err);
       }
-
-      /*
-       * Get the complete backend cart.
-       */
-      const cartResponse =
-        await getCart();
-
-      /*
-       * Sync backend cart into Redux.
-       */
-      syncBackendCartToRedux(
-        cartResponse
-      );
-
-      toast.success(
-        `${product.name} added to cart`,
-        {
-          duration: 3000,
-        }
-      );
-
-      onClose();
     } finally {
       setIsAdding(false);
     }

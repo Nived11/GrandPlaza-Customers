@@ -31,7 +31,7 @@ const HomeMain = () => {
   }
   
   return (
-    <div className="w-full min-h-screen bg-[var(--brand-cream-soft)] overflow-x-hidden">
+    <div className="w-full min-h-screen bg-white overflow-x-hidden">
       
     <BannerSection data={homeData?.banners ?? []} />
       <section className="bg-white w-full max-w-[1400px] mx-auto px-4 lg:px-10 pt-4 lg:pt-0">

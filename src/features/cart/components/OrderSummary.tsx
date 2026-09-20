@@ -3,16 +3,18 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
+import { FileText, Info, Lock, ArrowRight, Bike, ShieldCheck, Leaf, Loader2 } from "lucide-react";
 import type { RootState } from "@/redux/store";
 
 const OrderSummary = () => {
   const router = useRouter();
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
 
-  const [isCheckoutLoading, setIsCheckoutLoading] =
-    useState(false);
+  const cartItems = useSelector((state: RootState) => state.cart.items);
 
-  const cartItems = useSelector(
-    (state: RootState) => state.cart.items
+  const totalQuantity = cartItems.reduce(
+    (total, item) => total + (item.quantity || 0),
+    0
   );
 
   const itemsTotal = cartItems.reduce(
@@ -20,192 +22,134 @@ const OrderSummary = () => {
     0
   );
 
-  const totalPayable = itemsTotal;
+  // Delivery fee: flat ₹30 if cart has items, ₹0 if empty
+  const deliveryFee = cartItems.length > 0 ? 30 : 0;
+  const totalPayable = itemsTotal + deliveryFee;
 
   const handleCheckout = async () => {
-    /*
-     * If cart is empty, do nothing.
-     */
     if (cartItems.length === 0) {
       return;
     }
 
-    /*
-     * Check login status.
-     */
-    const isLoggedIn =
-      localStorage.getItem("isLoggedIn") === "true";
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
 
-    /*
-     * Guest user:
-     * Send user to login first.
-     */
     if (!isLoggedIn) {
       router.push("/login?redirect=/cart");
       return;
     }
 
-    /*
-     * Logged-in user:
-     * Cart is already synchronized with backend
-     * by CartMain.
-     *
-     * Move to address page where the user can
-     * select or add an address.
-     */
     try {
       setIsCheckoutLoading(true);
-
       router.push("/address");
     } catch (error) {
-      console.error(
-        "CHECKOUT NAVIGATION ERROR:",
-        error
-      );
-
+      console.error("CHECKOUT NAVIGATION ERROR:", error);
       setIsCheckoutLoading(false);
     }
   };
 
   return (
-    <section
-      aria-labelledby="order-summary-heading"
-      className="lg:col-span-4 lg:sticky lg:top-28 space-y-6"
-    >
-      <h2 className="sr-only" id="order-summary-heading">
-        Order Bill Summary
-      </h2>
+    <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-100/90 space-y-5">
+      {/* Summary Header */}
+      <div className="flex items-center gap-2.5 pb-3 border-b border-gray-100">
+        <div className="w-8 h-8 rounded-lg bg-emerald-50 text-[#0F3D2E] flex items-center justify-center shrink-0">
+          <FileText size={18} strokeWidth={2.2} />
+        </div>
+        <h2 className="font-bold text-base sm:text-lg text-slate-800">
+          Order Summary
+        </h2>
+      </div>
 
-      {/* Order Summary Card */}
-      <div className="bg-white rounded-2xl shadow-warm-lg border border-amber-100/70 p-6 space-y-5">
-
-        {/* Summary Card Header */}
-        <div className="flex items-center justify-between border-b border-[#0F3D2E]/10 pb-3">
-          <h3 className="font-serif font-bold text-xl text-[#0F3D2E] flex items-center gap-2">
-            <span className="text-[#D9A441]">✦</span>
-            Order Summary
-          </h3>
-
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#FBF6EC] text-[#0F3D2E] border border-[#0F3D2E]/10">
-            Malappuram Store
+      {/* Price Breakdown */}
+      <div className="space-y-3 text-sm">
+        {/* Items Subtotal */}
+        <div className="flex justify-between items-center text-slate-600">
+          <span>Items ({totalQuantity})</span>
+          <span className="font-semibold text-slate-800">
+            ₹{itemsTotal.toFixed(2)}
           </span>
         </div>
 
-        {/* Price Breakdown */}
-        <div className="space-y-3 text-xs pt-2">
-
-          {/* Items Total */}
-          <div className="flex justify-between text-[#1E2A22]/75">
-            <span>Items Total</span>
-
-            <span className="font-medium text-[#0F3D2E]">
-              ₹{itemsTotal.toFixed(2)}
+        {/* Delivery Fee with info tooltip */}
+        <div className="flex justify-between items-center text-slate-600">
+          <span className="inline-flex items-center gap-1">
+            Delivery Fee
+            <span title="Standard delivery charge">
+              <Info size={14} className="text-gray-400 cursor-help" />
             </span>
-          </div>
-
-          {/* Grand Total */}
-          <div className="border-t-2 border-dashed border-[#0F3D2E]/10 pt-3 flex justify-between items-baseline">
-            <div>
-              <span className="text-sm font-serif font-bold text-[#0F3D2E]">
-                Total Payable
-              </span>
-
-              <p className="text-[10px] text-[#1E2A22]/50">
-                Final amount for your order
-              </p>
-            </div>
-
-            <div className="text-right">
-              <span className="text-2xl font-serif font-bold text-[#0F3D2E] tracking-tight">
-                ₹{totalPayable.toFixed(2)}
-              </span>
-            </div>
-          </div>
+          </span>
+          <span className="font-semibold text-slate-800">
+            {deliveryFee === 0 ? "Free" : `₹${deliveryFee.toFixed(2)}`}
+          </span>
         </div>
 
-        {/* Checkout Primary Button */}
-        <div className="pt-2">
-          <button
-            className="w-full py-3.5 px-6 rounded-full bg-[#0F3D2E] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center space-x-2 shadow-lg hover:bg-[#165742] hover:shadow-xl transition-all duration-200 transform active:scale-[0.99] group border border-[#D9A441]/30 disabled:opacity-70 disabled:cursor-not-allowed"
-            type="button"
-            onClick={handleCheckout}
-            disabled={
-              isCheckoutLoading ||
-              cartItems.length === 0
-            }
-          >
-            <svg
-              className="w-4 h-4 text-[#D9A441] group-hover:scale-110 transition shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-              />
-            </svg>
-
-            <span>
-              {isCheckoutLoading
-                ? "PROCESSING..."
-                : "PROCEED TO CHECKOUT"}
-            </span>
-
-            {!isCheckoutLoading && (
-              <span className="text-[#D9A441] text-base leading-none group-hover:translate-x-1 transition">
-                →
-              </span>
-            )}
-          </button>
-        </div>
-
-        {/* Trust & Quality Badges */}
-        <div className="border-t border-[#0F3D2E]/5 pt-4 grid grid-cols-3 gap-2 text-center">
-          <div className="p-2 rounded-lg bg-[#FBF6EC]/40">
-            <span className="text-sm block mb-0.5">🛡️</span>
-            <span className="text-[10px] font-semibold text-[#0F3D2E] leading-tight block">
-              100% Hygienic
-            </span>
-          </div>
-
-          <div className="p-2 rounded-lg bg-[#FBF6EC]/40">
-            <span className="text-sm block mb-0.5">⚡</span>
-            <span className="text-[10px] font-semibold text-[#0F3D2E] leading-tight block">
-              30 Min Delivery
-            </span>
-          </div>
-
-          <div className="p-2 rounded-lg bg-[#FBF6EC]/40">
-            <span className="text-sm block mb-0.5">🔥</span>
-            <span className="text-[10px] font-semibold text-[#0F3D2E] leading-tight block">
-              Hot Thermal Pack
-            </span>
-          </div>
+        {/* Divider */}
+        <div className="border-t border-gray-100 pt-3 flex justify-between items-baseline">
+          <span className="font-bold text-slate-800 text-base">
+            Total Amount
+          </span>
+          <span className="font-bold text-xl sm:text-2xl text-[#0F3D2E]">
+            ₹{totalPayable.toFixed(2)}
+          </span>
         </div>
       </div>
 
-      {/* Safe Checkout Reassurance */}
-      <div className="text-center text-xs text-[#1E2A22]/60 flex items-center justify-center space-x-2">
-        <svg
-          className="w-4 h-4 text-[#0F3D2E]/70"
-          fill="currentColor"
-          viewBox="0 0 20 20"
+      {/* Checkout Primary Button */}
+      <div className="pt-1">
+        <button
+          type="button"
+          onClick={handleCheckout}
+          disabled={isCheckoutLoading || cartItems.length === 0}
+          className="w-full py-3.5 px-6 rounded-full bg-[#0F3D2E] hover:bg-[#165742] text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-sm transition active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed group"
         >
-          <path
-            clipRule="evenodd"
-            d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-            fillRule="evenodd"
-          />
-        </svg>
+          {isCheckoutLoading ? (
+            <Loader2 size={18} className="animate-spin text-white" />
+          ) : (
+            <Lock size={16} className="text-emerald-200" />
+          )}
 
-        <span>
-          Guaranteed Safe &amp; Secure Checkout
-        </span>
+          <span>
+            {isCheckoutLoading ? "Processing..." : "Proceed to Checkout"}
+          </span>
+
+          {!isCheckoutLoading && (
+            <ArrowRight
+              size={16}
+              className="text-emerald-200 group-hover:translate-x-1 transition-transform"
+            />
+          )}
+        </button>
       </div>
-    </section>
+
+      {/* Trust & Quality Badges */}
+      <div className="pt-3 border-t border-gray-100 grid grid-cols-3 gap-2 text-center text-gray-500">
+        <div className="flex flex-col items-center gap-1.5 p-1.5">
+          <div className="text-[#0F3D2E]">
+            <Bike size={18} strokeWidth={2} />
+          </div>
+          <span className="text-[11px] font-medium leading-tight text-slate-600">
+            Fast Delivery
+          </span>
+        </div>
+
+        <div className="flex flex-col items-center gap-1.5 p-1.5">
+          <div className="text-[#0F3D2E]">
+            <ShieldCheck size={18} strokeWidth={2} />
+          </div>
+          <span className="text-[11px] font-medium leading-tight text-slate-600">
+            Hygienic Food
+          </span>
+        </div>
+
+        <div className="flex flex-col items-center gap-1.5 p-1.5">
+          <div className="text-[#0F3D2E]">
+            <Leaf size={18} strokeWidth={2} />
+          </div>
+          <span className="text-[11px] font-medium leading-tight text-slate-600">
+            Fresh Ingredients
+          </span>
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -11,6 +11,7 @@ import {
   deleteCartApi,
   clearCartApi,
   checkoutApi,
+  mergeCartApi,
 } from "../api/cartApi";
 
 interface AddToCartData {
@@ -227,6 +228,25 @@ const useCartHook = () => {
     }
   };
 
+  // =========================
+  // MERGE CART
+  // =========================
+  const mergeCart = async (items: Array<{ menu_item_id: number; variant_id: number | null; quantity: number }>): Promise<CartResponse | null> => {
+    try {
+      setIsFetchingCart(true);
+      const response: CartResponse = await mergeCartApi({ items });
+      console.log("MERGE CART API DATA:", response);
+      return response;
+    } catch (error: any) {
+      console.error("MERGE CART ERROR:", error);
+      const message = extractErrorMessages(error);
+      toast.error(message);
+      return null;
+    } finally {
+      setIsFetchingCart(false);
+    }
+  };
+
   return {
     addToCart,
     getCart,
@@ -234,6 +254,7 @@ const useCartHook = () => {
     deleteCart,
     clearCart,
     checkout,
+    mergeCart,
 
     isAddingToCart,
     isFetchingCart,

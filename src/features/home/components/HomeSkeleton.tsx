@@ -14,8 +14,59 @@ export default function HomeSkeleton() {
   return (
     <div className="w-full min-h-screen bg-[var(--brand-cream-soft)] overflow-x-hidden">
       
-      {/* Banner */}
-      <div className="w-full h-[300px] sm:h-[400px] lg:h-[500px] bg-gray-200 animate-pulse" />
+      {/* Banner Skeleton (BannerSection-ന്റെ കൃത്യമായ ലേഔട്ട്) */}
+      <div className="relative w-full bg-white pb-24 lg:pb-12 pt-0 overflow-visible font-sans">
+        <div className="relative w-full h-[220px] sm:h-[260px] lg:h-[460px] bg-[var(--brand-cream-soft)] overflow-visible flex flex-row items-center">
+          
+          {/* ഇടത് വശത്തെ Text & Button Skeleton */}
+          <div className="absolute inset-0 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 flex items-center z-20">
+            <div className="text-left mt-0 lg:mt-[-60px] z-10 w-[55%] lg:w-[55%] space-y-3 lg:space-y-4">
+              <SkeletonBox className="w-24 sm:w-32 h-3 lg:h-4 rounded-full" />
+              <SkeletonBox className="w-4/5 sm:w-3/5 h-6 sm:h-8 lg:h-12 rounded-xl" />
+              <div className="space-y-2 max-w-[180px] sm:max-w-[240px] lg:max-w-md">
+                <SkeletonBox className="w-full h-2.5 sm:h-3.5 rounded-md" />
+                <SkeletonBox className="w-3/4 h-2.5 sm:h-3.5 rounded-md" />
+              </div>
+              <div className="pt-1 sm:pt-2">
+                <SkeletonBox className="w-24 sm:w-32 lg:w-36 h-7 sm:h-9 lg:h-12 rounded-full" />
+              </div>
+            </div>
+          </div>
+
+          {/* വലത് വശത്തെ Curved Food Dish Skeleton */}
+          <div className="absolute right-0 top-0 w-[45%] sm:w-[50%] h-full lg:h-[400px] z-10 overflow-hidden">
+            <div 
+              className="absolute right-0 top-0 w-full h-full bg-gray-200 animate-pulse"
+              style={{ 
+                borderTopLeftRadius: "500px",
+                borderBottomLeftRadius: "500px", 
+                borderLeft: "5px solid rgba(231,170,49,0.3)" 
+              }}
+            />
+          </div>
+
+        </div>
+
+        {/* താഴത്തെ 4-Feature Floating Card Skeleton */}
+        <div className="absolute -bottom-[-40px] lg:bottom-10 left-[0px] lg:left-[-200px] w-full pointer-events-none z-30">
+          <div className="max-w-[1000px] mx-auto px-2 lg:px-10 w-full flex justify-center lg:justify-start">
+            <div className="w-full lg:w-[90%] bg-white rounded-lg sm:rounded-xl shadow-[0_12px_40px_rgb(0,0,0,0.08)] border border-[var(--brand-gold)]/10 py-1.5 lg:py-2.5 px-3 lg:px-6">
+              <div className="grid grid-cols-4 divide-x divide-gray-100 items-center">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-1 lg:gap-3 px-1 lg:px-3">
+                    <SkeletonBox className="w-6 h-6 lg:w-8 lg:h-8 rounded-full shrink-0" />
+                    <div className="flex flex-col items-center lg:items-start gap-1 w-full max-w-[80px]">
+                      <SkeletonBox className="w-12 lg:w-16 h-2 lg:h-3 rounded" />
+                      <SkeletonBox className="w-8 lg:w-12 h-1.5 lg:h-2 rounded" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
 
       <section className="bg-white w-full max-w-[1400px] mx-auto px-4 lg:px-10 pt-4 lg:pt-0">
         
