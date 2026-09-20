@@ -50,29 +50,47 @@ export interface HomeResponse {
   data: HomeData;
 }
 
-export const useHomeHook = () => {
-  const [homeData, setHomeData] = useState<HomeData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export const useHomeHook = (search = "") => {
+  const [homeData, setHomeData] =
+    useState<HomeData | null>(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState<string | null>(null);
 
   const fetchHome = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const response: HomeResponse = await getHomeApi();
+      const response: HomeResponse =
+        await getHomeApi({
+          search: search.trim() || undefined,
+        });
 
-      console.log("HOME API RESPONSE:", response);
+      console.log(
+        "HOME API RESPONSE:",
+        response
+      );
 
-      if (response?.status && response?.data) {
+      if (
+        response?.status &&
+        response?.data
+      ) {
         setHomeData(response.data);
       } else {
         setHomeData(null);
       }
     } catch (err: any) {
-      console.error("Error fetching home data:", err);
+      console.error(
+        "Error fetching home data:",
+        err
+      );
 
-      const message = extractErrorMessages(err);
+      const message =
+        extractErrorMessages(err);
 
       setError(message);
       toast.error(message);
@@ -83,7 +101,7 @@ export const useHomeHook = () => {
 
   useEffect(() => {
     fetchHome();
-  }, []);
+  }, [search]);
 
   return {
     homeData,

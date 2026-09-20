@@ -1,4 +1,15 @@
 import type { HomeMenuItem, HomeVariant } from "@/features/home/hooks/useHomeHook";
+import {
+  Soup,
+  UtensilsCrossed,
+  Flame,
+  IceCreamBowl,
+  Coffee,
+  Salad,
+  ChefHat,
+  Drumstick,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 const toNumber = (value: string | null | undefined): number | null => {
   if (value === null || value === undefined) return null;
@@ -51,7 +62,35 @@ export const getBadgeLabel = (item: HomeMenuItem): string | null => {
 };
 
 export const isOrderable = (item: HomeMenuItem): boolean => {
+  // The /menu/public/menu-items endpoint now excludes unavailable items
+  // server-side, so this is mostly a defensive fallback rather than the
+  // primary gate it used to be.
   if (!item.is_available) return false;
   if (item.has_variants) return item.variants.some((v) => v.is_available);
   return true;
+};
+
+/*
+ * Category → icon mapping for the filter panel.
+ *
+ * There's no icon/image field on category data from the API (unlike
+ * HomeCategory, which has `image`), so this is a best-effort keyword
+ * match against category_name. If categories ever gain a real icon
+ * field, swap this out for that instead of extending this list forever.
+ */
+const CATEGORY_ICON_RULES: [RegExp, LucideIcon][] = [
+  [/soup|starter/i, Soup],
+  [/biryani|rice|main/i, ChefHat],
+  [/indian|curry|spicy|kerala/i, Flame],
+  [/chinese|noodle|manchow/i, UtensilsCrossed],
+  [/continental|pasta|grill/i, UtensilsCrossed],
+  [/dessert|cake|sweet/i, IceCreamBowl],
+  [/beverage|drink|juice|tea|coffee/i, Coffee],
+  [/salad/i, Salad],
+  [/chicken|meat|beef|mutton|seafood|fish/i, Drumstick],
+];
+
+export const getCategoryIcon = (categoryName: string): LucideIcon => {
+  const match = CATEGORY_ICON_RULES.find(([pattern]) => pattern.test(categoryName));
+  return match ? match[1] : UtensilsCrossed;
 };

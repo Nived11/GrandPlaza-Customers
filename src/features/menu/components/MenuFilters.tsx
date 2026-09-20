@@ -1,201 +1,126 @@
 "use client";
 
 import React from "react";
-import { ChevronDown, SlidersHorizontal } from "lucide-react";
-import type {
-  MenuCategory,
-  MenuDiet,
-  MenuSection,
-} from "../hooks/useMenuHook";
+import { UtensilsCrossed } from "lucide-react";
+import type { MenuCategory } from "../hooks/useMenuHook";
+import { getCategoryIcon } from "../utils/menuUtils";
 
-export const ALL_CATEGORY = "all" as const;
+export const ALL_CATEGORY = "ALL" as const;
 
-export type CategoryFilter =
-  | number
-  | typeof ALL_CATEGORY;
+export type CategoryFilter = number | typeof ALL_CATEGORY;
 
 interface MenuFiltersProps {
   categories: MenuCategory[];
-
   activeCategory: CategoryFilter;
-  onCategoryChange: (
-    category: CategoryFilter
-  ) => void;
-
-  diet: MenuDiet;
-  onDietChange: (diet: MenuDiet) => void;
-
-  section: MenuSection;
-  onSectionChange: (section: MenuSection) => void;
-
-  resultCount: number;
+  onCategoryChange: (category: CategoryFilter) => void;
 }
 
-const sectionOptions: MenuSection[] = [
-  "ALL",
-  "BEST SELLER",
-  "COMBO MENU",
-  "TODAY'S SPECIAL",
-  "OTHERS",
-];
+function CategoryThumb({
+  src,
+  alt,
+  active,
+}: {
+  src?: string | null;
+  alt: string;
+  active: boolean;
+}) {
+  const [errored, setErrored] = React.useState(false);
+
+  const FallbackIcon = getCategoryIcon(alt);
+
+  if (!src || errored) {
+    return (
+      <FallbackIcon
+        size={22}
+        strokeWidth={active ? 2 : 1.7}
+        className={
+          active ? "text-white" : "text-[var(--brand-gold)]"
+        }
+      />
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      onError={() => setErrored(true)}
+      className={`h-8 w-8 object-cover rounded-full ${
+        active
+          ? "ring-2 ring-white/50"
+          : "ring-1 ring-gray-100"
+      }`}
+    />
+  );
+}
 
 export default function MenuFilters({
   categories,
   activeCategory,
   onCategoryChange,
-  diet,
-  onDietChange,
-  section,
-  onSectionChange,
-  resultCount,
 }: MenuFiltersProps) {
-  const [open, setOpen] = React.useState(false);
-
   return (
-    <section className="relative z-30 bg-[#F8F2E8]">
-
-      <div className="max-w-[1200px] mx-auto px-5 sm:px-7 lg:px-8 pt-5">
-
-        {/* CATEGORY CARDS */}
-        <div className="rounded-[28px] bg-white/80 border border-[#EDE4D7] shadow-[0_10px_40px_rgba(0,0,0,0.04)] p-3">
-
-          <div className="flex items-stretch gap-2 overflow-x-auto no-scrollbar">
-
+    <section className="relative z-20 w-full bg-transparent">
+      <div className="mx-auto -mt-8 max-w-[1200px] px-4 sm:px-6 lg:-mt-10 lg:px-8">
+        <div className="rounded-[22px] border border-gray-100 bg-white px-3 py-3 shadow-[0_12px_35px_rgba(0,0,0,0.08)] sm:px-4 sm:py-4">
+          <div className="no-scrollbar flex items-center gap-2 overflow-x-auto sm:gap-3 lg:justify-center lg:gap-3">
             {/* ALL */}
             <button
-              onClick={() =>
-                onCategoryChange(ALL_CATEGORY)
-              }
-              className={`shrink-0 w-[82px] sm:w-[100px] h-[92px] sm:h-[105px] rounded-[20px] flex flex-col items-center justify-center gap-2 transition-all ${
+              type="button"
+              onClick={() => onCategoryChange(ALL_CATEGORY)}
+              className={`flex h-[72px] w-[68px] shrink-0 flex-col items-center justify-center gap-1.5 rounded-xl transition-all sm:h-[78px] sm:w-[74px] ${
                 activeCategory === ALL_CATEGORY
-                  ? "bg-[#005544] text-white shadow-lg"
-                  : "bg-[#FCFAF6] text-[#263B36] hover:bg-[#F5EFE4]"
+                  ? "bg-[var(--brand-green-dark)] text-white shadow-md"
+                  : "bg-white text-[var(--brand-green-dark)] hover:bg-[#faf8f2]"
               }`}
             >
-              <div className="text-[24px]">♨</div>
+              <UtensilsCrossed
+                size={22}
+                strokeWidth={activeCategory === ALL_CATEGORY ? 2.2 : 1.7}
+                className={
+                  activeCategory === ALL_CATEGORY
+                    ? "text-white"
+                    : "text-[var(--brand-gold)]"
+                }
+              />
 
-              <span className="text-[10px] sm:text-[11px] font-semibold">
+              <span className="text-[10px] font-semibold">
                 All
               </span>
             </button>
 
             {categories.map((category) => {
-              const active =
-                activeCategory === category.id;
+              const active = activeCategory === category.id;
 
               return (
                 <button
                   key={category.id}
-                  onClick={() =>
-                    onCategoryChange(category.id)
-                  }
-                  className={`shrink-0 w-[82px] sm:w-[100px] h-[92px] sm:h-[105px] rounded-[20px] flex flex-col items-center justify-center gap-2 transition-all ${
+                  type="button"
+                  onClick={() => onCategoryChange(category.id)}
+                  className={`flex h-[72px] w-[72px] shrink-0 flex-col items-center justify-center gap-1.5 rounded-xl px-1 transition-all sm:h-[78px] sm:w-[78px] ${
                     active
-                      ? "bg-[#005544] text-white shadow-lg"
-                      : "bg-[#FCFAF6] text-[#263B36] hover:bg-[#F5EFE4]"
+                      ? "bg-[var(--brand-green-dark)] text-white shadow-md"
+                      : "bg-white text-[var(--brand-green-dark)] hover:bg-[#faf8f2]"
                   }`}
                 >
-                  <div className="text-[23px] text-[#B8893D]">
-                    ◉
-                  </div>
+                  <CategoryThumb
+                    src={category.image}
+                    alt={category.name}
+                    active={active}
+                  />
 
-                  <span className="text-[10px] sm:text-[11px] font-semibold text-center px-1">
+                  <span
+                    className={`line-clamp-2 text-center text-[9px] font-semibold leading-[1.15] sm:text-[9.5px] ${
+                      active ? "text-white" : "text-[var(--brand-green-dark)]"
+                    }`}
+                  >
                     {category.name}
                   </span>
                 </button>
               );
             })}
-
           </div>
         </div>
-
-        {/* FILTER CONTROLS */}
-        <div className="flex flex-wrap items-center justify-between gap-3 py-5">
-
-          <div>
-            <p className="font-serif text-[24px] sm:text-[28px] font-black text-[#062F27]">
-              Our Menu
-            </p>
-
-            <p className="text-[10px] uppercase tracking-[0.16em] text-[#9B948A] mt-1">
-              {resultCount} dishes available
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-
-            {/* DIET */}
-            <div className="flex items-center bg-white rounded-full border border-[#E6DED2] p-1">
-
-              {(["ALL", "VEG", "NON-VEG"] as MenuDiet[]).map(
-                (value) => (
-                  <button
-                    key={value}
-                    onClick={() =>
-                      onDietChange(value)
-                    }
-                    className={`px-3 sm:px-4 py-2 rounded-full text-[9px] font-bold uppercase tracking-[0.08em] transition-all ${
-                      diet === value
-                        ? "bg-[#005544] text-white"
-                        : "text-[#77716A]"
-                    }`}
-                  >
-                    {value === "ALL"
-                      ? "All"
-                      : value === "VEG"
-                      ? "Veg"
-                      : "Non-Veg"}
-                  </button>
-                )
-              )}
-
-            </div>
-
-            {/* SECTION */}
-            <div className="relative">
-
-              <button
-                onClick={() => setOpen((value) => !value)}
-                className="flex items-center gap-2 bg-white border border-[#E6DED2] rounded-full px-4 py-2.5 text-[9px] font-bold uppercase tracking-[0.08em] text-[#263B36]"
-              >
-                <SlidersHorizontal size={13} />
-                <span className="hidden sm:block">
-                  {section === "ALL"
-                    ? "Filter"
-                    : section}
-                </span>
-                <ChevronDown size={13} />
-              </button>
-
-              {open && (
-                <div className="absolute right-0 top-full mt-2 w-[210px] bg-white rounded-2xl border border-[#E9E1D5] shadow-[0_20px_60px_rgba(0,0,0,0.12)] p-2 overflow-hidden">
-
-                  {sectionOptions.map((option) => (
-                    <button
-                      key={option}
-                      onClick={() => {
-                        onSectionChange(option);
-                        setOpen(false);
-                      }}
-                      className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-bold uppercase tracking-[0.08em] ${
-                        section === option
-                          ? "bg-[#005544] text-white"
-                          : "text-[#625E58] hover:bg-[#F8F2E8]"
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  ))}
-
-                </div>
-              )}
-
-            </div>
-
-          </div>
-
-        </div>
-
       </div>
     </section>
   );

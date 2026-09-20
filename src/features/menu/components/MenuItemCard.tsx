@@ -1,199 +1,128 @@
 "use client";
 
-import React from "react";
-import { Heart, Plus } from "lucide-react";
-
-import type { HomeMenuItem } from "@/features/home/hooks/useHomeHook";
-
-import {
-  isVeg,
-  getDisplayPrice,
-  getDiscountPercent,
-  getBadgeLabel,
-  isOrderable,
-} from "../utils/menuUtils";
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Plus, Heart } from 'lucide-react';
+import type { HomeMenuItem } from '@/features/home/hooks/useHomeHook';
+import { getDisplayPrice, isOrderable } from '../utils/menuUtils';
 
 interface MenuItemCardProps {
   item: HomeMenuItem;
   onOpen: (item: HomeMenuItem) => void;
 }
 
-export default function MenuItemCard({
-  item,
-  onOpen,
-}: MenuItemCardProps) {
+export default function MenuItemCard({ item, onOpen }: MenuItemCardProps) {
   const orderable = isOrderable(item);
+  const { price, original } = getDisplayPrice(item);
 
-  const { price, original } =
-    getDisplayPrice(item);
+  // Wishlist is UI-only for now — there's no confirmed wishlist endpoint,
+  // so this doesn't persist anywhere yet. Wire this up once one exists.
+  const [wishlisted, setWishlisted] = React.useState(false);
 
-  const discountPct =
-    getDiscountPercent(item);
-
-  const badge =
-    getBadgeLabel(item);
-
-  const veg = isVeg(item);
+  const handleClick = () => {
+    if (!orderable) return;
+    onOpen(item);
+  };
 
   return (
-    <article
-      onClick={() => {
-        if (orderable) {
-          onOpen(item);
-        }
-      }}
-      className={`group relative bg-white rounded-[15px] sm:rounded-[18px] overflow-hidden border border-[#EEE5D9] shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 ${
-        orderable
-          ? "cursor-pointer hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(0,0,0,0.10)]"
-          : "opacity-60 cursor-not-allowed"
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      onClick={handleClick}
+      className={`group relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-[0_8px_24px_rgba(0,0,0,0.05)] transition-shadow ${
+        orderable ? 'cursor-pointer hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)]' : 'opacity-60 cursor-not-allowed'
       }`}
     >
-
-      {/* IMAGE */}
-      <div className="relative w-full aspect-[1/0.88] overflow-hidden bg-[#EEE8DE]">
-
-        {item.image ? (
+      {/* Image */}
+      <div className="relative w-full aspect-[4/3] overflow-hidden bg-gray-100">
+        {item.image && (
           <img
             src={item.image}
             alt={item.name}
-            className={`w-full h-full object-cover transition-transform duration-700 ${
-              orderable
-                ? "group-hover:scale-105"
-                : "grayscale"
+            className={`w-full h-full object-cover transition-transform duration-500 ${
+              orderable ? 'group-hover:scale-105' : 'grayscale'
             }`}
           />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-[#B6AEA2]">
-            No Image
-          </div>
         )}
 
-        {/* dark gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent pointer-events-none" />
-
-        {/* VEG INDICATOR */}
-        <span
-          className={`absolute top-2.5 left-2.5 sm:top-3 sm:left-3 w-4 h-4 rounded-[3px] bg-white border-2 flex items-center justify-center ${
-            veg
-              ? "border-green-600"
-              : "border-red-500"
-          }`}
-        >
-          <span
-            className={`w-1.5 h-1.5 rounded-full ${
-              veg
-                ? "bg-green-600"
-                : "bg-red-500"
-            }`}
-          />
-        </span>
-
-        {/* HEART */}
+        {/* Wishlist heart */}
         <button
           onClick={(e) => {
             e.stopPropagation();
+            setWishlisted((v) => !v);
           }}
-          className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/20 backdrop-blur-sm flex items-center justify-center"
-          aria-label={`Favourite ${item.name}`}
+          aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+          className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
         >
           <Heart
-            size={15}
-            strokeWidth={1.8}
-            className="text-white"
+            size={13}
+            strokeWidth={2.2}
+            className={wishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400'}
           />
         </button>
 
-        {/* BADGE */}
-        {badge && (
-          <span className="absolute bottom-2.5 left-2.5 sm:bottom-3 sm:left-3 bg-[#B8893D] text-white px-2 py-1 rounded-full text-[7px] sm:text-[8px] font-bold uppercase tracking-[0.08em]">
-            {badge}
-          </span>
-        )}
-
-        {/* DISCOUNT */}
-        {discountPct !== null && (
-          <span className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 bg-[#005544] text-white px-2 py-1 rounded-full text-[7px] sm:text-[8px] font-bold">
-            {discountPct}% OFF
-          </span>
-        )}
-
-        {/* SOLD OUT */}
         {!item.is_available && (
-          <div className="absolute inset-0 bg-black/45 flex items-center justify-center">
-            <span className="px-3 py-1.5 border border-white/60 rounded-full text-white text-[8px] font-bold uppercase tracking-[0.15em]">
+          <span className="absolute inset-0 flex items-center justify-center bg-black/40">
+            <span className="text-white text-[10px] font-black uppercase tracking-[0.2em]">
               Sold Out
             </span>
-          </div>
+          </span>
         )}
-
       </div>
 
-      {/* CONTENT */}
+      {/* Content */}
       <div className="p-3 sm:p-4">
-
-        <span className="block text-[7px] sm:text-[8px] font-bold text-[#B8893D] uppercase tracking-[0.16em] truncate">
-          {item.category_name}
-        </span>
-
-        <h3 className="mt-1 font-serif font-black text-[14px] sm:text-[16px] leading-tight text-[#062F27] line-clamp-1">
+        <h3 className="font-serif font-black text-[13px] sm:text-[15px] text-[var(--brand-green-dark)] leading-snug mb-1 line-clamp-1">
           {item.name}
         </h3>
 
-        <p className="mt-1.5 text-[9px] sm:text-[11px] leading-[1.45] text-[#77736D] line-clamp-2 min-h-[27px] sm:min-h-[32px]">
+        <p className="text-[10px] sm:text-[11px] text-gray-500 leading-relaxed font-medium mb-2.5 sm:mb-3 line-clamp-2">
           {item.description}
         </p>
 
-        <div className="mt-3 sm:mt-4 flex items-center justify-between gap-2">
-
-          <div className="flex items-baseline gap-1.5 min-w-0">
-
+        <div className="flex items-center justify-between">
+          <div className="flex items-baseline gap-1.5">
             {price !== null ? (
               <>
-                <span className="text-[14px] sm:text-[16px] font-black text-[#062F27] whitespace-nowrap">
-                  ₹{price}
+                <span className="text-[13px] sm:text-[15px] font-black text-[var(--brand-green-dark)]">
+                  ₹ {price}
                 </span>
-
+                {/* Kept subtle rather than a loud badge, since the reference
+                    design shows no discount ribbon — but a real discount is
+                    still worth surfacing when one exists. */}
                 {original !== null && (
-                  <span className="text-[9px] sm:text-[11px] text-gray-400 line-through whitespace-nowrap">
+                  <span className="text-[10px] text-gray-400 line-through">
                     ₹{original}
                   </span>
                 )}
               </>
             ) : (
-              <span className="text-[8px] sm:text-[10px] font-bold text-gray-400 uppercase">
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.08em]">
                 Coming Soon
               </span>
             )}
-
           </div>
 
           <button
             onClick={(e) => {
               e.stopPropagation();
-
-              if (orderable) {
-                onOpen(item);
-              }
+              handleClick();
             }}
             disabled={!orderable}
             aria-label={`View ${item.name}`}
-            className={`shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-transform ${
+            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${
               orderable
-                ? "bg-[#005544] hover:scale-105"
-                : "bg-gray-300"
+                ? 'bg-[var(--brand-green-dark)] hover:opacity-90'
+                : 'bg-gray-300 cursor-not-allowed'
             }`}
           >
-            <Plus
-              size={15}
-              strokeWidth={2.5}
-              className="text-white"
-            />
+            <Plus size={14} className="text-white" strokeWidth={3} />
           </button>
-
         </div>
-
       </div>
-
-    </article>
+    </motion.div>
   );
 }

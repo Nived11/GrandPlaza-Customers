@@ -1,38 +1,31 @@
 "use client";
 
 import React from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import MenuHero from "./components/MenuHero";
 import MenuFilters, {
   ALL_CATEGORY,
-  type CategoryFilter,
+  CategoryFilter,
 } from "./components/MenuFilters";
-
 import MenuGrid from "./components/MenuGrid";
+import MenuMoodSection from "./components/MenuMoodSection";
 import MenuSkeleton from "./components/MenuSkeleton";
 
 import ProductQuickViewModal from "@/features/product/components/ProductQuickViewModal";
 
-import {
-  useMenuHook,
-  type MenuDiet,
-  type MenuSection,
-} from "./hooks/useMenuHook";
+import { useMenuHook } from "./hooks/useMenuHook";
 
 import type { HomeMenuItem } from "@/features/home/hooks/useHomeHook";
 
-export default function MenuMain() {
+const MenuMain = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const searchQuery = searchParams.get("search") || "";
+
   const [activeCategory, setActiveCategory] =
     React.useState<CategoryFilter>(ALL_CATEGORY);
-
-  const [diet, setDiet] =
-    React.useState<MenuDiet>("ALL");
-
-  const [section, setSection] =
-    React.useState<MenuSection>("ALL");
-
-  const [searchQuery, setSearchQuery] =
-    React.useState("");
 
   const [selectedProduct, setSelectedProduct] =
     React.useState<HomeMenuItem | null>(null);
@@ -43,82 +36,75 @@ export default function MenuMain() {
     loading,
     error,
   } = useMenuHook({
-    search: searchQuery,
-
     category:
       activeCategory === ALL_CATEGORY
-        ? "ALL"
-        : activeCategory,
-
-    diet,
-
-    section,
+        ? undefined
+        : String(activeCategory),
+    search: searchQuery,
   });
 
   const handleClearFilters = () => {
+    // Clear selected category
     setActiveCategory(ALL_CATEGORY);
-    setDiet("ALL");
-    setSection("ALL");
-    setSearchQuery("");
+
+    // Clear search from URL
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("search");
+
+    const query = params.toString();
+
+    router.replace(
+      query ? `/menu?${query}` : "/menu",
+      { scroll: false }
+    );
   };
 
-  if (loading) {
+  if (loading && menuItems.length === 0) {
     return <MenuSkeleton />;
   }
 
-  if (error) {
+  if (error && menuItems.length === 0) {
     return (
-      <div className="w-full min-h-[50vh] flex items-center justify-center bg-[var(--brand-cream-soft)] px-6">
-        <div className="text-center">
-          <p className="text-[11px] font-bold text-red-500 uppercase tracking-[0.15em]">
-            {error}
-          </p>
-
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-5 px-6 py-3 bg-[var(--brand-green-dark)] text-white text-[10px] font-bold uppercase tracking-[0.15em] rounded-full"
-          >
-            Try Again
-          </button>
-        </div>
+      <div className="w-full min-h-[50vh] flex items-center justify-center px-4">
+        <p className="text-[12px] font-bold text-red-500 uppercase tracking-[0.15em] text-center">
+          {error}
+        </p>
       </div>
     );
   }
 
   return (
-    <main className="w-full min-h-screen bg-[var(--brand-cream-soft)] overflow-hidden">
+    <div className="w-full flex flex-col min-h-screen">
+      <MenuHero />
 
-      {/* HERO */}
-      <MenuHero
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
-
-      {/* CATEGORY / FILTER BAR */}
       <MenuFilters
         categories={categories}
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
-        diet={diet}
-        onDietChange={setDiet}
-        section={section}
-        onSectionChange={setSection}
-        resultCount={menuItems.length}
       />
 
-      {/* PRODUCTS */}
-      <MenuGrid
-        items={menuItems}
-        onOpenItem={setSelectedProduct}
-        onClearFilters={handleClearFilters}
-      />
+      <div
+        className={
+          loading
+            ? "opacity-60 transition-opacity"
+            : "transition-opacity"
+        }
+      >
+        <MenuGrid
+          items={menuItems}
+          onOpenItem={setSelectedProduct}
+          onClearFilters={handleClearFilters}
+        />
+      </div>
 
-      {/* QUICK VIEW */}
+      <MenuMoodSection />
+
       <ProductQuickViewModal
         product={selectedProduct}
         onClose={() => setSelectedProduct(null)}
       />
-
-    </main>
+    </div>
   );
-}
+};
+
+export default MenuMain;

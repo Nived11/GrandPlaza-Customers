@@ -1,26 +1,27 @@
 import axiosInstance from "@/lib/axios";
 
-export interface MenuQueryParams {
+interface MenuParams {
   search?: string;
-  category?: number | "ALL";
-  diet?: "VEG" | "NON-VEG";
-  section?:
-    | "ALL"
-    | "BEST SELLER"
-    | "COMBO MENU"
-    | "TODAY'S SPECIAL"
-    | "OTHERS";
+  category?: string;
+  diet?: string;
+  section?: string;
 }
 
 export const getMenuItemsApi = async (
-  params?: MenuQueryParams
+  params?: MenuParams
 ) => {
-  const response = await axiosInstance.get(
-    "/menu/public/menu-items",
-    {
-      params,
-    }
-  );
+  const response =
+    await axiosInstance.get(
+      "/menu/public/menu-items",
+      {
+        params,
+      }
+    );
 
+  return response.data;
+};
+
+export const getMenuCategoriesApi = async () => {
+  const response = await axiosInstance.get("/menu/public/categories");
   return response.data;
 };

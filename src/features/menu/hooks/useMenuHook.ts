@@ -1,130 +1,108 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import {
   getMenuItemsApi,
-  type MenuQueryParams,
+  getMenuCategoriesApi,
 } from "../api/menuApi";
 
 import { extractErrorMessages } from "@/utils/extractErrorMessages";
-import type { HomeMenuItem } from "@/features/home/hooks/useHomeHook";
+
+export interface MenuVariant {
+  id: number;
+  size_name: string;
+  actual_price: string;
+  offer_price: string;
+  is_available: boolean;
+}
+
+export interface MenuItem {
+  id: number;
+  category: number;
+  category_name: string;
+  section: string;
+  name: string;
+  description: string;
+  image: string | null;
+  banner_image: string | null;
+  dietary_preference: string;
+  has_variants: boolean;
+  actual_price: string | null;
+  offer_price: string | null;
+  is_available: boolean;
+  created_at: string;
+  variants: MenuVariant[];
+}
 
 export interface MenuCategory {
   id: number;
   name: string;
+  image: string;
 }
 
-export type MenuDiet = "ALL" | "VEG" | "NON-VEG";
-
-export type MenuSection =
-  | "ALL"
-  | "BEST SELLER"
-  | "COMBO MENU"
-  | "TODAY'S SPECIAL"
-  | "OTHERS";
-
-export interface UseMenuFilters {
+interface UseMenuHookParams {
+  category?: string;
   search?: string;
-  category?: number | "ALL";
-  diet?: MenuDiet;
-  section?: MenuSection;
+  diet?: string;
+  section?: string;
 }
 
-export const useMenuHook = (
-  filters: UseMenuFilters = {}
-) => {
+export const useMenuHook = ({
+  category = "ALL",
+  search = "",
+  diet = "ALL",
+  section = "ALL",
+}: UseMenuHookParams = {}) => {
+
   const [menuItems, setMenuItems] =
-    useState<HomeMenuItem[]>([]);
+    useState<MenuItem[]>([]);
 
   const [categories, setCategories] =
     useState<MenuCategory[]>([]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
 
   const [error, setError] =
     useState<string | null>(null);
 
-  const fetchMenu = async (
-    customFilters: UseMenuFilters = filters
-  ) => {
+  const fetchMenuItems = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const params: MenuQueryParams = {};
+      const response =
+        await getMenuItemsApi({
+          category:
+            category !== "ALL"
+              ? category
+              : undefined,
 
-      if (
-        customFilters.search &&
-        customFilters.search.trim()
-      ) {
-        params.search =
-          customFilters.search.trim();
-      }
+          search:
+            search.trim() || undefined,
 
-      params.category =
-        customFilters.category ?? "ALL";
+          diet:
+            diet !== "ALL"
+              ? diet
+              : undefined,
 
-      if (
-        customFilters.diet &&
-        customFilters.diet !== "ALL"
-      ) {
-        params.diet = customFilters.diet;
-      }
+          section:
+            section !== "ALL"
+              ? section
+              : undefined,
+        });
 
-      if (
-        customFilters.section &&
-        customFilters.section !== "ALL"
-      ) {
-        params.section = customFilters.section;
-      }
-
-      const response = await getMenuItemsApi(params);
-
-      /*
-       * API returns the array directly.
-       *
-       * [
-       *   { id, category, category_name, ... }
-       * ]
-       */
-      const items: HomeMenuItem[] =
+      setMenuItems(
         Array.isArray(response)
           ? response
-          : [];
-
-      setMenuItems(items);
-
-      /*
-       * Build categories from the API response.
-       */
-      const categoryMap =
-        new Map<number, string>();
-
-      items.forEach((item) => {
-        if (
-          !categoryMap.has(item.category)
-        ) {
-          categoryMap.set(
-            item.category,
-            item.category_name
-          );
-        }
-      });
-
-      setCategories(
-        Array.from(
-          categoryMap,
-          ([id, name]) => ({
-            id,
-            name,
-          })
-        )
+          : []
       );
+
     } catch (err: any) {
       console.error(
-        "Error fetching menu data:",
+        "Error fetching menu items:",
         err
       );
 
@@ -133,29 +111,56 @@ export const useMenuHook = (
 
       setError(message);
       toast.error(message);
+
+      setMenuItems([]);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchMenu(filters);
-    }, 350);
+  const fetchCategories = async () => {
+    try {
+      const response =
+        await getMenuCategoriesApi();
 
-    return () => clearTimeout(timer);
+      setCategories(
+        Array.isArray(response)
+          ? response
+          : response?.data ?? []
+      );
+
+    } catch (err: any) {
+      console.error(
+        "Error fetching menu categories:",
+        err
+      );
+
+      const message =
+        extractErrorMessages(err);
+
+      toast.error(message);
+    }
+  };
+
+  useEffect(() => {
+    fetchMenuItems();
   }, [
-    filters.search,
-    filters.category,
-    filters.diet,
-    filters.section,
+    category,
+    search,
+    diet,
+    section,
   ]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   return {
     menuItems,
     categories,
     loading,
     error,
-    fetchMenu,
+    fetchMenuItems,
+    fetchCategories,
   };
 };
