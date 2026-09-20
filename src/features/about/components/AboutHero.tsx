@@ -2,11 +2,10 @@ import React from 'react';
 
 export default function AboutHero() {
   return (
-    // 🌟 padding പൂർണ്ണമായും കുറച്ചു 
     <section className="relative w-full bg-[var(--brand-green-dark)] empire-geometric-bg py-2 lg:py-0 overflow-hidden border-b border-[var(--brand-gold)]/20">
       
       {/* Left Side Floating Decoration Image */}
-      <div className="absolute top-2 left-26 h-full w-[120px] sm:w-[150px] lg:w-[200px] z-0 pointer-events-none opacity-90 rotate-15">
+      <div className="absolute top-2 left-4 sm:left-25 h-full w-[120px] sm:w-[150px] lg:w-[200px] z-0 pointer-events-none opacity-90 rotate-12">
         <img 
           src="/ourstoryleft.png" 
           alt="Decoration" 
@@ -15,7 +14,6 @@ export default function AboutHero() {
       </div>
 
       <div className="max-w-[1200px] mx-auto px-6 lg:px-0 relative z-10">
-        {/* 🌟 1. ഗ്യാപ്പ് കുറച്ചു (gap-10 മാറ്റി gap-4 ആക്കി) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 items-center">
           
           {/* 📝 Left Side: Text Content */}
@@ -29,7 +27,6 @@ export default function AboutHero() {
               </div>
             </div>
 
-            {/* 🌟 2. Margin (mb) എല്ലാം കുറച്ചു */}
             <h1 className="text-3xl sm:text-4xl lg:text-[38px] font-serif font-black text-white leading-tight mb-2 lg:mb-3">
               Our Story
             </h1>
@@ -43,14 +40,19 @@ export default function AboutHero() {
             </p>
           </div>
 
-          {/* 📸 Right Side: Local Image */}
-          {/* 🌟 3. ഇമേജിന്റെ ഹൈറ്റ് നന്നായി കുറച്ചു: h-[120px] sm:h-[150px] lg:h-[180px] */}
-          <div className="relative w-full h-[120px] sm:h-[150px] lg:h-[180px] mt-2 -right-50 lg:mt-0 flex justify-center lg:justify-end">
+          {/* 📸 Right Side: Local Image (Updated to aboutbanner.png) */}
+          {/* 🌟 ലാൻഡ്സ്കേപ്പ് ഇമേജ് ആയതുകൊണ്ട് ഹൈറ്റ് ചെറുതായി അഡ്ജസ്റ്റ് ചെയ്തു */}
+          <div className="relative w-full h-[150px] sm:h-[180px] lg:h-[220px] -right-10 sm:-right-50 mt-2 lg:mt-0 flex justify-end">
+            
+            {/* ഇമേജ് ഫുൾ വിഡ്ത്തിൽ വെച്ചു */}
             <img 
-              src="/ourstory.png" 
-              alt="Our Story" 
-              className="w-full h-full object-contain drop-shadow-2xl "
+              src="/aboutbanner.png" 
+              alt="About Banner" 
+              className="w-full  object-cover object-center lg:object-right opacity-90"
             />
+            
+            {/* 🌟 മാജിക്: ഇമേജിന്റെ സൈഡുകൾ ബാക്ക്ഗ്രൗണ്ടുമായി (Dark Green) സ്മൂത്ത് ആയി ബ്ലെൻഡ് ചെയ്യാൻ ഒരു ഫേഡ് എഫക്റ്റ്! */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[var(--brand-green-dark)]/70 via-[var(--brand-green-dark)]/0 to-transparent"></div>
           </div>
 
         </div>
