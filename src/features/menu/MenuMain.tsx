@@ -3,10 +3,10 @@
 import React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import MenuHero from "./components/MenuHero";
 import MenuFilters, {
   ALL_CATEGORY,
   CategoryFilter,
+  DietFilter,
 } from "./components/MenuFilters";
 import MenuGrid from "./components/MenuGrid";
 import MenuMoodSection from "./components/MenuMoodSection";
@@ -22,13 +22,24 @@ const MenuMain = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  /* -------------------- SEARCH -------------------- */
+
   const searchQuery = searchParams.get("search") || "";
+
+  /* -------------------- FILTER STATE -------------------- */
 
   const [activeCategory, setActiveCategory] =
     React.useState<CategoryFilter>(ALL_CATEGORY);
 
+  const [activeDiet, setActiveDiet] =
+    React.useState<DietFilter>("ALL");
+
+  /* -------------------- PRODUCT MODAL -------------------- */
+
   const [selectedProduct, setSelectedProduct] =
     React.useState<HomeMenuItem | null>(null);
+
+  /* -------------------- MENU API -------------------- */
 
   const {
     menuItems,
@@ -40,49 +51,71 @@ const MenuMain = () => {
       activeCategory === ALL_CATEGORY
         ? undefined
         : String(activeCategory),
+
     search: searchQuery,
+
+    diet:
+      activeDiet === "ALL"
+        ? undefined
+        : activeDiet,
   });
 
-  const handleClearFilters = () => {
-    // Clear selected category
-    setActiveCategory(ALL_CATEGORY);
+  /* -------------------- CLEAR FILTERS -------------------- */
 
-    // Clear search from URL
-    const params = new URLSearchParams(searchParams.toString());
+  const handleClearFilters = () => {
+    setActiveCategory(ALL_CATEGORY);
+    setActiveDiet("ALL");
+
+    const params = new URLSearchParams(
+      searchParams.toString()
+    );
+
     params.delete("search");
 
     const query = params.toString();
 
     router.replace(
-      query ? `/menu?${query}` : "/menu",
-      { scroll: false }
+      query
+        ? `/menu?${query}`
+        : "/menu",
+      {
+        scroll: false,
+      }
     );
   };
+
+  /* -------------------- LOADING -------------------- */
 
   if (loading && menuItems.length === 0) {
     return <MenuSkeleton />;
   }
 
+  /* -------------------- ERROR -------------------- */
+
   if (error && menuItems.length === 0) {
     return (
-      <div className="w-full min-h-[50vh] flex items-center justify-center px-4">
-        <p className="text-[12px] font-bold text-red-500 uppercase tracking-[0.15em] text-center">
+      <div className="flex min-h-[50vh] w-full items-center justify-center px-4">
+        <p className="text-center text-[12px] font-bold uppercase tracking-[0.15em] text-red-500">
           {error}
         </p>
       </div>
     );
   }
 
-  return (
-    <div className="w-full flex flex-col min-h-screen">
-      <MenuHero />
+  /* -------------------- PAGE -------------------- */
 
+  return (
+    <div className="flex min-h-screen w-full flex-col bg-[#FCF8F0]">
+      {/* FILTERS */}
       <MenuFilters
         categories={categories}
         activeCategory={activeCategory}
+        activeDiet={activeDiet}
         onCategoryChange={setActiveCategory}
+        onDietChange={setActiveDiet}
       />
 
+      {/* PRODUCT GRID */}
       <div
         className={
           loading
@@ -97,8 +130,10 @@ const MenuMain = () => {
         />
       </div>
 
+      {/* BOTTOM SECTION */}
       <MenuMoodSection />
 
+      {/* PRODUCT QUICK VIEW */}
       <ProductQuickViewModal
         product={selectedProduct}
         onClose={() => setSelectedProduct(null)}
