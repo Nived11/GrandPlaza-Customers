@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { extractErrorMessages } from "@/utils/extractErrorMessages";
 import { loginApi } from "../api/authApi";
@@ -11,6 +12,7 @@ interface LoginResponse {
 }
 
 const useLogin = () => {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const login = async (
@@ -38,9 +40,29 @@ const useLogin = () => {
       }
 
       return data;
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        sessionStorage.setItem(
+          "register_phone",
+          phoneNumber
+        );
+
+        toast.error(
+          "No account found with this phone number. Please Sign Up first.",
+          {
+            duration: 3000,
+          }
+        );
+
+        setTimeout(() => {
+          router.push("/signup");
+        }, 3000);
+
+        return null;
+      }
+
       const message = extractErrorMessages(error);
-          
+
       toast.error(message);
 
       return null;

@@ -1,18 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import useRegister from "../hook/useRegister";
 
 interface RegisterFormProps {
+  phone: string;
   onSuccess: (phone: string) => void;
 }
 
 const RegisterForm = ({
+  phone,
   onSuccess,
 }: RegisterFormProps) => {
   const [fullName, setFullName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState(phone);
   const [email, setEmail] = useState("");
 
   const [fullNameError, setFullNameError] = useState("");
@@ -20,6 +22,12 @@ const RegisterForm = ({
   const [emailError, setEmailError] = useState("");
 
   const { register, isLoading } = useRegister();
+
+  useEffect(() => {
+    if (phone) {
+      setPhoneNumber(phone);
+    }
+  }, [phone]);
 
   const validateForm = () => {
     let isValid = true;

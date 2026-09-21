@@ -526,6 +526,7 @@ const RegisterMain = () => {
                   }}
                 >
                   <RegisterForm
+                    phone={phone}
                     onSuccess={
                       handleRegisterSuccess
                     }
