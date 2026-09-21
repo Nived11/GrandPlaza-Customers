@@ -26,8 +26,7 @@ const LoginMain = () => {
   }, []);
 
   return (
-    <main className="relative min-h-screen w-full overflow-hidden bg-[#FBF6EC]">
-
+    <main className="relative h-[100svh] max-h-[100svh] w-full overflow-hidden bg-[#FBF6EC]">
       {/* Full Screen Background */}
       <div className="fixed inset-0 z-0 h-full w-full">
 
@@ -187,17 +186,17 @@ const LoginMain = () => {
           relative
           z-20
           flex
-          min-h-[100svh]
+          h-full
+          max-h-full
           w-full
           items-center
           justify-center
-          px-5
-          pt-64
-          pb-8
+          overflow-hidden
+          px-4
+          py-2
+          pt-40
           sm:px-8
-          sm:pt-20
-          sm:pb-0
-          lg:min-h-screen
+          sm:py-4
           lg:items-center
           lg:justify-end
           lg:px-14
