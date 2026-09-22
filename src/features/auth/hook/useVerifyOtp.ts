@@ -25,6 +25,12 @@ const useVerifyOtp = () => {
       // API returns response.data directly
       if (data?.status === true) {
         localStorage.setItem("isLoggedIn", "true");
+
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("auth-state-changed")
+          );
+        }
         toast.success(
           data.message || "OTP verified successfully",
           {

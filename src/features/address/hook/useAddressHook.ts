@@ -10,6 +10,7 @@ import {
   type AddressPayload,
 } from "../api/AddressApi";
 import { extractErrorMessages } from "@/utils/extractErrorMessages";
+import { persistDeliveryLocation } from "./useDeliveryLocationHook";
 
 export interface AddressData extends AddressPayload {
   id: number;
@@ -65,6 +66,7 @@ export const useAddressHook = () => {
         null;
 
       setSelectedAddress(defaultAddress);
+      persistDeliveryLocation(defaultAddress);
     } catch (error) {
       toast.error(extractErrorMessages(error));
     } finally {
@@ -106,6 +108,24 @@ export const useAddressHook = () => {
       toast.success(
         response?.message || "Address updated successfully"
       );
+
+      /*
+       * Update the header immediately when this address
+       * has been made the default address.
+       */
+      if (data?.is_default === true) {
+        const currentAddress = addresses.find(
+          (address) => address.id === id
+        );
+
+        if (currentAddress) {
+          persistDeliveryLocation({
+            ...currentAddress,
+            ...data,
+            id,
+          } as AddressData);
+        }
+      }
 
       await getAddresses();
 

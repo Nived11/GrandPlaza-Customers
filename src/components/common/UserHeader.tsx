@@ -37,11 +37,33 @@ import {
 import ReservationModal from "@/features/reservation/ReservationMain";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import useDeliveryLocationHook from "@/features/address/hook/useDeliveryLocationHook";
 
 export default function UserHeader() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const {
+    location,
+    loading: isLocationLoading,
+  } = useDeliveryLocationHook();
+
+  const deliveryLocation =
+    location
+      ? `${location.city}${location.state ? `, ${location.state}` : ""}`
+      : "Select Location";
+
+  const handleLocationClick = () => {
+    const loggedIn =
+      localStorage.getItem("isLoggedIn") === "true";
+    
+    router.push(
+      loggedIn
+        ? "/address?source=header"
+        : "/login?redirect=/address?source=header"
+    );
+  };
 
   /*
    * GLOBAL SEARCH
@@ -304,7 +326,12 @@ export default function UserHeader() {
 
         <div className="bg-brand-green-dark empire-geometric-bg text-[#F4F1EA] h-12 px-8 flex items-center justify-between relative">
 
-          <div className="flex items-center gap-2 cursor-pointer">
+          <button
+            type="button"
+            onClick={handleLocationClick}
+            className="flex items-center gap-2 cursor-pointer text-left"
+            aria-label="Select delivery location"
+          >
 
             <MapPin
               size={20}
@@ -319,19 +346,21 @@ export default function UserHeader() {
 
               <div className="flex items-center gap-1">
 
-                <span className="font-bold text-[#D4AF37] text-xs">
-                  Malappuram, Kerala
+                <span className="font-bold text-[#D4AF37] text-xs truncate max-w-[220px]">
+                  {isLocationLoading
+                    ? "Detecting..."
+                    : deliveryLocation}
                 </span>
 
                 <ChevronDown
                   size={14}
-                  className="text-[#D4AF37]"
+                  className="text-[#D4AF37] shrink-0"
                 />
 
               </div>
 
             </div>
-          </div>
+          </button>
 
           <div
             className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-[1px] w-72 h-11 bg-brand-green-light flex items-center justify-center z-10"
@@ -573,7 +602,12 @@ export default function UserHeader() {
 
         <div className="bg-brand-green-dark empire-geometric-bg text-[#F4F1EA] h-[56px] px-3 flex items-center justify-between relative z-20">
 
-          <div className="flex items-center gap-1.5 flex-1">
+          <button
+            type="button"
+            onClick={handleLocationClick}
+            className="flex items-center gap-1.5 flex-1 text-left"
+            aria-label="Select delivery location"
+          >
 
             <MapPin
               size={16}
@@ -588,18 +622,21 @@ export default function UserHeader() {
 
               <div className="flex items-center gap-1">
 
-                <span className="font-bold text-[var(--brand-gold)] text-[9px] truncate max-w-[75px]">
-                  Malappuram...
+                <span className="font-bold text-[var(--brand-gold)] text-[9px] truncate max-w-[100px]">
+                  {isLocationLoading
+                    ? "Detecting..."
+                    : deliveryLocation}
                 </span>
 
                 <ChevronDown
                   size={12}
-                  className="text-[var(--brand-gold)]"
+                  className="text-[var(--brand-gold)] shrink-0"
                 />
 
               </div>
+
             </div>
-          </div>
+          </button>
 
           <div
             className="absolute left-1/2 -translate-x-1/2 bottom-[-1px] w-[220px] h-[36px] bg-white flex items-center justify-center z-30"
