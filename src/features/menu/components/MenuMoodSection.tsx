@@ -1,7 +1,11 @@
-import React from "react";
+'use client';
+
+import React, { useState } from "react";
 import { ArrowRight } from "lucide-react";
+import ReservationMain from "@/features/reservation/ReservationMain";
 
 export default function MenuMoodSection() {
+  const [isReservationOpen, setIsReservationOpen] =useState(false);
   return (
     <section className="w-full bg-[#faf7ef] px-4 pb-8 pt-2 sm:px-6 lg:px-8 lg:pb-12">
       <div className="mx-auto max-w-[1200px]">
@@ -29,6 +33,7 @@ export default function MenuMoodSection() {
 
             <button
               type="button"
+              onClick={() => setIsReservationOpen(true)}
               className="absolute bottom-5 left-1/2 hidden -translate-x-1/2 items-center gap-2 rounded-lg border border-[var(--brand-gold)] bg-[var(--brand-green-dark)]/70 px-7 py-3 text-[10px] font-bold text-[var(--brand-gold)] backdrop-blur-sm transition-all hover:bg-[var(--brand-gold)] hover:text-[var(--brand-green-dark)] sm:flex lg:bottom-1/2 lg:flex lg:translate-y-1/2"
             >
               Reserve a Table
@@ -37,6 +42,10 @@ export default function MenuMoodSection() {
           </div>
         </div>
       </div>
+      <ReservationMain
+        isOpen={isReservationOpen}
+        onClose={() => setIsReservationOpen(false)}
+      />
     </section>
   );
 }

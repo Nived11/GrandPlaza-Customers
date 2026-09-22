@@ -1,7 +1,11 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from "react";
 import { Calendar, Star, Gift } from 'lucide-react';
+import ReservationMain from "@/features/reservation/ReservationMain";
 
 export default function ReservationCard() {
+  const [isReservationOpen, setIsReservationOpen] =useState(false);
   return (
     // 🌟 Container background changed back to green
     <div className="relative w-full bg-[var(--brand-green-dark)] border border-[var(--brand-gold)]/40 rounded-xl overflow-hidden flex flex-col shadow-xl">
@@ -28,7 +32,7 @@ export default function ReservationCard() {
         <p className="text-gray-100 text-[9px] sm:text-xs lg:text-sm mt-1 sm:mt-2 mb-2.5 sm:mb-5 font-medium max-w-[220px] sm:max-w-[250px] md:max-w-none drop-shadow-md leading-relaxed">
           Celebrate special moments with your loved ones.
         </p>
-        <button className="bg-[var(--brand-gold)] hover:bg-white text-[var(--brand-green-dark)] px-4 py-1.5 sm:px-6 sm:py-2.5 rounded-md sm:rounded-lg font-black uppercase text-[8px] sm:text-[10px] lg:text-xs tracking-widest transition-colors shadow-md active:scale-95">
+        <button onClick={() => setIsReservationOpen(true)} className="bg-[var(--brand-gold)] hover:bg-white text-[var(--brand-green-dark)] px-4 py-1.5 sm:px-6 sm:py-2.5 rounded-md sm:rounded-lg font-black uppercase text-[8px] sm:text-[10px] lg:text-xs tracking-widest transition-colors shadow-md active:scale-95">
           Reserve Now
         </button>
       </div>
@@ -70,7 +74,10 @@ export default function ReservationCard() {
         </div>
 
       </div>
-
+      <ReservationMain
+        isOpen={isReservationOpen}
+        onClose={() => setIsReservationOpen(false)}
+      />
     </div>
   );
 }

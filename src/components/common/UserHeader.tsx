@@ -57,11 +57,22 @@ export default function UserHeader() {
   const handleLocationClick = () => {
     const loggedIn =
       localStorage.getItem("isLoggedIn") === "true";
-    
+
     router.push(
       loggedIn
         ? "/address?source=header"
         : "/login?redirect=/address?source=header"
+    );
+  };
+
+  const handleProfileClick = () => {
+    const loggedIn =
+      localStorage.getItem("isLoggedIn") === "true";
+
+    router.push(
+      loggedIn
+        ? "/profile"
+        : "/login?redirect=/profile"
     );
   };
 
@@ -578,15 +589,17 @@ export default function UserHeader() {
 
             <div className="h-4 lg:h-5 w-[1px] bg-gray-300 mx-0.5 lg:mx-1 shrink-0" />
 
-            <Link
-              href="/profile"
+            <button
+              type="button"
+              onClick={handleProfileClick}
+              aria-label="Profile"
               className="p-2 lg:p-2.5 rounded-full bg-brand-green-dark empire-geometric-bg border-2 border-brand-gold hover:scale-105 transition text-brand-gold shrink-0"
             >
               <User
                 size={16}
                 className="xl:w-[18px] xl:h-[18px]"
               />
-            </Link>
+            </button>
 
           </div>
         </div>
@@ -802,25 +815,8 @@ export default function UserHeader() {
                       }
                     : {};
 
-                return (
-                  <Link
-                    key={item.path}
-                    href={item.path}
-                    style={
-                      isActive
-                        ? {
-                            clipPath:
-                              "polygon(15px 0%, calc(100% - 15px) 0%, 100% 50%, calc(100% - 15px) 100%, 15px 100%, 0% 50%)",
-                          }
-                        : {}
-                    }
-                    className={`relative flex flex-col items-center justify-center w-[24%] py-1.5 transition-all duration-300 ${
-                      isActive
-                        ? "bg-[var(--brand-green-dark)]"
-                        : "bg-transparent hover:bg-gray-200/50"
-                    }`}
-                  >
-
+                const navContent = (
+                  <>
                     <div
                       className={`transition-transform duration-300 ${
                         isActive
@@ -843,7 +839,54 @@ export default function UserHeader() {
                     >
                       {item.name}
                     </span>
+                  </>
+                );
 
+                if (item.name === "Profile") {
+                  return (
+                    <button
+                      key={item.path}
+                      type="button"
+                      onClick={handleProfileClick}
+                      aria-label="Profile"
+                      style={
+                        isActive
+                          ? {
+                              clipPath:
+                                "polygon(15px 0%, calc(100% - 15px) 0%, 100% 50%, calc(100% - 15px) 100%, 15px 100%, 0% 50%)",
+                            }
+                          : {}
+                      }
+                      className={`relative flex flex-col items-center justify-center w-[24%] py-1.5 transition-all duration-300 ${
+                        isActive
+                          ? "bg-[var(--brand-green-dark)]"
+                          : "bg-transparent hover:bg-gray-200/50"
+                      }`}
+                    >
+                      {navContent}
+                    </button>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    style={
+                      isActive
+                        ? {
+                            clipPath:
+                              "polygon(15px 0%, calc(100% - 15px) 0%, 100% 50%, calc(100% - 15px) 100%, 15px 100%, 0% 50%)",
+                          }
+                        : {}
+                    }
+                    className={`relative flex flex-col items-center justify-center w-[24%] py-1.5 transition-all duration-300 ${
+                      isActive
+                        ? "bg-[var(--brand-green-dark)]"
+                        : "bg-transparent hover:bg-gray-200/50"
+                    }`}
+                  >
+                    {navContent}
                   </Link>
                 );
               }

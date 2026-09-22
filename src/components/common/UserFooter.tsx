@@ -1,4 +1,6 @@
-import React from "react";
+'use client';
+
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
@@ -12,8 +14,10 @@ import {
   RiUserStarLine,
   RiChatSmile3Line
 } from "react-icons/ri";
+import ReservationMain from "@/features/reservation/ReservationMain";
 
 export default function UserFooter() {
+  const [isReservationOpen, setIsReservationOpen] =useState(false);
   return (
     <footer className="w-full bg-[var(--brand-green-dark)] empire-geometric-bg pt-16 pb-24 md:pb-8 border-t border-[var(--brand-gold)]/20 relative z-10">
       
@@ -120,12 +124,12 @@ export default function UserFooter() {
             </div>
 
             {/* 🌟 RESERVE YOUR TABLE BUTTON */}
-            <Link 
-              href="/bookings" 
+            <button 
+              onClick={() => setIsReservationOpen(true)}
               className="inline-flex items-center justify-center border border-[var(--brand-gold)] text-[var(--brand-gold)] hover:bg-[var(--brand-gold)] hover:text-[var(--brand-green-dark)] px-6 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-sm w-max"
             >
               Reserve Your Table
-            </Link>
+            </button>
           </div>
 
           {/* Column 4: Get in Touch */}
@@ -188,7 +192,10 @@ export default function UserFooter() {
             </Link>
           </div>
         </div>
-
+        <ReservationMain
+          isOpen={isReservationOpen}
+          onClose={() => setIsReservationOpen(false)}
+        />
       </div>
     </footer>
   );
