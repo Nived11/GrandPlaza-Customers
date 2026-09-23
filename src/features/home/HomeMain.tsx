@@ -47,12 +47,11 @@ const HomeMain = () => {
   }
 
   return (
-    <div className="w-full min-h-screen bg-white overflow-x-hidden">
+    <div className="w-full min-h-screen bg-white overflow-x-clip">
 
       <BannerSection
         data={homeData?.banners ?? []}
       />
-
       <section className="bg-white w-full max-w-[1400px] mx-auto px-4 lg:px-10 pt-4 lg:pt-0">
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">

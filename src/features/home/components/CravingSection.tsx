@@ -29,9 +29,9 @@ export default function CravingSection({ data = [] }: CravingSectionProps) {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full relative">
       {/* Title Section */}
-      <div className="flex items-center justify-center gap-3 mb-6 sm:mb-6 px-2">
+      <div className="flex items-center justify-center gap-3 mb-4 sm:mb-6 px-2">
         <span className="text-[var(--brand-gold)] opacity-70">✦✧</span>
         <h2 className="text-base lg:text-xl font-black text-slate-800 uppercase tracking-widest whitespace-nowrap">
           Explore Our{" "}
@@ -40,8 +40,15 @@ export default function CravingSection({ data = [] }: CravingSectionProps) {
         <span className="text-[var(--brand-gold)] opacity-70">✧✦</span>
       </div>
 
-      {/* Container */}
-      <div className="relative w-full mx-auto lg:px-10">
+      {/* 
+        🔑 CSS position:sticky ഉപയോഗിക്കുന്നു — JS state toggle ഇല്ല, jump ഇല്ല!
+        Browser നേരിട്ട് GPU-accelerated sticky ചെയ്യുന്നതിനാൽ 
+        യാതൊരു jitter/shiver ഉം ഉണ്ടാകില്ല.
+      */}
+      <div
+        className="md:relative md:py-1 sticky z-40 bg-white py-2 lg:px-10"
+        style={{ top: "var(--mobile-header-height, 70px)" }}
+      >
         {/* Left Arrow (Desktop only) */}
         <button
           onClick={() => handleScroll("left")}
@@ -54,7 +61,7 @@ export default function CravingSection({ data = [] }: CravingSectionProps) {
         {/* Scroll container */}
         <div
           ref={scrollContainerRef}
-          className="flex items-start gap-4 sm:gap-6 overflow-x-auto scroll-smooth py-1 px-4 lg:px-4 snap-x snap-mandatory"
+          className="no-scrollbar [&::-webkit-scrollbar]:hidden flex items-start gap-3 px-3 lg:px-4 lg:gap-6 overflow-x-auto py-1 snap-x snap-mandatory will-change-scroll"
           style={{
             scrollbarWidth: "none",
             msOverflowStyle: "none",
@@ -64,26 +71,27 @@ export default function CravingSection({ data = [] }: CravingSectionProps) {
           {data.map((cat) => (
             <div
               key={cat.id}
-              className="flex flex-col items-center gap-2 cursor-pointer group shrink-0 snap-start"
+              className="flex flex-col items-center gap-1.5 cursor-pointer group shrink-0 snap-start w-[calc((100vw-52px)/4.5)] max-w-[82px] lg:w-[82px] lg:max-w-none"
             >
-              {/* റൗണ്ട് സർക്കിൾ */}
-              <div className="w-[70px] h-[70px] lg:w-[82px] lg:h-[82px] rounded-full p-1 bg-white border border-gray-200 shadow-sm group-hover:border-[var(--brand-gold)] group-hover:shadow-md transition-all">
+              {/* റൗണ്ട് സർക്കിൾ — GPU layer promote ചെയ്ത് shiver ഒഴിവാക്കുന്നു */}
+              <div className="w-[64px] h-[64px] sm:w-[68px] sm:h-[68px] lg:w-[82px] lg:h-[82px] p-1 lg:p-1 rounded-full bg-white border border-gray-200 shadow-sm group-hover:border-[var(--brand-gold)] group-hover:shadow-md transform-gpu">
                 <img
                   src={cat.image}
                   alt={cat.name}
-                  className="w-full h-full object-cover rounded-full"
+                  loading="lazy"
+                  className="w-full h-full object-cover rounded-full transform-gpu"
                 />
               </div>
 
               {/* പേര് */}
-              <span className="text-[9px] lg:text-[10px] font-black text-slate-700 uppercase tracking-widest text-center line-clamp-2 leading-tight group-hover:text-[var(--brand-green-dark)] w-[72px] lg:w-[82px]">
+              <span className="text-[8.5px] sm:text-[9px] lg:text-[10px] w-full lg:w-[82px] line-clamp-1 lg:line-clamp-2 font-bold lg:font-black text-slate-700 uppercase tracking-wider text-center leading-tight group-hover:text-[var(--brand-green-dark)]">
                 {cat.name}
               </span>
             </div>
           ))}
         </div>
 
-        {/* Right fade gradient — partially visible item smooth ആയി fade ആകും */}
+        {/* Right fade gradient (Desktop only) */}
         <div className="hidden lg:block absolute right-[40px] top-0 bottom-0 w-16 pointer-events-none z-10 bg-gradient-to-l from-white to-transparent" />
 
         {/* Right Arrow (Desktop only) */}
