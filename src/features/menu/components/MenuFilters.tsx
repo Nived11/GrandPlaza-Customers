@@ -113,7 +113,7 @@ export default function MenuFilters({
                   : "border border-gray-200 bg-white text-[var(--brand-green-dark)] hover:bg-[#faf8f2]"
               }`}
             >
-              {/* Sliding indicator */}
+              {/* Sliding Indicator */}
               {activeDiet === "ALL" && (
                 <motion.span
                   layoutId="diet-active-indicator"
@@ -127,7 +127,7 @@ export default function MenuFilters({
                 />
               )}
 
-              {/* Animated icon */}
+              {/* Animated Icon */}
               <motion.span
                 className="relative z-10 flex items-center justify-center"
                 animate={{
@@ -169,7 +169,6 @@ export default function MenuFilters({
                   : "border border-gray-200 bg-white text-[var(--brand-green-dark)] hover:bg-[#faf8f2]"
               }`}
             >
-              {/* Sliding indicator */}
               {activeDiet === "VEG" && (
                 <motion.span
                   layoutId="diet-active-indicator"
@@ -183,7 +182,6 @@ export default function MenuFilters({
                 />
               )}
 
-              {/* Animated icon */}
               <motion.span
                 className="relative z-10 flex items-center justify-center"
                 animate={{
@@ -225,7 +223,6 @@ export default function MenuFilters({
                   : "border border-gray-200 bg-white text-[var(--brand-green-dark)] hover:bg-[#faf8f2]"
               }`}
             >
-              {/* Sliding indicator */}
               {activeDiet === "NON-VEG" && (
                 <motion.span
                   layoutId="diet-active-indicator"
@@ -239,7 +236,6 @@ export default function MenuFilters({
                 />
               )}
 
-              {/* Animated icon */}
               <motion.span
                 className="relative z-10 flex items-center justify-center"
                 animate={{
@@ -257,8 +253,7 @@ export default function MenuFilters({
                 <Drumstick
                   size={14}
                   strokeWidth={
-                    activeDiet ===
-                    "NON-VEG"
+                    activeDiet === "NON-VEG"
                       ? 2.2
                       : 1.9
                   }
@@ -277,85 +272,101 @@ export default function MenuFilters({
           {/* =================================================
               CATEGORY FILTERS
           ================================================= */}
-          <div className="no-scrollbar flex items-center gap-2 overflow-x-auto sm:gap-3 lg:justify-center lg:gap-3">
+          <div className="relative w-full">
 
-            {/* ALL CATEGORY */}
-            <button
-              type="button"
-              onClick={() =>
-                onCategoryChange(
-                  ALL_CATEGORY
-                )
-              }
-              className={`flex h-[68px] w-[66px] shrink-0 flex-col items-center justify-center gap-1.5 rounded-xl transition-all sm:h-[74px] sm:w-[72px] ${
-                activeCategory ===
-                ALL_CATEGORY
-                  ? "bg-[var(--brand-green-dark)] text-white shadow-md"
-                  : "bg-white text-[var(--brand-green-dark)] hover:bg-[#faf8f2]"
-              }`}
-            >
-              <UtensilsCrossed
-                size={22}
-                strokeWidth={
-                  activeCategory ===
-                  ALL_CATEGORY
-                    ? 2.2
-                    : 1.7
+            {/* Scrollable Categories */}
+            <div className="no-scrollbar flex w-full items-center gap-2 overflow-x-auto px-1 pb-1 sm:gap-3">
+              
+              {/* ALL CATEGORY */}
+              <button
+                type="button"
+                onClick={() =>
+                  onCategoryChange(
+                    ALL_CATEGORY
+                  )
                 }
-                className={
+                className={`flex h-[68px] w-[68px] shrink-0 flex-col items-center justify-center gap-1.5 rounded-xl transition-all sm:h-[74px] sm:w-[76px] ${
                   activeCategory ===
                   ALL_CATEGORY
-                    ? "text-white"
-                    : "text-[var(--brand-gold)]"
-                }
-              />
+                    ? "bg-[var(--brand-green-dark)] text-white shadow-md"
+                    : "bg-white text-[var(--brand-green-dark)] hover:bg-[#faf8f2]"
+                }`}
+              >
+                <UtensilsCrossed
+                  size={22}
+                  strokeWidth={
+                    activeCategory ===
+                    ALL_CATEGORY
+                      ? 2.2
+                      : 1.7
+                  }
+                  className={
+                    activeCategory ===
+                    ALL_CATEGORY
+                      ? "text-white"
+                      : "text-[var(--brand-gold)]"
+                  }
+                />
 
-              <span className="text-[10px] font-semibold">
-                All
-              </span>
-            </button>
+                <span className="text-[10px] font-semibold">
+                  All
+                </span>
+              </button>
 
-            {/* API CATEGORIES */}
-            {categories.map(
-              (category) => {
-                const active =
-                  activeCategory ===
-                  category.id;
+              {/* API CATEGORIES */}
+              {categories.map(
+                (category) => {
+                  const active =
+                    activeCategory ===
+                    category.id;
 
-                return (
-                  <button
-                    key={category.id}
-                    type="button"
-                    onClick={() =>
-                      onCategoryChange(
-                        category.id
-                      )
-                    }
-                    className={`flex h-[68px] w-[70px] shrink-0 flex-col items-center justify-center gap-1.5 rounded-xl px-1 transition-all sm:h-[74px] sm:w-[76px] ${
-                      active
-                        ? "bg-[var(--brand-green-dark)] text-white shadow-md"
-                        : "bg-white text-[var(--brand-green-dark)] hover:bg-[#faf8f2]"
-                    }`}
-                  >
-                    <CategoryThumb
-                      src={category.image}
-                      alt={category.name}
-                      active={active}
-                    />
-
-                    <span
-                      className={`line-clamp-2 text-center text-[9px] font-semibold leading-[1.15] sm:text-[9.5px] ${
+                  return (
+                    <button
+                      key={category.id}
+                      type="button"
+                      onClick={() =>
+                        onCategoryChange(
+                          category.id
+                        )
+                      }
+                      className={`flex h-[68px] w-[68px] shrink-0 flex-col items-center justify-center gap-1.5 rounded-xl px-1 transition-all sm:h-[74px] sm:w-[76px] ${
                         active
-                          ? "text-white"
-                          : "text-[var(--brand-green-dark)]"
+                          ? "bg-[var(--brand-green-dark)] text-white shadow-md"
+                          : "bg-white text-[var(--brand-green-dark)] hover:bg-[#faf8f2]"
                       }`}
                     >
-                      {category.name}
-                    </span>
-                  </button>
-                );
-              }
-            )}
+                      <CategoryThumb
+                        src={
+                          category.image
+                        }
+                        alt={
+                          category.name
+                        }
+                        active={active}
+                      />
+
+                      <span
+                        className={`line-clamp-2 text-center text-[9px] font-semibold leading-[1.15] sm:text-[9.5px] ${
+                          active
+                            ? "text-white"
+                            : "text-[var(--brand-green-dark)]"
+                        }`}
+                      >
+                        {
+                          category.name
+                        }
+                      </span>
+                    </button>
+                  );
+                }
+              )}
+            </div>
+
+            {/* Subtle Right Fade Only */}
+            <div
+              className="pointer-events-none absolute right-0 top-0 h-full w-5 bg-gradient-to-l from-white/85 via-white/35 to-transparent sm:w-6"
+              aria-hidden="true"
+            />
           </div>
         </div>
       </div>
