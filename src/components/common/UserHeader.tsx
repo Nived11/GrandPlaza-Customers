@@ -98,24 +98,13 @@ export default function UserHeader() {
   const [isReservationOpen, setIsReservationOpen] =
     useState(false);
 
-  // MOBILE SEARCH SCROLL LOGIC
-  const [isScrolled, setIsScrolled] =
-    useState(false);
-
-  const [lastScrollY, setLastScrollY] =
-    useState(0);
+  // 🌟 SMOOTH SCROLL LOGIC: Scroll down = Hide Search | Scroll up = Show Search (NO JITTER)
+  const [isScrolled, setIsScrolled] = useState(false);
 
   /*
    * ------------------------------------------------
    * SYNC URL SEARCH -> INPUT
    * ------------------------------------------------
-   *
-   * Example:
-   *
-   * /?search=burger
-   * /menu?search=burger
-   *
-   * If the URL changes, the input also changes.
    */
   useEffect(() => {
     const urlSearch =
@@ -128,14 +117,8 @@ export default function UserHeader() {
 
   /*
    * ------------------------------------------------
-   * INPUT -> URL
+   * INPUT -> URL (Wait 500ms after user stops typing)
    * ------------------------------------------------
-   *
-   * Wait 500ms after the user stops typing.
-   *
-   * We only update the URL here.
-   * Home/Menu will read the URL and call
-   * their own API.
    */
   useEffect(() => {
     const search = searchQuery.trim();
@@ -180,88 +163,32 @@ export default function UserHeader() {
     searchParams,
   ]);
 
-  /*
-   * Detect Scroll Direction
-   */
   useEffect(() => {
+    let lastY = window.scrollY;
+
+    // Set initial header height
+    document.documentElement.style.setProperty("--mobile-header-height", "115px");
+
     const handleScroll = () => {
       if (window.innerWidth >= 768) return;
+      const currentY = window.scrollY;
+      const diff = currentY - lastY;
 
-      const currentScrollY =
-        window.scrollY;
-
-      // Hide search bar when scrolling down
-      // more than 50px
-      if (
-        currentScrollY > lastScrollY &&
-        currentScrollY > 50
-      ) {
+      // 12px threshold: prevents scroll jitter
+      if (currentY > 80 && diff > 12) {
         setIsScrolled(true);
-      } else if (
-        currentScrollY < lastScrollY
-      ) {
+        document.documentElement.style.setProperty("--mobile-header-height", "70px");
+      } else if (diff < -12 || currentY <= 30) {
         setIsScrolled(false);
+        document.documentElement.style.setProperty("--mobile-header-height", "115px");
       }
 
-      setLastScrollY(currentScrollY);
+      lastY = currentY;
     };
 
-    window.addEventListener(
-      "scroll",
-      handleScroll,
-      { passive: true }
-    );
-
-    return () =>
-      window.removeEventListener(
-        "scroll",
-        handleScroll
-      );
-  }, [lastScrollY]);
-
-  /*
-   * Push main content up smoothly when
-   * mobile search bar hides
-   */
-  useEffect(() => {
-    const mainEl =
-      document.querySelector("main");
-
-    const handleResize = () => {
-      if (
-        window.innerWidth >= 768 &&
-        mainEl
-      ) {
-        mainEl.style.transform =
-          "translateY(0px)";
-
-        setIsScrolled(false);
-      }
-    };
-
-    window.addEventListener(
-      "resize",
-      handleResize
-    );
-
-    if (
-      mainEl &&
-      window.innerWidth < 768
-    ) {
-      mainEl.style.transition =
-        "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
-
-      mainEl.style.transform = isScrolled
-        ? "translateY(-56px)"
-        : "translateY(0px)";
-    }
-
-    return () =>
-      window.removeEventListener(
-        "resize",
-        handleResize
-      );
-  }, [isScrolled]);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Mobile Navigation Links
   const mobileNavLinks = [
@@ -693,28 +620,16 @@ export default function UserHeader() {
 
           </div>
         </div>
-
-        {/* Mobile Search */}
-
-        <div className="bg-white w-full relative z-10 px-4 pt-[12px]">
-
-          <div
-            className={`w-full transition-all duration-300 ease-in-out overflow-hidden flex items-start ${
-              isScrolled
-                ? "max-h-0 opacity-0 pointer-events-none mb-0"
-                : "max-h-[50px] opacity-100 mb-3"
-            }`}
-          >
-
-            <div
-              style={{
-                filter:
-                  "drop-shadow(0px 2px 4px rgba(0,0,0,0.05))",
-              }}
-              className="w-full"
-            >
-
-              <div
+        {/* 2. Mobile Bottom White Bar (Search) - Smooth slide up/down, keeps clean white strip */}
+        <div className={`bg-white w-full relative z-10 px-4 transition-all duration-300 ease-in-out overflow-hidden ${
+          isScrolled ? "h-[14px] min-h-[14px] pt-0 pb-0" : "max-h-[65px] pt-[12px] pb-3"
+        }`}>
+          <div className={`w-full flex items-start transition-all duration-200 ${
+            isScrolled ? "opacity-0 -translate-y-2 pointer-events-none" : "opacity-100 translate-y-0"
+          }`}>
+            <div style={{ filter: "drop-shadow(0px 2px 4px rgba(0,0,0,0.05))" }} className="w-full">
+              {/* Green Border Wrapper */}
+              <div 
                 className="w-full bg-[var(--brand-green-dark)]/60 p-[1px]"
                 style={{
                   clipPath:
