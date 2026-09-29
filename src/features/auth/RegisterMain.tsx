@@ -216,13 +216,18 @@ const RegisterMain = () => {
           relative
           z-10
           flex
-          min-h-screen
+          min-h-[100dvh]
           w-full
-          items-center
+          items-end
           justify-center
-          px-4
-          py-20
+          px-3
+          pb-10
+          pt-4
+          sm:px-4
+          sm:pb-5
+          sm:pt-6
           lg:block
+          lg:min-h-screen
           lg:px-0
           lg:py-0
         "
@@ -230,7 +235,7 @@ const RegisterMain = () => {
         <div
           className="
             w-full
-            max-w-[440px]
+            max-w-[420px]
             lg:absolute
             lg:right-[8%]
             lg:top-1/2
@@ -256,12 +261,13 @@ const RegisterMain = () => {
               ease: "easeOut",
             }}
             className="
-              mb-6
+              mb-3
               flex
               flex-col
               items-center
               text-center
-              sm:mb-7
+              sm:mb-5
+              lg:mb-6
             "
           >
 
@@ -286,11 +292,13 @@ const RegisterMain = () => {
                 ease: "easeOut",
               }}
               className="
-                mb-2
-                h-7
+                mb-1
+                h-5
                 w-auto
                 object-contain
-                sm:h-8
+                sm:mb-2
+                sm:h-7
+                lg:h-8
               "
             />
 
@@ -313,9 +321,10 @@ const RegisterMain = () => {
               }}
               className="
                 h-auto
-                w-[150px]
+                w-[130px]
                 object-contain
-                sm:w-[175px]
+                sm:w-[155px]
+                lg:w-[175px]
               "
             />
 
@@ -335,12 +344,15 @@ const RegisterMain = () => {
                 ease: "easeOut",
               }}
               className="
-                mt-4
-                text-2xl
+                mt-2
+                text-xl
                 font-semibold
                 tracking-tight
                 text-[#1E2A22]
-                sm:text-3xl
+                sm:mt-3
+                sm:text-2xl
+                lg:mt-4
+                lg:text-3xl
               "
             >
               Create Account
@@ -361,11 +373,13 @@ const RegisterMain = () => {
                 ease: "easeOut",
               }}
               className="
-                mt-2
-                text-xs
+                mt-1
+                text-[11px]
                 leading-relaxed
                 text-[#1E2A22]/60
-                sm:text-sm
+                sm:mt-2
+                sm:text-xs
+                lg:text-sm
               "
             >
               Your food journey starts here.
@@ -378,7 +392,7 @@ const RegisterMain = () => {
                 opacity: 0,
               }}
               animate={{
-                width: 48,
+                width: 40,
                 opacity: 1,
               }}
               transition={{
@@ -387,9 +401,11 @@ const RegisterMain = () => {
                 ease: "easeOut",
               }}
               className="
-                mt-4
+                mt-2
                 h-[2px]
                 bg-[#D9A441]
+                sm:mt-3
+                lg:mt-4
               "
             />
           </motion.div>
@@ -412,7 +428,7 @@ const RegisterMain = () => {
               delay: 0.45,
             }}
             className="
-              mb-6
+              mb-3
               flex
               items-center
               justify-center
@@ -424,17 +440,21 @@ const RegisterMain = () => {
               p-1
               shadow-sm
               backdrop-blur-sm
+              sm:mb-5
+              lg:mb-6
             "
           >
             <button
               type="button"
-              onClick={() => router.push("/login")}
+              onClick={() =>
+                router.push("/login")
+              }
               className="
                 flex-1
                 rounded-full
-                px-4
-                py-2.5
-                text-[10px]
+                px-3
+                py-2
+                text-[9px]
                 font-semibold
                 uppercase
                 tracking-[0.15em]
@@ -442,6 +462,8 @@ const RegisterMain = () => {
                 transition-all
                 duration-300
                 hover:text-[#0F3D2E]
+                sm:px-4
+                sm:py-2.5
                 sm:text-xs
               "
             >
@@ -454,14 +476,16 @@ const RegisterMain = () => {
                 flex-1
                 rounded-full
                 bg-[#0F3D2E]
-                px-4
-                py-2.5
-                text-[10px]
+                px-3
+                py-2
+                text-[9px]
                 font-semibold
                 uppercase
                 tracking-[0.15em]
                 text-white
                 shadow-sm
+                sm:px-4
+                sm:py-2.5
                 sm:text-xs
               "
             >

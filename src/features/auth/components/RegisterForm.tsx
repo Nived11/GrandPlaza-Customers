@@ -124,7 +124,7 @@ const RegisterForm = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4"
+      className="space-y-2.5 sm:space-y-4"
     >
       {/* Full Name */}
       <motion.div
