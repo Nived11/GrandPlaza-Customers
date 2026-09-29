@@ -142,41 +142,44 @@ const LoginMain = () => {
         onClick={() => router.push("/")}
         initial={{
           opacity: 0,
-          y: -8,
+          x: -10,
         }}
         animate={{
           opacity: 1,
-          y: 0,
+          x: 0,
         }}
         transition={{
-          duration: 0.5,
+          duration: 0.4,
         }}
         className="
           absolute
-          right-5
-          top-5
+          left-4
+          top-4
           z-30
           flex
           items-center
           gap-2
-          text-sm
-          font-medium
-          text-[#1E2A22]
-          transition-colors
-          hover:text-[#0F3D2E]
-          sm:right-8
-          sm:top-7
-          lg:right-12
-          lg:top-8
-          xl:right-16
-          2xl:right-20
+          rounded-full
+          bg-white/80
+          px-4
+          py-2
+          text-[10px]
+          font-semibold
+          uppercase
+          tracking-wider
+          text-[#0F3D2E]
+          shadow-sm
+          backdrop-blur-md
+          transition-all
+          duration-300
+          hover:bg-white
+          hover:text-[#D9A441]
+          sm:left-6
+          sm:top-6
+          sm:text-xs
         "
       >
-        <ArrowLeft
-          size={18}
-          strokeWidth={1.7}
-        />
-
+        <span>←</span>
         <span>Back to Home</span>
       </motion.button>
 
