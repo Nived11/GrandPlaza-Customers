@@ -221,7 +221,7 @@ const RegisterMain = () => {
           items-end
           justify-center
           px-3
-          pb-10
+          pb-12
           pt-4
           sm:px-4
           sm:pb-5
