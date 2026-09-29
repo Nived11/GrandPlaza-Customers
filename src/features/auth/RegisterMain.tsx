@@ -127,7 +127,7 @@ const RegisterMain = () => {
             ) : (
               <motion.img
                 key="register-mobile-background"
-                src="/images/auth/authbg_mobile.png"
+                src="/images/auth/authbg_mobile_otp.png"
                 alt=""
                 aria-hidden="true"
                 initial={{
