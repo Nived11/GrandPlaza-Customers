@@ -194,7 +194,7 @@ const LoginMain = () => {
           overflow-hidden
           px-4
           py-2
-          pt-40
+          pt-54
           sm:px-8
           sm:py-4
           lg:items-center
