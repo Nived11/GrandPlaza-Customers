@@ -32,6 +32,11 @@ interface MenuFiltersProps {
   onDietChange: (
     diet: DietFilter
   ) => void;
+
+  // Prefetch category data
+  onPrefetchCategory?: (
+    categoryId: number
+  ) => void;
 }
 
 function CategoryThumb({
@@ -53,7 +58,9 @@ function CategoryThumb({
     return (
       <FallbackIcon
         size={22}
-        strokeWidth={active ? 2 : 1.7}
+        strokeWidth={
+          active ? 2 : 1.7
+        }
         className={
           active
             ? "text-white"
@@ -67,7 +74,9 @@ function CategoryThumb({
     <img
       src={src}
       alt={alt}
-      onError={() => setErrored(true)}
+      onError={() =>
+        setErrored(true)
+      }
       className={`h-8 w-8 rounded-full object-cover ${
         active
           ? "ring-2 ring-white/50"
@@ -90,6 +99,7 @@ export default function MenuFilters({
   activeDiet,
   onCategoryChange,
   onDietChange,
+  onPrefetchCategory,
 }: MenuFiltersProps) {
   return (
     <section className="relative z-20 w-full bg-[#FCF8F0]">
@@ -113,7 +123,6 @@ export default function MenuFilters({
                   : "border border-gray-200 bg-white text-[var(--brand-green-dark)] hover:bg-[#faf8f2]"
               }`}
             >
-              {/* Sliding Indicator */}
               {activeDiet === "ALL" && (
                 <motion.span
                   layoutId="diet-active-indicator"
@@ -127,7 +136,6 @@ export default function MenuFilters({
                 />
               )}
 
-              {/* Animated Icon */}
               <motion.span
                 className="relative z-10 flex items-center justify-center"
                 animate={{
@@ -276,7 +284,7 @@ export default function MenuFilters({
 
             {/* Scrollable Categories */}
             <div className="no-scrollbar flex w-full items-center gap-2 overflow-x-auto px-1 pb-1 sm:gap-3">
-              
+
               {/* ALL CATEGORY */}
               <button
                 type="button"
@@ -329,6 +337,27 @@ export default function MenuFilters({
                           category.id
                         )
                       }
+
+                      /*
+                       * Start fetching before
+                       * the user clicks.
+                       */
+                      onMouseEnter={() =>
+                        onPrefetchCategory?.(
+                          category.id
+                        )
+                      }
+
+                      /*
+                       * Also prefetch when the
+                       * button receives keyboard focus.
+                       */
+                      onFocus={() =>
+                        onPrefetchCategory?.(
+                          category.id
+                        )
+                      }
+
                       className={`flex h-[68px] w-[68px] shrink-0 flex-col items-center justify-center gap-1.5 rounded-xl px-1 transition-all sm:h-[74px] sm:w-[76px] ${
                         active
                           ? "bg-[var(--brand-green-dark)] text-white shadow-md"

@@ -8,20 +8,29 @@ interface MenuParams {
 }
 
 export const getMenuItemsApi = async (
-  params?: MenuParams
+  params?: MenuParams,
+  signal?: AbortSignal
 ) => {
-  const response =
-    await axiosInstance.get(
-      "/menu/public/menu-items",
-      {
-        params,
-      }
-    );
+  const response = await axiosInstance.get(
+    "/menu/public/menu-items",
+    {
+      params,
+      signal,
+    }
+  );
 
   return response.data;
 };
 
-export const getMenuCategoriesApi = async () => {
-  const response = await axiosInstance.get("/menu/public/categories");
+export const getMenuCategoriesApi = async (
+  signal?: AbortSignal
+) => {
+  const response = await axiosInstance.get(
+    "/menu/public/categories",
+    {
+      signal,
+    }
+  );
+
   return response.data;
 };

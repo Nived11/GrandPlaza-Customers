@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import axios from "axios";
 import { toast } from "sonner";
 
 import {
@@ -49,118 +55,270 @@ interface UseMenuHookParams {
   section?: string;
 }
 
+/*
+ * =========================================================
+ * QUERY KEY
+ * =========================================================
+ */
+
+const getMenuQueryKey = ({
+  category = "ALL",
+  search = "",
+  diet = "ALL",
+  section = "ALL",
+}: {
+  category?: string;
+  search?: string;
+  diet?: string;
+  section?: string;
+}) => [
+  "menu-items",
+  {
+    category,
+    search: search.trim(),
+    diet,
+    section,
+  },
+];
+
+/*
+ * =========================================================
+ * MENU REQUEST
+ * =========================================================
+ */
+
+const fetchMenuItems = async ({
+  category = "ALL",
+  search = "",
+  diet = "ALL",
+  section = "ALL",
+  signal,
+}: {
+  category?: string;
+  search?: string;
+  diet?: string;
+  section?: string;
+  signal?: AbortSignal;
+}): Promise<MenuItem[]> => {
+  const response = await getMenuItemsApi(
+    {
+      category:
+        category !== "ALL"
+          ? category
+          : undefined,
+
+      search:
+        search.trim() || undefined,
+
+      diet:
+        diet !== "ALL"
+          ? diet
+          : undefined,
+
+      section:
+        section !== "ALL"
+          ? section
+          : undefined,
+    },
+    signal
+  );
+
+  return Array.isArray(response)
+    ? response
+    : [];
+};
+
 export const useMenuHook = ({
   category = "ALL",
   search = "",
   diet = "ALL",
   section = "ALL",
 }: UseMenuHookParams = {}) => {
+  const queryClient = useQueryClient();
 
-  const [menuItems, setMenuItems] =
-    useState<MenuItem[]>([]);
+  /*
+   * =========================================================
+   * MENU ITEMS
+   * =========================================================
+   */
 
-  const [categories, setCategories] =
-    useState<MenuCategory[]>([]);
+  const menuQuery = useQuery({
+    queryKey: getMenuQueryKey({
+      category,
+      search,
+      diet,
+      section,
+    }),
 
-  const [loading, setLoading] =
-    useState(true);
+    queryFn: ({ signal }) =>
+      fetchMenuItems({
+        category,
+        search,
+        diet,
+        section,
+        signal,
+      }),
 
-  const [error, setError] =
-    useState<string | null>(null);
+    /*
+     * Keep previous products visible while
+     * another filter result is loading.
+     */
+    placeholderData: keepPreviousData,
 
-  const fetchMenuItems = async () => {
-    setLoading(true);
-    setError(null);
+    /*
+     * Cache menu results for 5 minutes.
+     */
+    staleTime: 1000 * 60 * 5,
 
-    try {
+    retry: false,
+  });
+
+  /*
+   * =========================================================
+   * MENU CATEGORIES
+   * =========================================================
+   */
+
+  const categoryQuery = useQuery({
+    queryKey: ["menu-categories"],
+
+    queryFn: async ({ signal }) => {
       const response =
-        await getMenuItemsApi({
-          category:
-            category !== "ALL"
-              ? category
-              : undefined,
+        await getMenuCategoriesApi(signal);
 
-          search:
-            search.trim() || undefined,
+      return Array.isArray(response)
+        ? response
+        : response?.data ?? [];
+    },
 
-          diet:
-            diet !== "ALL"
-              ? diet
-              : undefined,
+    staleTime: 1000 * 60 * 10,
 
-          section:
-            section !== "ALL"
-              ? section
-              : undefined,
-        });
+    retry: false,
+  });
 
-      setMenuItems(
-        Array.isArray(response)
-          ? response
-          : []
-      );
+  /*
+   * =========================================================
+   * PREFETCH CATEGORY
+   * =========================================================
+   */
 
-    } catch (err: any) {
-      console.error(
-        "Error fetching menu items:",
-        err
-      );
+  const prefetchCategory = async (
+    categoryId: number
+  ) => {
+    const categoryValue =
+      String(categoryId);
 
-      const message =
-        extractErrorMessages(err);
+    await queryClient.prefetchQuery({
+      queryKey: getMenuQueryKey({
+        category: categoryValue,
+        search,
+        diet,
+        section,
+      }),
 
-      setError(message);
-      toast.error(message);
+      queryFn: ({ signal }) =>
+        fetchMenuItems({
+          category: categoryValue,
+          search,
+          diet,
+          section,
+          signal,
+        }),
 
-      setMenuItems([]);
-    } finally {
-      setLoading(false);
-    }
+      staleTime: 1000 * 60 * 5,
+    });
   };
 
-  const fetchCategories = async () => {
-    try {
-      const response =
-        await getMenuCategoriesApi();
+  /*
+   * =========================================================
+   * ERROR HANDLING
+   * =========================================================
+   */
 
-      setCategories(
-        Array.isArray(response)
-          ? response
-          : response?.data ?? []
-      );
+  useEffect(() => {
+    if (!menuQuery.error) return;
 
-    } catch (err: any) {
-      console.error(
-        "Error fetching menu categories:",
-        err
-      );
-
-      const message =
-        extractErrorMessages(err);
-
-      toast.error(message);
+    if (
+      axios.isCancel(menuQuery.error)
+    ) {
+      return;
     }
-  };
+
+    console.error(
+      "Error fetching menu items:",
+      menuQuery.error
+    );
+
+    const message =
+      extractErrorMessages(
+        menuQuery.error
+      );
+
+    toast.error(message);
+  }, [menuQuery.error]);
 
   useEffect(() => {
-    fetchMenuItems();
-  }, [
-    category,
-    search,
-    diet,
-    section,
-  ]);
+    if (!categoryQuery.error) return;
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+    if (
+      axios.isCancel(
+        categoryQuery.error
+      )
+    ) {
+      return;
+    }
+
+    console.error(
+      "Error fetching menu categories:",
+      categoryQuery.error
+    );
+
+    const message =
+      extractErrorMessages(
+        categoryQuery.error
+      );
+
+    toast.error(message);
+  }, [categoryQuery.error]);
+
+  /*
+   * =========================================================
+   * RETURN
+   * =========================================================
+   */
 
   return {
-    menuItems,
-    categories,
-    loading,
-    error,
-    fetchMenuItems,
-    fetchCategories,
+    menuItems: menuQuery.data ?? [],
+
+    categories:
+      categoryQuery.data ?? [],
+
+    loading:
+      menuQuery.isLoading ||
+      categoryQuery.isLoading,
+
+    error: menuQuery.error
+      ? extractErrorMessages(
+          menuQuery.error
+        )
+      : categoryQuery.error
+      ? extractErrorMessages(
+          categoryQuery.error
+        )
+      : null,
+
+    fetchMenuItems:
+      menuQuery.refetch,
+
+    fetchCategories:
+      categoryQuery.refetch,
+
+    isFetching:
+      menuQuery.isFetching,
+
+    isCategoriesFetching:
+      categoryQuery.isFetching,
+
+    prefetchCategory,
   };
 };

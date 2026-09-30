@@ -1,13 +1,17 @@
 "use client";
 
 import React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import {
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 
 import MenuFilters, {
   ALL_CATEGORY,
   CategoryFilter,
   DietFilter,
 } from "./components/MenuFilters";
+
 import MenuGrid from "./components/MenuGrid";
 import MenuMoodSection from "./components/MenuMoodSection";
 import MenuSkeleton from "./components/MenuSkeleton";
@@ -22,30 +26,45 @@ const MenuMain = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  /* -------------------- SEARCH -------------------- */
+  /* =========================================================
+     SEARCH
+  ========================================================= */
 
-  const searchQuery = searchParams.get("search") || "";
+  const searchQuery =
+    searchParams.get("search") || "";
 
-  /* -------------------- FILTER STATE -------------------- */
+  /* =========================================================
+     FILTER STATE
+  ========================================================= */
 
   const [activeCategory, setActiveCategory] =
-    React.useState<CategoryFilter>(ALL_CATEGORY);
+    React.useState<CategoryFilter>(
+      ALL_CATEGORY
+    );
 
   const [activeDiet, setActiveDiet] =
     React.useState<DietFilter>("ALL");
 
-  /* -------------------- PRODUCT MODAL -------------------- */
+  /* =========================================================
+     PRODUCT MODAL
+  ========================================================= */
 
   const [selectedProduct, setSelectedProduct] =
-    React.useState<HomeMenuItem | null>(null);
+    React.useState<HomeMenuItem | null>(
+      null
+    );
 
-  /* -------------------- MENU API -------------------- */
+  /* =========================================================
+     MENU API
+  ========================================================= */
 
   const {
     menuItems,
     categories,
     loading,
+    isFetching,
     error,
+    prefetchCategory,
   } = useMenuHook({
     category:
       activeCategory === ALL_CATEGORY
@@ -60,10 +79,15 @@ const MenuMain = () => {
         : activeDiet,
   });
 
-  /* -------------------- CLEAR FILTERS -------------------- */
+  /* =========================================================
+     CLEAR FILTERS
+  ========================================================= */
 
   const handleClearFilters = () => {
-    setActiveCategory(ALL_CATEGORY);
+    setActiveCategory(
+      ALL_CATEGORY
+    );
+
     setActiveDiet("ALL");
 
     const params = new URLSearchParams(
@@ -84,15 +108,25 @@ const MenuMain = () => {
     );
   };
 
-  /* -------------------- LOADING -------------------- */
+  /* =========================================================
+     INITIAL LOADING
+  ========================================================= */
 
-  if (loading && menuItems.length === 0) {
+  if (
+    loading &&
+    menuItems.length === 0
+  ) {
     return <MenuSkeleton />;
   }
 
-  /* -------------------- ERROR -------------------- */
+  /* =========================================================
+     ERROR
+  ========================================================= */
 
-  if (error && menuItems.length === 0) {
+  if (
+    error &&
+    menuItems.length === 0
+  ) {
     return (
       <div className="flex min-h-[50vh] w-full items-center justify-center px-4">
         <p className="text-center text-[12px] font-bold uppercase tracking-[0.15em] text-red-500">
@@ -102,31 +136,47 @@ const MenuMain = () => {
     );
   }
 
-  /* -------------------- PAGE -------------------- */
+  /* =========================================================
+     PAGE
+  ========================================================= */
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-[#FCF8F0]">
+
       {/* FILTERS */}
       <MenuFilters
         categories={categories}
-        activeCategory={activeCategory}
+        activeCategory={
+          activeCategory
+        }
         activeDiet={activeDiet}
-        onCategoryChange={setActiveCategory}
-        onDietChange={setActiveDiet}
+        onCategoryChange={
+          setActiveCategory
+        }
+        onDietChange={
+          setActiveDiet
+        }
+        onPrefetchCategory={
+          prefetchCategory
+        }
       />
 
       {/* PRODUCT GRID */}
       <div
-        className={
-          loading
-            ? "opacity-60 transition-opacity"
-            : "transition-opacity"
-        }
+        className={`transition-opacity duration-200 ${
+          isFetching
+            ? "opacity-70"
+            : "opacity-100"
+        }`}
       >
         <MenuGrid
           items={menuItems}
-          onOpenItem={setSelectedProduct}
-          onClearFilters={handleClearFilters}
+          onOpenItem={
+            setSelectedProduct
+          }
+          onClearFilters={
+            handleClearFilters
+          }
         />
       </div>
 
@@ -135,8 +185,12 @@ const MenuMain = () => {
 
       {/* PRODUCT QUICK VIEW */}
       <ProductQuickViewModal
-        product={selectedProduct}
-        onClose={() => setSelectedProduct(null)}
+        product={
+          selectedProduct
+        }
+        onClose={() =>
+          setSelectedProduct(null)
+        }
       />
     </div>
   );
