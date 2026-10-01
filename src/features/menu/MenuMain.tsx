@@ -1,10 +1,6 @@
 "use client";
 
 import React from "react";
-import {
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
 
 import MenuFilters, {
   ALL_CATEGORY,
@@ -23,16 +19,6 @@ import { useMenuHook } from "./hooks/useMenuHook";
 import type { HomeMenuItem } from "@/features/home/hooks/useHomeHook";
 
 const MenuMain = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  /* =========================================================
-     SEARCH
-  ========================================================= */
-
-  const searchQuery =
-    searchParams.get("search") || "";
-
   /* =========================================================
      FILTER STATE
   ========================================================= */
@@ -46,7 +32,7 @@ const MenuMain = () => {
     React.useState<DietFilter>("ALL");
 
   /* =========================================================
-     PRODUCT MODAL
+     PRODUCT QUICK VIEW
   ========================================================= */
 
   const [selectedProduct, setSelectedProduct] =
@@ -55,7 +41,7 @@ const MenuMain = () => {
     );
 
   /* =========================================================
-     MENU API
+     MENU API / TANSTACK QUERY
   ========================================================= */
 
   const {
@@ -70,8 +56,6 @@ const MenuMain = () => {
       activeCategory === ALL_CATEGORY
         ? undefined
         : String(activeCategory),
-
-    search: searchQuery,
 
     diet:
       activeDiet === "ALL"
@@ -89,23 +73,6 @@ const MenuMain = () => {
     );
 
     setActiveDiet("ALL");
-
-    const params = new URLSearchParams(
-      searchParams.toString()
-    );
-
-    params.delete("search");
-
-    const query = params.toString();
-
-    router.replace(
-      query
-        ? `/menu?${query}`
-        : "/menu",
-      {
-        scroll: false,
-      }
-    );
   };
 
   /* =========================================================
@@ -143,7 +110,10 @@ const MenuMain = () => {
   return (
     <div className="flex min-h-screen w-full flex-col bg-[#FCF8F0]">
 
-      {/* FILTERS */}
+      {/* =====================================================
+          FILTERS
+      ===================================================== */}
+
       <MenuFilters
         categories={categories}
         activeCategory={
@@ -161,7 +131,10 @@ const MenuMain = () => {
         }
       />
 
-      {/* PRODUCT GRID */}
+      {/* =====================================================
+          PRODUCT GRID
+      ===================================================== */}
+
       <div
         className={`transition-opacity duration-200 ${
           isFetching
@@ -180,10 +153,16 @@ const MenuMain = () => {
         />
       </div>
 
-      {/* BOTTOM SECTION */}
+      {/* =====================================================
+          BOTTOM SECTION
+      ===================================================== */}
+
       <MenuMoodSection />
 
-      {/* PRODUCT QUICK VIEW */}
+      {/* =====================================================
+          PRODUCT QUICK VIEW
+      ===================================================== */}
+
       <ProductQuickViewModal
         product={
           selectedProduct
