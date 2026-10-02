@@ -101,26 +101,13 @@ export default function AddressMain() {
    * This function is only reachable in checkout mode
    * because AddressSummary is hidden in management mode.
    */
-  const handleConfirmAddress = async (
-    addressId: number
-  ) => {
+  const handleConfirmAddress = (addressId: number) => {
     if (isAddressManagementMode) {
       return;
     }
 
-    const response =
-      await createOrder(addressId);
-
-    if (
-      response?.status &&
-      response?.data
-    ) {
-      dispatch(clearCart());
-
-      setOrder(response.data);
-
-      setIsOrderModalOpen(true);
-    }
+    // Step 3 ആയ Payment പേജിലേക്ക് അഡ്രസ് ഐഡിയുമായി പോകുന്നു
+    router.push(`/payment?addressId=${addressId}`);
   };
 
   /*

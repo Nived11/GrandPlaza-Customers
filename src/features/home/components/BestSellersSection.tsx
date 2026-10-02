@@ -174,15 +174,17 @@ export default function BestSellersSection({
       {/* Grid Section */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 lg:gap-5">
         {data.map((item) => {
-          const availableVariant = item.variants?.find(
-            (variant) => variant.is_available
-          );
+          const availableVariant =
+            item.variants?.find((variant) => variant.is_available) ??
+            item.variants?.[0];
 
           const offerPrice =
             item.offer_price || availableVariant?.offer_price;
 
           const actualPrice =
             item.actual_price || availableVariant?.actual_price;
+
+          const displayPrice = offerPrice || actualPrice;
 
           const discount =
             offerPrice &&
@@ -262,9 +264,9 @@ export default function BestSellersSection({
                 {/* Price & Add Button */}
                 <div className="mt-auto flex items-end justify-between">
                   <div className="flex flex-col">
-                    {offerPrice && (
+                    {displayPrice && (
                       <span className="text-[12px] sm:text-[16px] font-black text-[var(--brand-green-dark)] leading-none mb-0.5 sm:mb-1">
-                        ₹{offerPrice}
+                        ₹{displayPrice}
                       </span>
                     )}
 

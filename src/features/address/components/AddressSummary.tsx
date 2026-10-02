@@ -89,9 +89,7 @@ const AddressSummary = ({
               : "bg-[#CBD5E1] text-stone-500 cursor-not-allowed"
           }`}
         >
-          <span>
-            {isCreatingOrder ? "Creating Order..." : "Confirm Address"}
-          </span>
+          <span>Proceed to Payment</span>
         
           <svg
             className="w-4 h-4 text-[#D9A441] group-hover:translate-x-1 transition-transform"

@@ -31,7 +31,7 @@ export default function CravingSection({ data = [] }: CravingSectionProps) {
   return (
     <div className="w-full relative">
       {/* Title Section */}
-      <div className="flex items-center justify-center gap-3 mb-4 sm:mb-6 px-2">
+      <div className="flex items-center justify-center gap-3 mb-3 px-2">
         <span className="text-[var(--brand-gold)] opacity-70">✦✧</span>
         <h2 className="text-base lg:text-xl font-black text-slate-800 uppercase tracking-widest whitespace-nowrap">
           Explore Our{" "}
@@ -40,15 +40,9 @@ export default function CravingSection({ data = [] }: CravingSectionProps) {
         <span className="text-[var(--brand-gold)] opacity-70">✧✦</span>
       </div>
 
-      {/* 
-        🔑 CSS position:sticky ഉപയോഗിക്കുന്നു — JS state toggle ഇല്ല, jump ഇല്ല!
-        Browser നേരിട്ട് GPU-accelerated sticky ചെയ്യുന്നതിനാൽ 
-        യാതൊരു jitter/shiver ഉം ഉണ്ടാകില്ല.
-      */}
-      <div
-        className="md:relative md:py-1 sticky z-40 bg-white py-2 lg:px-10"
-        style={{ top: "var(--mobile-header-height, 70px)" }}
-      >
+      {/* Category Container */}
+      <div className="relative w-full py-1 lg:px-10">
+
         {/* Left Arrow (Desktop only) */}
         <button
           onClick={() => handleScroll("left")}

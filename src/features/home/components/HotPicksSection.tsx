@@ -158,7 +158,7 @@ export default function HotPicksSection({
     <div className="w-full">
       
       {/* Header Section - existing design */}
-      <div className="flex items-center justify-center gap-2 md:gap-3 mb-6 lg:mb-8 px-4 mt-4">
+      <div className="flex items-center justify-center gap-2 md:gap-3 mb-6 lg:mb-8 px-4">
         <span className="text-[var(--brand-gold)] opacity-70 text-xs md:text-sm">
           ✦✧
         </span>
@@ -178,15 +178,18 @@ export default function HotPicksSection({
       {/* Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5 lg:px-0">
         {data.map((item) => {
-          const availableVariant = item.variants?.find(
-            (variant) => variant.is_available
-          );
+          const availableVariant =
+            item.variants?.find((variant) => variant.is_available) ??
+            item.variants?.[0];
 
           const offerPrice =
             item.offer_price || availableVariant?.offer_price;
 
           const actualPrice =
             item.actual_price || availableVariant?.actual_price;
+
+          const displayPrice = offerPrice || actualPrice;
+
 
           return (
             <div
@@ -246,11 +249,12 @@ export default function HotPicksSection({
                 {/* Price & Add Button */}
                 <div className="mt-auto flex items-center justify-between">
                   <div className="flex flex-col">
-                    {offerPrice && (
+                    {displayPrice && (
                       <span className="text-[12px] sm:text-[15px] font-black text-[var(--brand-gold)]">
-                        ₹{offerPrice}
+                        ₹{displayPrice}
                       </span>
                     )}
+
 
                     {actualPrice &&
                       offerPrice &&
