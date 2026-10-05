@@ -53,6 +53,8 @@ export default function ComboOffersSection({
             item.actual_price ||
             availableVariant?.actual_price;
 
+          const displayPrice = offerPrice || actualPrice;
+
           const savings =
             offerPrice &&
             actualPrice &&
@@ -95,9 +97,9 @@ export default function ComboOffersSection({
                 </p>
                 
                 <div className="flex items-center gap-2 mb-2.5">
-                  {offerPrice && (
+                  {displayPrice && (
                     <span className="text-[18px] font-black text-slate-900 leading-none">
-                      ₹{offerPrice}
+                      ₹{displayPrice}
                     </span>
                   )}
 
