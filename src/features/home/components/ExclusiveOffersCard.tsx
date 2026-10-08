@@ -3,7 +3,7 @@ import React from 'react';
 export default function ExclusiveOffersCard() {
   return (
     <div className="bg-[#fcf5e3] rounded-xl p-5 lg:p-8 relative overflow-hidden shadow-sm border border-[var(--brand-gold)]/20 min-h-[150px] lg:min-h-[220px] flex flex-col justify-center w-full">
-      {/* 🌟 മൊബൈലിൽ min-h-[150px] ഉം പാഡിംഗ് p-5 ഉം ആക്കി */}
+      {/* 🌟  min-h-[150px]   p-5   */}
       
       {/* 📝 Text Content */}
       <div className="relative z-10 w-[55%] lg:w-[60%]">
@@ -22,11 +22,10 @@ export default function ExclusiveOffersCard() {
       </div>
 
       {/* 🎁 Transparent PNG Image Section */}
-      {/* 🌟 മൊബൈലിൽ ഇമേജ് കണ്ടെയ്നറിന്റെ വലിപ്പവും പൊസിഷനും അഡ്ജസ്റ്റ് ചെയ്തു */}
       <div className="absolute right-[10px] lg:right-[0px] top-1/2 -translate-y-1/2 w-[50%] lg:w-[50%] h-[100%] lg:h-[100%] flex items-center justify-end pointer-events-none">
         {/* 
-          🚨 ശ്രദ്ധിക്കുക: നിന്റെ public ഫോൾഡറിൽ ആ ഗിഫ്റ്റ് ബോക്സ് ഇമേജിന് 'giftbox.png' 
-          എന്ന് പേര് കൊടുത്തിട്ടുണ്ടെന്ന് ഉറപ്പുവരുത്തുക! 
+          🚨 :  public      'giftbox.png' 
+             ! 
         */}
         <img 
           src="/giftbox.png" 

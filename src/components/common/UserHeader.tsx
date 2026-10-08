@@ -688,7 +688,9 @@ export default function UserHeader() {
           ========================================= */}
 
       <div
-        className="fixed bottom-3 left-2 right-2 z-50 md:hidden"
+        className={`fixed bottom-3 left-2 right-2 z-50 md:hidden transition-transform duration-500 ease-in-out ${
+          isScrolled ? "translate-y-[150%]" : "translate-y-0"
+        }`}
         style={{
           filter:
             "drop-shadow(0px 8px 24px rgba(0,0,0,0.15))",

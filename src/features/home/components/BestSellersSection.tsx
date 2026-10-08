@@ -38,7 +38,7 @@ export default function BestSellersSection({
       return;
     }
 
-    // 🛡️ Limit Check: കാർട്ടിൽ ഇതിനകം 20 എണ്ണം ഉണ്ടോ എന്ന് പരിശോധിക്കുന്നു
+    // 🛡️ Limit Check:   20    
     const existingCartItem = cartItems.find(
       (cItem) =>
         cItem.id === item.id &&
@@ -65,7 +65,7 @@ export default function BestSellersSection({
       typeof window !== "undefined" &&
       localStorage.getItem("isLoggedIn") === "true";
 
-    // 1. Instant Optimistic Update: Redux / LocalStorage അടിയന്തരമായി അപ്ഡേറ്റ് ആകും (0ms feedback)
+    // 1. Instant Optimistic Update: Redux / LocalStorage    (0ms feedback)
     dispatch(
       addToCart({
         cart_item_id: existingCartItem?.cart_item_id ?? 0,
@@ -104,7 +104,7 @@ export default function BestSellersSection({
       return;
     }
 
-    // 2. Logged-in User: Background API sync (UI block ചെയ്യില്ല)
+    // 2. Logged-in User: Background API sync (UI block )
     try {
       const response = await addToCartApi({
         menu_item_id: item.id,

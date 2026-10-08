@@ -22,13 +22,13 @@ export const usePaymentHook = () => {
     try {
       setIsProcessing(true);
 
-      // 💳 FRONTEND SIMULATION (Razorpay API / Key വരുന്നതുവരെ):
-      // GPay / PhonePe / Cards ആണെങ്കിൽ 1.2 സെക്കന്റ് പ്രോസസ്സിംഗ് കാണിച്ച് ഓർഡർ ഇടുന്നു.
+      // 💳 FRONTEND SIMULATION (Razorpay API / Key ):
+      // GPay / PhonePe / Cards  1.2     .
       if (selectedMethod !== "cod") {
         await new Promise((resolve) => setTimeout(resolve, 1200));
       }
 
-      // നിലവിലുള്ള Backend Order Checkout API കാൾ ചെയ്യുന്നു
+      //  Backend Order Checkout API  
       const response = await createOrder(addressId);
 
       if (response?.status && response?.data) {

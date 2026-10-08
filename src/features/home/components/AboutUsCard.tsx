@@ -4,17 +4,17 @@ import { BookOpen, ArrowRight } from 'lucide-react';
 export default function AboutUsCard() {
   return (
     <div className="bg-[var(--brand-green-dark)] rounded-xl p-5 lg:p-7 relative overflow-hidden shadow-md border border-[var(--brand-gold)]/20 flex flex-col justify-center min-h-[150px] lg:min-h-[200px] mt-2 group">
-      {/* 🌟 മൊബൈലിൽ min-h-[150px] ഉം പാഡിംഗ് p-5 ഉം ആക്കി */}
+      {/* 🌟  min-h-[150px]   p-5   */}
       
       {/* 📸 Background Image Overlay (Increased visibility) */}
       <div className="absolute inset-0 z-0 bg-[var(--brand-green-dark)]">
         <img 
           src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=600&fit=crop" 
           alt="Our Story" 
-          /* 🌟 Opacity കൂട്ടി, ഗ്രേഡിയൻ്റ് കുറച്ചു */
+          /* 🌟 Opacity ,   */
           className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
         />
-        {/* 🌟 ഗ്രേഡിയൻ്റ് നന്നായി കുറച്ചു, ഇപ്പോൾ ഇമേജ് ക്ലിയർ ആയി കാണാം */}
+        {/* 🌟   ,      */}
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--brand-green-dark)]/80 via-[var(--brand-green-dark)]/20 to-transparent"></div>
       </div>
 

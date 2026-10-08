@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* 🌟 പഴയ Cinzel ഫോണ്ട് ഇമ്പോർട്ട് പൂർണ്ണമായും ഒഴിവാക്കി */
+/* 🌟  Cinzel     */
 
 :root {
   --brand-green-dark: #015a41;
@@ -19,7 +19,7 @@
   --color-brand-cream: var(--brand-cream);
   --color-brand-cream-soft: var(--brand-cream-soft);
   
-  /* 🌟 font-sans ഉം font-serif ഉം വിളിക്കുമ്പോൾ പുതിയ മോഡേൺ ഫോണ്ട് വരും */
+  /* 🌟 font-sans  font-serif       */
   --font-sans: var(--font-jakarta), sans-serif;
   --font-serif: var(--font-jakarta), sans-serif; 
 }

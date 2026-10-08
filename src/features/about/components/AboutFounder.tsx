@@ -5,13 +5,13 @@ export default function AboutFounder() {
     <section className="relative w-full bg-[var(--brand-cream-soft)] py-10 lg:py-16 overflow-hidden">
       <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
         
-        {/* 🌟 ഗ്യാപ്പ് കുറച്ചുകൂടി കൂട്ടി നല്ല സ്പേസ് കിട്ടാൻ (gap-10 lg:gap-16) */}
+        {/* 🌟       (gap-10 lg:gap-16) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           
           {/* 📸 LEFT SIDE: FOUNDER IMAGE */}
           <div className="flex justify-center lg:justify-start">
-            {/* 🌟 മാജിക് ഇവിടെയാണ്: aspect-square കൊടുത്തു, അപ്പൊ കൃത്യം 1:1 ആകും */}
-            <div className="relative w-full max-w-[400px] lg:max-w-[400px] aspect-square ">
+            {/* 🌟  : aspect-square ,   1:1  */}
+            <div className="relative w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[400px] aspect-square ">
               <img 
                 src="./Founder.png" 
                 alt="Founder" 
@@ -22,21 +22,21 @@ export default function AboutFounder() {
           </div>
 
           {/* 📝 RIGHT SIDE: TEXT CONTENT */}
-          {/* 🌟 max-w-lg എടുത്തുകളഞ്ഞു, പകരം w-full കൊടുത്തു. ഇനി നടുവിലേക്ക് ഒതുങ്ങില്ല! */}
+          {/* 🌟 max-w-lg ,  w-full .   ! */}
           <div className="flex flex-col justify-center w-full">
             
             <div className="flex flex-col items-start gap-2 mb-4">
               <span className="text-[10px] font-black text-[var(--brand-gold)] uppercase tracking-[0.25em]">
                 The Founder
               </span>
-              <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-serif font-black text-[var(--brand-green-dark)] leading-[1.2]">
+              <h2 className="text-2xl sm:text-3xl lg:text-[40px] font-serif font-black text-[var(--brand-green-dark)] leading-[1.2]">
                 Driven by Vision & Values
               </h2>
             </div>
 
             <div className="w-12 h-px bg-[var(--brand-gold)]/50 mb-5"></div>
 
-            <div className="space-y-4 text-[13px] sm:text-[14px] text-gray-600 leading-relaxed font-medium">
+            <div className="space-y-4 text-[14px] lg:text-[15px] text-gray-600 leading-relaxed font-medium text-justify">
               
               <p>
                 While our history spans decades, the core of our success lies in the values passed down through generations. Inspired by the dedication, discipline, and patience of my father—a hardworking farmer—I learned that true success comes from consistency and the willingness to keep moving forward, regardless of challenges.

@@ -3,7 +3,7 @@ import React from 'react';
 export default function ComboMealsCard() {
   return (
     <div className="bg-[var(--brand-green-dark)] rounded-xl p-5 lg:p-8 relative overflow-hidden shadow-lg border border-[var(--brand-gold)]/20 min-h-[150px] lg:min-h-[220px] flex flex-col justify-center w-full">
-      {/* 🌟 മൊബൈലിൽ min-h-[150px] ഉം പാഡിംഗ് p-5 ഉം ആക്കി കുറച്ചു */}
+      {/* 🌟  min-h-[150px]   p-5    */}
       
       {/* 📝 Text Content */}
       <div className="relative z-10 w-[55%] lg:w-[60%]">
@@ -22,7 +22,7 @@ export default function ComboMealsCard() {
       {/* 📸 Local Transparent PNG Image Section */}
       <div className="absolute right-[25px] lg:right-[-0px] top-[50%] lg:top-[60%] -translate-y-1/2 w-[45%] lg:w-[50%] h-[75%] lg:h-[55%] flex items-center lg:items-end justify-end pointer-events-none">
         
-        {/* 🚨 ശ്രദ്ധിക്കുക: public ഫോൾഡറിൽ combo.png എന്ന ഇമേജ് ഉണ്ടെങ്കിൽ മാത്രമേ ഇത് വർക്ക് ആകൂ! */}
+        {/* 🚨 : public  combo.png       ! */}
         <img 
           src="/combo.png" 
           alt="Combo Meal" 

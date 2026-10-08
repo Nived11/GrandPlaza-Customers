@@ -1,10 +1,10 @@
 export const extractErrorMessages = (err: any): string => {
-  // 🟢 1. Server-ൽ നിന്ന് Response എത്തിയെങ്കിൽ (HTTP Status Codes like 400, 404, 500)
+  // 🟢 1. Server-  Response  (HTTP Status Codes like 400, 404, 500)
   if (err?.response) {
     const status = err.response.status;
     const data = err.response.data;
 
-    // A. status Code 404 ആണെങ്കിൽ
+    // A. status Code 404 
     if (status === 404) {
       return data?.detail || data?.message || "Requested resource or endpoint not found. (404)";
     }
@@ -40,7 +40,7 @@ export const extractErrorMessages = (err: any): string => {
     }
   } 
 
-  // 🔴 2. Server-ലേക്ക് Request പോയി, പക്ഷെ Response ഒന്നും വരാതിരുന്നാൽ മാത്രം (True Network Error)
+  // 🔴 2. Server- Request ,  Response    (True Network Error)
   if (err?.request) {
     return "Network error. Server unreachable or connection failed.";
   }

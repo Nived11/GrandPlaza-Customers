@@ -5,7 +5,7 @@ export default function AboutHero() {
     <section className="relative w-full bg-[var(--brand-green-dark)] empire-geometric-bg py-2 lg:py-0 overflow-hidden border-b border-[var(--brand-gold)]/20">
       
       {/* Left Side Floating Decoration Image */}
-      <div className="absolute top-2 left-4 sm:left-25 h-full w-[120px] sm:w-[150px] lg:w-[200px] z-0 pointer-events-none opacity-90 rotate-12">
+      <div className="hidden sm:block absolute top-2 left-2 sm:left-25 h-full w-[80px] sm:w-[150px] lg:w-[200px] z-0 pointer-events-none opacity-90 rotate-12">
         <img 
           src="/ourstoryleft.png" 
           alt="Decoration" 
@@ -13,46 +13,45 @@ export default function AboutHero() {
         />
       </div>
 
-      <div className="max-w-[1200px] mx-auto px-6 lg:px-0 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 items-center">
+      <div className="max-w-[1200px] mx-auto px-4 lg:px-0 relative z-10">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-2 lg:gap-6 lg:items-center">
           
           {/* 📝 Left Side: Text Content */}
-          <div className="flex flex-col justify-center max-w-lg lg:pl-12 py-4 lg:py-6">
+          <div className="flex flex-col justify-center w-full pr-8 sm:pr-0 sm:max-w-md lg:max-w-lg lg:pl-12 py-3 lg:py-6 relative z-10">
             
-            <div className="flex flex-col items-start gap-2 mb-2">
+            <div className="flex flex-col items-start gap-1 mb-1 lg:mb-2">
               <div className="flex items-center gap-2">
-                <span className="text-[9px] sm:text-[10px] font-black text-[var(--brand-gold)] uppercase tracking-[0.2em]">
+                <span className="text-[10px] font-black text-[var(--brand-gold)] uppercase tracking-[0.2em]">
                   About Us
                 </span>
               </div>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl lg:text-[38px] font-serif font-black text-white leading-tight mb-2 lg:mb-3">
+            <h1 className="text-2xl sm:text-3xl lg:text-[40px] font-serif font-black text-white leading-[1.2] mb-1 lg:mb-3">
               Our Story
             </h1>
 
             {/* Divider */}
-            <div className="w-10 h-px bg-[var(--brand-gold)]/40 mb-2 lg:mb-3"></div>
+            <div className="w-8 h-px bg-[var(--brand-gold)]/40 mb-2 lg:mb-3"></div>
     
             {/* Description */}
-            <p className="text-[12px] sm:text-[13px] text-[#F4F1EA]/90 leading-relaxed font-medium">
-              A journey built on family values, entrepreneurship, hospitality and a passion for creating lasting experiences.
+            <p className="text-[12px] lg:text-[15px] text-[#F4F1EA]/90 leading-relaxed font-medium">
+              A journey built on family values, hospitality,<br className="block sm:hidden" /> and creating lasting experiences.
             </p>
           </div>
 
           {/* 📸 Right Side: Local Image (Updated to aboutbanner.png) */}
-          {/* 🌟 ലാൻഡ്സ്കേപ്പ് ഇമേജ് ആയതുകൊണ്ട് ഹൈറ്റ് ചെറുതായി അഡ്ജസ്റ്റ് ചെയ്തു */}
-          <div className="relative w-full h-[150px] sm:h-[180px] lg:h-[220px] -right-10 sm:-right-50 mt-2 lg:mt-0 flex justify-end">
+          {/* Adjusted height slightly for the landscape image */ }
+          <div className="absolute -top-4 -right-4 w-[220px] h-[130px] sm:relative sm:w-full sm:h-[180px] lg:h-[220px] lg:w-[80%] sm:-right-50 lg:-right-70 mt-0 flex justify-end z-0">
             
-            {/* ഇമേജ് ഫുൾ വിഡ്ത്തിൽ വെച്ചു */}
             <img 
               src="/aboutbanner.png" 
               alt="About Banner" 
-              className="w-full  object-cover object-center lg:object-right opacity-90"
+              className="w-full h-full object-cover object-center lg:object-right opacity-90"
             />
             
-            {/* 🌟 മാജിക്: ഇമേജിന്റെ സൈഡുകൾ ബാക്ക്ഗ്രൗണ്ടുമായി (Dark Green) സ്മൂത്ത് ആയി ബ്ലെൻഡ് ചെയ്യാൻ ഒരു ഫേഡ് എഫക്റ്റ്! */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[var(--brand-green-dark)]/70 via-[var(--brand-green-dark)]/0 to-transparent"></div>
+            {/* Smooth gradient fade effect to blend image edges with the dark green background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[var(--brand-green-dark)]/90 via-[var(--brand-green-dark)]/10 to-transparent sm:from-[var(--brand-green-dark)]/70 sm:via-[var(--brand-green-dark)]/0 sm:to-transparent"></div>
           </div>
 
         </div>

@@ -19,10 +19,10 @@ interface BannerItem {
 
 interface BannerSectionProps {
   data?: BannerItem[];
-  onBannerClick?: (item: BannerItem) => void; // 🌟 ഫിക്സ് ചെയ്തത്: ഈ ലൈൻ മിസ്സിങ് ആയിരുന്നു!
+  onBannerClick?: (item: BannerItem) => void; // 🌟  :    !
 }
 
-// 🌟 ഫിക്സ് ചെയ്തത്: onBannerClick ഇവിടെ എടുത്തു (Destructure ചെയ്തു)
+// 🌟  : onBannerClick   (Destructure )
 const BannerSection = ({ data = [], onBannerClick }: BannerSectionProps) => {
   const sliderRef = useRef<Slider | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);

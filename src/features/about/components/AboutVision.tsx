@@ -19,11 +19,11 @@ export default function AboutVision() {
             <div className="w-6 sm:w-10 h-px bg-[var(--brand-gold)]/60"></div>
           </div>
           
-          <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-serif font-black text-[var(--brand-green-dark)] mb-4 leading-tight">
-            Built on People, Flavours & Possibilities
+          <h2 className="text-2xl sm:text-3xl lg:text-[40px] font-serif font-black text-[var(--brand-green-dark)] mb-4 leading-tight">
+            Built on People, Flavours <br className="block sm:hidden" /> & <br className="block sm:hidden" /> Possibilities
           </h2>
           
-          <p className="text-[12px] sm:text-[13px] text-gray-500 font-medium max-w-2xl mx-auto">
+          <p className="text-[14px] sm:text-[13px] text-gray-500 font-medium max-w-2xl mx-auto">
             From our roots to our vision — every step is about people, experiences, and a brighter tomorrow.
           </p>
         </div>
@@ -49,10 +49,10 @@ export default function AboutVision() {
             <h3 className="text-xl sm:text-2xl font-serif font-black text-[var(--brand-green-dark)] mb-4 leading-snug">
               A Growing Family
             </h3>
-            <p className="text-[12px] sm:text-[13px] text-gray-500 leading-relaxed font-medium mb-8">
+            <p className="text-[14px] sm:text-[14px] lg:text-[15px] text-gray-500 leading-relaxed font-medium mb-8">
               Today, with a team of 220+ professionals, the journey continues. We believe a successful business is not simply about financial performance; it is about developing people and creating opportunities.
             </p>
-            <p className="text-[8px] sm:text-[9px] font-bold text-[var(--brand-gold)] uppercase tracking-[0.15em] mt-auto">
+            <p className="text-[10px] sm:text-[10px] font-bold text-[var(--brand-gold)] uppercase tracking-[0.15em] mt-auto">
               Building people, businesses,<br className="hidden lg:block"/> and opportunities.
             </p>
           </div>
@@ -73,10 +73,10 @@ export default function AboutVision() {
             <h3 className="text-xl sm:text-2xl font-serif font-black text-[var(--brand-green-dark)] mb-4 leading-snug">
               Local Roots to <br className="hidden lg:block"/> Global Experiences
             </h3>
-            <p className="text-[12px] sm:text-[13px] text-gray-500 leading-relaxed font-medium mb-8">
+            <p className="text-[14px] sm:text-[14px] lg:text-[15px] text-gray-500 leading-relaxed font-medium mb-8">
               Hospitality remains at the heart of our vision. We aspire to take authentic flavours across the world, creating memorable dining experiences inspired by diverse cuisines and cultures.
             </p>
-            <p className="text-[8px] sm:text-[9px] font-bold text-[var(--brand-gold)] uppercase tracking-[0.15em] mt-auto">
+            <p className="text-[10px] sm:text-[10px] font-bold text-[var(--brand-gold)] uppercase tracking-[0.15em] mt-auto">
               Authentic flavours, <br className="hidden lg:block"/> Meaningful experiences.
             </p>
           </div>
@@ -97,10 +97,10 @@ export default function AboutVision() {
             <h3 className="text-xl sm:text-2xl font-serif font-black text-[var(--brand-green-dark)] mb-4 leading-snug">
               Building a Lasting <br className="hidden lg:block"/> Legacy
             </h3>
-            <p className="text-[12px] sm:text-[13px] text-gray-500 leading-relaxed font-medium mb-8">
+            <p className="text-[14px] sm:text-[14px] lg:text-[15px] text-gray-500 leading-relaxed font-medium mb-8">
               The vision goes beyond business. It is about creating ventures that represent quality, authenticity, and long-term value, while empowering talent and contributing positively to society.
             </p>
-            <p className="text-[8px] sm:text-[9px] font-bold text-[var(--brand-gold)] uppercase tracking-[0.15em] mt-auto">
+            <p className="text-[10px] sm:text-[10px] font-bold text-[var(--brand-gold)] uppercase tracking-[0.15em] mt-auto">
               Creating meaning for <br className="hidden lg:block"/> generations to come.
             </p>
           </div>

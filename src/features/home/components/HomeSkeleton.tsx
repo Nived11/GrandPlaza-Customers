@@ -14,11 +14,11 @@ export default function HomeSkeleton() {
   return (
     <div className="w-full min-h-screen bg-[var(--brand-cream-soft)] overflow-x-hidden">
       
-      {/* Banner Skeleton (BannerSection-ന്റെ കൃത്യമായ ലേഔട്ട്) */}
+      {/* Banner Skeleton (BannerSection-  ) */}
       <div className="relative w-full bg-white pb-24 lg:pb-12 pt-0 overflow-visible font-sans">
         <div className="relative w-full h-[220px] sm:h-[260px] lg:h-[460px] bg-[var(--brand-cream-soft)] overflow-visible flex flex-row items-center">
           
-          {/* ഇടത് വശത്തെ Text & Button Skeleton */}
+          {/*   Text & Button Skeleton */}
           <div className="absolute inset-0 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 flex items-center z-20">
             <div className="text-left mt-0 lg:mt-[-60px] z-10 w-[55%] lg:w-[55%] space-y-3 lg:space-y-4">
               <SkeletonBox className="w-24 sm:w-32 h-3 lg:h-4 rounded-full" />
@@ -33,7 +33,7 @@ export default function HomeSkeleton() {
             </div>
           </div>
 
-          {/* വലത് വശത്തെ Curved Food Dish Skeleton */}
+          {/*   Curved Food Dish Skeleton */}
           <div className="absolute right-0 top-0 w-[45%] sm:w-[50%] h-full lg:h-[400px] z-10 overflow-hidden">
             <div 
               className="absolute right-0 top-0 w-full h-full bg-gray-200 animate-pulse"
@@ -47,7 +47,7 @@ export default function HomeSkeleton() {
 
         </div>
 
-        {/* താഴത്തെ 4-Feature Floating Card Skeleton */}
+        {/*  4-Feature Floating Card Skeleton */}
         <div className="absolute -bottom-[-40px] lg:bottom-10 left-[0px] lg:left-[-200px] w-full pointer-events-none z-30">
           <div className="max-w-[1000px] mx-auto px-2 lg:px-10 w-full flex justify-center lg:justify-start">
             <div className="w-full lg:w-[90%] bg-white rounded-lg sm:rounded-xl shadow-[0_12px_40px_rgb(0,0,0,0.08)] border border-[var(--brand-gold)]/10 py-1.5 lg:py-2.5 px-3 lg:px-6">

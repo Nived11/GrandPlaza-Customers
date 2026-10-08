@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// 🌟 കറൗസലിൽ വരാനുള്ള ഫോട്ടോകൾ 
 const carouselImages = [
   "/family.png",
   "https://images.unsplash.com/photo-1600891964092-4316c288032e?auto=format&fit=crop&w=600&q=80",
@@ -13,7 +12,7 @@ const carouselImages = [
 export default function AboutHero() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // 🌟 Auto Carousel Logic (ഓരോ 3 സെക്കൻഡിലും ഇമേജ് മാറും)
+  // 🌟 Auto Carousel Logic ( 3   )
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % carouselImages.length);
@@ -28,7 +27,7 @@ export default function AboutHero() {
   return (
     <section className="relative w-full bg-[var(--brand-cream-soft)] py-8 lg:py-10 overflow-hidden">
       
-      {/* 🌟 BACKGROUND DECORATIONS (യാതൊരു മാറ്റവും വരുത്താതെ) */}
+      {/* 🌟 BACKGROUND DECORATIONS (  ) */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <img 
           src="/shefcap.png" 
@@ -63,17 +62,17 @@ export default function AboutHero() {
         <div className="text-center w-full px-4 mb-6 lg:mb-8">
           <div className="flex items-center justify-center gap-3 mb-3">
             <div className="w-8 sm:w-12 h-px bg-[var(--brand-gold)]/50"></div>
-            <span className="text-[9px] sm:text-[10px] font-black text-[var(--brand-gold)] uppercase tracking-[0.25em]">
+            <span className="text-[10px] font-black text-[var(--brand-gold)] uppercase tracking-[0.25em]">
               The Journey
             </span>
             <div className="w-8 sm:w-12 h-px bg-[var(--brand-gold)]/50"></div>
           </div>
           
-          <h1 className="text-2xl sm:text-3xl lg:text-[40px] font-black text-[var(--brand-green-dark)] leading-tight mb-3">
+          <h1 className="text-2xl sm:text-3xl lg:text-[40px] font-serif font-black text-[var(--brand-green-dark)] leading-[1.2] mb-3">
             From Family Roots to a<br />Global Vision
           </h1>
           
-          <p className="text-[11px] sm:text-[13px] lg:text-[14px] text-gray-500 leading-relaxed font-medium max-w-xl mx-auto px-4">
+          <p className="text-[14px] lg:text-[15px] text-gray-600 leading-relaxed font-medium max-w-xl mx-auto px-4">
             What began as a family tradition has grown into a diverse, people-first enterprise with a global outlook.
           </p>
         </div>
@@ -81,7 +80,7 @@ export default function AboutHero() {
         {/* 📸 3D IMAGE GALLERY SECTION */}
         <div className="relative w-full h-[180px] sm:h-[240px] lg:h-[320px] flex items-center justify-center mb-8">
           
-          {/* ⬅️ Left Tilted Image (മൊബൈലിൽ ചെറുതാക്കി ഒതുക്കി വെച്ചു, ലാപ്ടോപ്പ് സെയിം) */}
+          {/* ⬅️ Left Tilted Image (   ,  ) */}
           <div 
             className="absolute left-[-10%] sm:left-[-5%] lg:left-[-2%] top-[15%] bottom-[15%] lg:top-[10%] lg:bottom-[10%] w-[25%] sm:w-[28%] lg:w-[26%] z-10 rounded-xl sm:rounded-2xl lg:rounded-3xl overflow-hidden shadow-xl"
             style={{ 
@@ -103,7 +102,7 @@ export default function AboutHero() {
             <div className="absolute inset-0 bg-black/10"></div> 
           </div>
 
-          {/* 🟢 Center Main Image (മൊബൈലിൽ വിഡ്ത്ത് കൂട്ടി, ലാപ്ടോപ്പ് സെയിം) */}
+          {/* 🟢 Center Main Image (  ,  ) */}
           <div className="relative z-20 w-[70%] sm:w-[60%] lg:w-[38%] h-[85%] lg:h-full rounded-xl sm:rounded-3xl overflow-hidden shadow-2xl border-2 border-[var(--brand-gold)] ring-4 ring-[var(--brand-cream-soft)] bg-white">
             <AnimatePresence mode="popLayout">
               <motion.img 
@@ -118,7 +117,7 @@ export default function AboutHero() {
             </AnimatePresence>
           </div>
 
-          {/* ➡️ Right Tilted Image (മൊബൈലിൽ ചെറുതാക്കി ഒതുക്കി വെച്ചു, ലാപ്ടോപ്പ് സെയിം) */}
+          {/* ➡️ Right Tilted Image (   ,  ) */}
           <div 
             className="absolute right-[-10%] sm:right-[-5%] lg:right-[-2%] top-[15%] bottom-[15%] lg:top-[10%] lg:bottom-[10%] w-[25%] sm:w-[28%] lg:w-[26%] z-10 rounded-xl sm:rounded-2xl lg:rounded-3xl overflow-hidden shadow-xl"
             style={{ 

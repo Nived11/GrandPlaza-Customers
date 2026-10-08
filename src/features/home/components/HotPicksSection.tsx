@@ -23,10 +23,10 @@ export default function HotPicksSection({
   const { addToCart: addToCartApi, getCart } = useCartHook();
 
   const handleAddToCart = async (e: React.MouseEvent, item: HomeMenuItem) => {
-    // Card-ന്റെ ക്ലിക്ക് ഇവന്റ് ട്രിഗർ ആകാതിരിക്കാൻ stopPropagation
+    // Card-     stopPropagation
     e.stopPropagation();
 
-    // ഐറ്റത്തിന് ഒന്നിൽ കൂടുതൽ വേരിയന്റുകൾ (Half, Full etc.) ഉണ്ടെങ്കിൽ Modal ഓപ്പൺ ചെയ്യുക
+    //     (Half, Full etc.)  Modal  
     if (item.has_variants && item.variants && item.variants.length > 1) {
       onProductClick?.(item);
       return;
@@ -40,7 +40,7 @@ export default function HotPicksSection({
       return;
     }
 
-    // 🛡️ Limit Check: കാർട്ടിൽ ഇതിനകം 20 എണ്ണം ഉണ്ടോ എന്ന് പരിശോധിക്കുന്നു
+    // 🛡️ Limit Check:   20    
     const existingCartItem = cartItems.find(
       (cItem) =>
         cItem.id === item.id &&
@@ -67,7 +67,7 @@ export default function HotPicksSection({
       typeof window !== "undefined" &&
       localStorage.getItem("isLoggedIn") === "true";
 
-    // 1. Instant Optimistic Update: Redux / LocalStorage അടിയന്തരമായി അപ്ഡേറ്റ് ആകും (0ms feedback)
+    // 1. Instant Optimistic Update: Redux / LocalStorage    (0ms feedback)
     dispatch(
       addToCart({
         cart_item_id: existingCartItem?.cart_item_id ?? 0,
@@ -106,7 +106,7 @@ export default function HotPicksSection({
       return;
     }
 
-    // 2. Logged-in User: Background API sync (UI block ചെയ്യില്ല)
+    // 2. Logged-in User: Background API sync (UI block )
     try {
       const response = await addToCartApi({
         menu_item_id: item.id,

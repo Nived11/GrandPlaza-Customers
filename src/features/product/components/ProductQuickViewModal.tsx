@@ -327,7 +327,7 @@ const ProductQuickViewModal = ({
       return;
     }
 
-    // 🛡️ Limit Check: നിലവിലുള്ള quantity + പുതിയ quantity 20-ൽ കൂടുമോ എന്ന് നോക്കുന്നു
+    // 🛡️ Limit Check:  quantity +  quantity 20-   
     const existingCartItem = cartItems.find(
       (cItem) =>
         cItem.id === product.id &&

@@ -106,7 +106,7 @@ export default function AddressMain() {
       return;
     }
 
-    // Step 3 ആയ Payment പേജിലേക്ക് അഡ്രസ് ഐഡിയുമായി പോകുന്നു
+    // Step 3  Payment    
     router.push(`/payment?addressId=${addressId}`);
   };
 

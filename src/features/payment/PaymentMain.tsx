@@ -30,7 +30,7 @@ export default function PaymentMain() {
     processPayment,
   } = usePaymentHook();
 
-  // URL-ൽ നിന്ന് വന്ന addressId വെച്ച് അഡ്രസ് കണ്ടെത്തുന്നു
+  // URL-   addressId   
   useEffect(() => {
     if (addresses.length > 0) {
       if (addressIdParam) {
@@ -104,7 +104,7 @@ export default function PaymentMain() {
         </div>
       </main>
 
-      {/* Order Success Modal (നിലവിലുള്ളത് അതേപോലെ ഉപയോഗിക്കുന്നു) */}
+      {/* Order Success Modal (  ) */}
       <OrderSuccessModal
         isOpen={isSuccessModalOpen}
         order={createdOrder}
