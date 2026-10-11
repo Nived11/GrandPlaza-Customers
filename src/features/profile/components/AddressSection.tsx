@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { MapPin, Plus, Pencil, Trash2, X, Check, Loader2 } from "lucide-react";
+import { MapPin, Plus, Pencil, Trash2, X, Check, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import {
   useAddressHook,
   type AddressData,
 } from "../../address/hook/useAddressHook";
 import type { AddressPayload } from "../../address/api/AddressApi";
 import AddressSkeleton from "./AddressSkeleton";
+import GoogleMapLocationPicker, { SelectedLocationData } from "../../address/components/GoogleMapLocationPicker";
 
 const ADDRESS_TYPES = ["Home", "Work", "Other"];
 
@@ -40,10 +41,12 @@ export default function AddressSection() {
   } = useAddressHook();
 
   const [form, setForm] = useState<AddressPayload>(EMPTY_FORM);
+  const [showMapPicker, setShowMapPicker] = useState(false);
 
   // Sync the form whenever the modal opens, for both add and edit
   useEffect(() => {
     if (!isModalOpen) return;
+    setShowMapPicker(false);
     setForm(
       editingAddress
         ? {
@@ -59,6 +62,16 @@ export default function AddressSection() {
         : EMPTY_FORM
     );
   }, [isModalOpen, editingAddress]);
+
+  const handleLocationSelect = (data: SelectedLocationData) => {
+    setForm((prev) => ({
+      ...prev,
+      address_line: data.address_line || prev.address_line,
+      city: data.city || prev.city,
+      state: data.state || prev.state,
+      pincode: data.pincode || prev.pincode,
+    }));
+  };
 
   const handleChange = (
     field: keyof AddressPayload,
@@ -250,6 +263,52 @@ export default function AddressSection() {
                     className="w-full border border-gray-200 focus:border-[var(--brand-gold)] focus:outline-none rounded-lg px-4 py-2.5 text-[13px] font-medium"
                   />
                 </div>
+              </div>
+
+              {/* Google Map Toggle / Trigger */}
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setShowMapPicker((prev) => !prev)}
+                  className="w-full flex items-center justify-between p-3 rounded-xl border-2 border-dashed border-[var(--brand-gold)]/60 bg-[var(--brand-cream-soft)]/50 hover:bg-[var(--brand-cream-soft)] transition-colors text-left"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-white border border-[var(--brand-gold)]/40 flex items-center justify-center shrink-0">
+                      <MapPin size={16} className="text-[var(--brand-green-dark)]" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-bold text-[var(--brand-green-dark)]">
+                        {showMapPicker ? "Hide Google Map" : "Pin on Google Map & Auto-fill"}
+                      </p>
+                      <p className="text-[10px] text-gray-500 font-medium">
+                        {showMapPicker ? "Click to close map" : "Search landmark or drag pin to exact building"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1 text-[11px] font-bold text-[var(--brand-green-dark)] px-2.5 py-1 rounded-md bg-white border border-gray-200">
+                    {showMapPicker ? (
+                      <>
+                        <span>Close</span>
+                        <ChevronUp size={13} />
+                      </>
+                    ) : (
+                      <>
+                        <span>Open Map</span>
+                        <ChevronDown size={13} />
+                      </>
+                    )}
+                  </div>
+                </button>
+
+                {showMapPicker && (
+                  <div className="mt-3 p-3 rounded-xl bg-gray-50 border border-gray-200">
+                    <GoogleMapLocationPicker
+                      onLocationSelect={handleLocationSelect}
+                      initialAddress={form.address_line ? `${form.address_line}, ${form.city}` : undefined}
+                    />
+                  </div>
+                )}
               </div>
 
               <div>

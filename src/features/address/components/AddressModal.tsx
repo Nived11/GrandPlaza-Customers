@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import type { AddressData } from "../hook/useAddressHook";
+import GoogleMapLocationPicker, { SelectedLocationData } from "./GoogleMapLocationPicker";
+import { MapPin, ChevronDown, ChevronUp } from "lucide-react";
 
 interface AddressModalProps {
   isOpen: boolean;
@@ -47,6 +49,15 @@ const AddressModal = ({
 
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState("");
+  const [showMapPicker, setShowMapPicker] = useState(false);
+
+  const handleLocationSelect = (data: SelectedLocationData) => {
+    if (data.address_line) setAddressLine(data.address_line);
+    if (data.city) setCity(data.city);
+    if (data.state) setState(data.state);
+    if (data.pincode) setPincode(data.pincode);
+    setLocationError("");
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -73,6 +84,7 @@ const AddressModal = ({
 
     setLocationError("");
     setIsLocating(false);
+    setShowMapPicker(false);
   }, [isOpen, address]);
 
   useEffect(() => {
@@ -245,7 +257,7 @@ const populateCurrentLocation = () => {
       aria-labelledby="modal-title"
     >
       <div
-        className="relative z-[10000] w-full max-w-[440px] rounded-[22px] border border-[#EADBCA] bg-white p-5 sm:p-6 md:p-7"
+        className="relative z-[10000] w-full max-w-[480px] max-h-[92vh] overflow-y-auto rounded-[22px] border border-[#EADBCA] bg-white p-5 sm:p-6 md:p-7"
         style={{
           boxShadow:
             "0 25px 60px -15px rgba(9, 40, 30, 0.35)",
@@ -308,80 +320,53 @@ const populateCurrentLocation = () => {
           )}
         </div>
 
-        {/* Current Location */}
-        <button
-          type="button"
-          onClick={populateCurrentLocation}
-          disabled={isLocating}
-          className="group mb-4 flex w-full items-center justify-between gap-3 rounded-xl border-2 border-dashed border-[#D9A441] bg-[#FDF9F0] p-3 text-left transition-colors hover:bg-[#FBF6EC] disabled:cursor-not-allowed disabled:opacity-70"
-        >
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#EADBCA] bg-white text-[#0F3D2E] shadow-sm">
-              {isLocating ? (
-                <svg
-                  className="h-4 w-4 animate-spin"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="9"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                  />
-                  <path
-                    className="opacity-90"
-                    d="M21 12a9 9 0 00-9-9"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                  />
-                </svg>
+        {/* Google Map Picker Accordion / Toggle */}
+        <div className="mb-4">
+          <button
+            type="button"
+            onClick={() => setShowMapPicker((prev) => !prev)}
+            className="group flex w-full items-center justify-between gap-3 rounded-xl border-2 border-dashed border-[#D9A441] bg-[#FDF9F0] p-3 text-left transition-colors hover:bg-[#FBF6EC]"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#EADBCA] bg-white text-[#0F3D2E] shadow-sm">
+                <MapPin className="h-4 w-4 text-[#0F3D2E]" />
+              </div>
+
+              <div className="min-w-0">
+                <p className="text-xs font-bold leading-snug text-[#0F3D2E]">
+                  {showMapPicker ? "Hide Google Map" : "Pin on Google Map & Auto-fill"}
+                </p>
+                <p className="text-[11px] font-medium text-[#78716C]">
+                  {showMapPicker ? "Click to collapse map" : "Pick exact spot, search places & landmarks"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-[#EADBCA] text-xs font-semibold text-[#0F3D2E] shadow-xs">
+              {showMapPicker ? (
+                <>
+                  <span>Close</span>
+                  <ChevronUp size={14} />
+                </>
               ) : (
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <>
+                  <span>Open Map</span>
+                  <ChevronDown size={14} />
+                </>
               )}
             </div>
+          </button>
 
-            <div className="min-w-0">
-              <p className="text-xs font-bold leading-snug text-[#0F3D2E]">
-                {isLocating
-                  ? "Detecting Your Location..."
-                  : "Use Current Location / Map"}
-              </p>
-
-              <p className="text-[11px] font-medium text-[#78716C]">
-                {isLocating
-                  ? "Please wait..."
-                  : "Tap to detect your location"}
-              </p>
+          {/* Interactive Google Map Pin Picker */}
+          {showMapPicker && (
+            <div className="mt-3 p-3 rounded-2xl bg-stone-50 border border-stone-200 shadow-xs">
+              <GoogleMapLocationPicker
+                onLocationSelect={handleLocationSelect}
+                initialAddress={addressLine ? `${addressLine}, ${city}` : undefined}
+              />
             </div>
-          </div>
-
-          {/* Map Preview */}
-          <div className="relative flex h-10 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[#CBD5E1] bg-[#E2E8F0]">
-            <div className="absolute inset-0 bg-gradient-to-tr from-emerald-100 via-amber-50 to-emerald-200" />
-
-            <div className="absolute h-0.5 w-12 rotate-45 bg-white/70" />
-
-            <div className="absolute h-0.5 w-12 -rotate-12 bg-white/70" />
-
-            <div className="relative z-10 h-3 w-3 animate-bounce rounded-full border-2 border-white bg-[#D9A441] shadow-sm" />
-          </div>
-        </button>
+          )}
+        </div>
 
         {/* Location Error */}
         {locationError && (
