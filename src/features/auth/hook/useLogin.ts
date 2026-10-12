@@ -53,19 +53,8 @@ const useLogin = () => {
       }
 
 
-      /*
-       * Development OTP fallback toast
-       */
-      if (data?.otp_development_only) {
-        toast.info(
-          `Backup OTP: ${data.otp_development_only}`,
-          {
-            duration: 6000,
-          }
-        );
-      }
-
       return data;
+
 
     } catch (error: any) {
       if (error?.response?.status === 404) {

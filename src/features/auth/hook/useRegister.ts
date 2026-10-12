@@ -47,15 +47,11 @@ const useRegister = () => {
       }
 
 
-      if (result?.otp_development_only) {
-        toast.info(
-          `Backup OTP: ${result.otp_development_only}`,
-          { duration: 6000 }
-        );
-      } else if (result?.message) {
+      if (result?.message) {
         toast.success(result.message);
       }
       return result;
+
 
     } catch (error) {
       const message = extractErrorMessages(error);
