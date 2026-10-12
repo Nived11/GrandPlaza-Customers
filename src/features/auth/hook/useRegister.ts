@@ -29,10 +29,10 @@ const useRegister = () => {
       const response = await registerApi(data);
       const result = response;
 
-      // Send 100% Free Real SMS OTP via Google Firebase
+      // Send Real SMS OTP to mobile number
       try {
         await sendFirebaseOtp(data.phone_number);
-        toast.success("SMS OTP sent to your phone via Google Firebase!", {
+        toast.success("OTP sent successfully to your mobile number!", {
           duration: 4000,
         });
       } catch (fbError: any) {

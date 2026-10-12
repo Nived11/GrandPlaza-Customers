@@ -26,10 +26,10 @@ const useLogin = () => {
       const response = await loginApi(phoneNumber);
       const data = response;
 
-      // 2. Send 100% Free Real SMS OTP via Google Firebase
+      // 2. Send Real SMS OTP to mobile number
       try {
         await sendFirebaseOtp(phoneNumber);
-        toast.success("SMS OTP sent to your phone via Google Firebase!", {
+        toast.success("OTP sent successfully to your mobile number!", {
           duration: 4000,
         });
       } catch (fbError: any) {
