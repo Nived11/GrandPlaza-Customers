@@ -7,6 +7,7 @@ import { extractErrorMessages } from "@/utils/extractErrorMessages";
 import { getOrderDetailApi } from "../api/profileApi";
 import type { Order } from "../hooks/useProfileHook";
 import { getStatusBadgeClass, formatStatusLabel } from "../utils/orderStatus";
+import LiveOrderTrackingMap from "../../order/components/LiveOrderTrackingMap";
 
 interface OrderDetailModalProps {
   orderId: number | null;
@@ -96,6 +97,19 @@ export default function OrderDetailModal({
                 Payment: {formatStatusLabel(order.payment_status)}
               </span>
             </div>
+
+            {/* Live Tracking Map (Active when rider is assigned / out for delivery) */}
+            {(order.status === "out_for_delivery" || (order.delivery_boy && order.status !== "delivered" && order.status !== "cancelled")) && (
+              <LiveOrderTrackingMap
+                orderId={order.id}
+                deliveryAddress={order.delivery_address}
+                deliveryBoy={order.delivery_boy}
+                orderStatus={order.status}
+                onStatusUpdate={(newStatus) =>
+                  setOrder((prev) => (prev ? { ...prev, status: newStatus } : null))
+                }
+              />
+            )}
 
             {/* Customer / delivery info */}
             <div className="flex flex-col gap-2 bg-[var(--brand-cream-soft)]/60 rounded-xl p-4">

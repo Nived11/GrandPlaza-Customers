@@ -28,6 +28,16 @@ export interface OrderItem {
   line_total: string;
 }
 
+export interface DeliveryBoyInfo {
+  id: number;
+  name: string;
+  phone: string;
+  employee_id?: string | null;
+  status: string;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
 // Matches both the /orders/my-orders list entries and the
 // /orders/my-orders/:id detail response — same shape either way.
 export interface Order {
@@ -40,6 +50,7 @@ export interface Order {
   status: string;
   payment_status: string;
   items: OrderItem[];
+  delivery_boy?: DeliveryBoyInfo | null;
   created_at: string;
   updated_at: string;
 }
