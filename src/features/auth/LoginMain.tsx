@@ -27,7 +27,11 @@ const LoginMain = () => {
 
   return (
     <main className="relative h-[100svh] max-h-[100svh] w-full overflow-hidden bg-[#FBF6EC]">
+      {/* Firebase Invisible reCAPTCHA Anchor */}
+      <div id="recaptcha-container"></div>
+
       {/* Full Screen Background */}
+
       <div className="fixed inset-0 z-0 h-full w-full">
 
         {/* Desktop Background */}

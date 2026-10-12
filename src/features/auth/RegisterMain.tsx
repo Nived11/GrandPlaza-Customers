@@ -59,8 +59,11 @@ const RegisterMain = () => {
 
   return (
     <main className="relative min-h-screen overflow-hidden">
+      {/* Firebase Invisible reCAPTCHA Anchor */}
+      <div id="recaptcha-container"></div>
 
       {/* =====================================================
+
           BACKGROUND
       ===================================================== */}
 

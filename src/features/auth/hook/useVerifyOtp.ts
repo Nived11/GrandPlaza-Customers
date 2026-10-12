@@ -3,10 +3,42 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { extractErrorMessages } from "@/utils/extractErrorMessages";
-import { VerifyOTPApi } from "../api/authApi";
+import { VerifyOTPApi, firebaseVerifyApi } from "../api/authApi";
+import { confirmFirebaseOtp } from "@/lib/firebaseAuth";
 
 const useVerifyOtp = () => {
   const [isLoading, setIsLoading] = useState(false);
+
+  const saveAuthSession = (data: any) => {
+    localStorage.setItem("isLoggedIn", "true");
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("auth-state-changed")
+      );
+    }
+
+    if (data.access_token) {
+      localStorage.setItem(
+        "access_token",
+        data.access_token
+      );
+    }
+
+    if (data.refresh_token) {
+      localStorage.setItem(
+        "refresh_token",
+        data.refresh_token
+      );
+    }
+
+    if (data.user) {
+      localStorage.setItem(
+        "user",
+        JSON.stringify(data.user)
+      );
+    }
+  };
 
   const verifyOtp = async (
     phoneNumber: string,
@@ -15,49 +47,40 @@ const useVerifyOtp = () => {
     try {
       setIsLoading(true);
 
-      const data = await VerifyOTPApi({
-        phone_number: phoneNumber,
-        otp,
-      });
+      let data = null;
+
+      // 1. Try Firebase confirmation first if active
+      if (typeof window !== "undefined" && window.firebaseConfirmationResult) {
+        try {
+          const fbResult = await confirmFirebaseOtp(otp);
+          data = await firebaseVerifyApi({
+            id_token: fbResult.idToken,
+            phone_number: phoneNumber,
+          });
+        } catch (fbErr: any) {
+          console.warn("Firebase confirmation notice, falling back to standard verify:", fbErr);
+        }
+      }
+
+      // 2. If Firebase wasn't active or verification didn't complete, check standard database OTP
+      if (!data || data?.status !== true) {
+        data = await VerifyOTPApi({
+          phone_number: phoneNumber,
+          otp,
+        });
+      }
 
       console.log("VERIFY OTP RESPONSE:", data);
 
-      // API returns response.data directly
       if (data?.status === true) {
-        localStorage.setItem("isLoggedIn", "true");
+        saveAuthSession(data);
 
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(
-            new CustomEvent("auth-state-changed")
-          );
-        }
         toast.success(
           data.message || "OTP verified successfully",
           {
             duration: 5000,
           }
         );
-
-        if (data.access_token) {
-          localStorage.setItem(
-            "access_token",
-            data.access_token
-          );
-        }
-
-        if (data.refresh_token) {
-          localStorage.setItem(
-            "refresh_token",
-            data.refresh_token
-          );
-        }
-
-        if (data.user) {
-          localStorage.setItem(
-            "user",
-            JSON.stringify(data.user)
-          );
-        }
 
         return data;
       }
@@ -108,7 +131,7 @@ const useVerifyOtp = () => {
           });
         } else {
           toast.error(
-            "Something went wrong. Please try again.",
+            "Invalid or expired OTP. Please try again.",
             {
               duration: 5000,
             }

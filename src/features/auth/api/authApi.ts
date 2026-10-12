@@ -16,3 +16,13 @@ export const registerApi = async (data: { phone_number: string; full_name: strin
   const response = await axiosInstance.post("/accounts/signup", data);
   return response.data;
 };
+
+export const firebaseVerifyApi = async (data: {
+  id_token: string;
+  phone_number?: string;
+  full_name?: string;
+  email?: string;
+}) => {
+  const response = await axiosInstance.post("/accounts/firebase-verify", data);
+  return response.data;
+};
