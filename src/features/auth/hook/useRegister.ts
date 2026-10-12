@@ -36,8 +36,16 @@ const useRegister = () => {
           duration: 4000,
         });
       } catch (fbError: any) {
-        console.warn("Firebase Phone Auth registration error:", fbError);
+        console.error("Firebase Phone Auth registration error:", fbError);
+        const fbCode = fbError?.code || "";
+        const fbMsg = fbError?.message || "";
+        if (fbCode === "auth/unauthorized-domain") {
+          toast.error("Firebase error: Server IP (187.127.167.18) must be added to Authorised Domains!");
+        } else {
+          toast.error(`Firebase error: ${fbCode ? fbCode.replace("auth/", "") : fbMsg}`);
+        }
       }
+
 
       if (result?.otp_development_only) {
         toast.info(

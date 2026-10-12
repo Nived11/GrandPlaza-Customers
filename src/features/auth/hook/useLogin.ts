@@ -33,20 +33,25 @@ const useLogin = () => {
           duration: 4000,
         });
       } catch (fbError: any) {
-        console.warn("Firebase Phone Auth notification:", fbError);
+        console.error("Firebase Phone Auth error:", fbError);
         const fbCode = fbError?.code || "";
-        if (fbCode === "auth/invalid-phone-number") {
-          toast.error("Invalid phone number format.");
+        const fbMsg = fbError?.message || "";
+
+        if (fbCode === "auth/unauthorized-domain") {
+          toast.error("Firebase error: Server IP (187.127.167.18) must be added to Authorised Domains in Firebase Console!");
           return null;
         } else if (fbCode === "auth/too-many-requests") {
-          toast.error("Too many attempts. Please try again after some time.");
+          toast.error("Google: Too many attempts for this number. Please wait a few minutes or add as test number.");
           return null;
-        } else if (fbCode === "auth/unauthorized-domain") {
-          toast.info("Firebase domain authorizing. Using backup OTP.");
+        } else if (fbCode === "auth/invalid-phone-number") {
+          toast.error("Invalid phone number format.");
+          return null;
         } else {
-          toast.info("OTP sent to your registered number.");
+          toast.error(`Firebase error: ${fbCode ? fbCode.replace("auth/", "") : fbMsg || "Failed to send SMS"}`);
+          return null;
         }
       }
+
 
       /*
        * Development OTP fallback toast

@@ -13,40 +13,39 @@ declare global {
 }
 
 /**
- * Initializes or re-initializes invisible reCAPTCHA for Firebase Phone Auth.
+ * Returns a stable singleton invisible reCAPTCHA verifier.
  */
 export const getRecaptchaVerifier = (
   containerId: string = "recaptcha-container"
-): RecaptchaVerifier | null => {
-  if (typeof window === "undefined") return null;
-
-  const container = document.getElementById(containerId);
-  if (!container) {
-    console.warn(`reCAPTCHA container '#${containerId}' not found in DOM`);
+): RecaptchaVerifier => {
+  if (typeof window === "undefined") {
+    throw new Error("Window is not defined");
   }
 
-  // Clear existing verifier if any to prevent duplicate widget errors
-  if (window.recaptchaVerifier) {
-    try {
-      window.recaptchaVerifier.clear();
-    } catch (e) {
-      console.warn("Could not clear recaptchaVerifier:", e);
+  if (!window.recaptchaVerifier) {
+    const container = document.getElementById(containerId);
+    if (!container) {
+      console.warn(`reCAPTCHA container '#${containerId}' not found in DOM`);
     }
-    window.recaptchaVerifier = undefined;
+
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
+      size: "invisible",
+      callback: () => {
+        console.log("reCAPTCHA solved");
+      },
+      "expired-callback": () => {
+        console.warn("reCAPTCHA expired, resetting");
+        if (window.recaptchaVerifier) {
+          try {
+            window.recaptchaVerifier.clear();
+          } catch (e) {}
+          window.recaptchaVerifier = undefined;
+        }
+      },
+    });
   }
 
-  const verifier = new RecaptchaVerifier(auth, containerId, {
-    size: "invisible",
-    callback: () => {
-      console.log("reCAPTCHA verified automatically");
-    },
-    "expired-callback": () => {
-      console.warn("reCAPTCHA expired, please try again");
-    },
-  });
-
-  window.recaptchaVerifier = verifier;
-  return verifier;
+  return window.recaptchaVerifier;
 };
 
 /**
@@ -60,14 +59,11 @@ export const sendFirebaseOtp = async (
     throw new Error("Window is not defined");
   }
 
-  // Ensure +91 country prefix
+  // Ensure 10-digit clean number with +91 country prefix
   const digits = phoneNumber.replace(/\D/g, "").slice(-10);
   const formattedNumber = `+91${digits}`;
 
   const verifier = getRecaptchaVerifier(containerId);
-  if (!verifier) {
-    throw new Error("Unable to initialize reCAPTCHA verifier");
-  }
 
   try {
     const confirmation = await signInWithPhoneNumber(
@@ -78,8 +74,8 @@ export const sendFirebaseOtp = async (
     window.firebaseConfirmationResult = confirmation;
     return confirmation;
   } catch (error: any) {
-    console.error("Firebase send OTP error:", error);
-    // If verifier was tainted, reset it
+    console.error("Firebase send OTP error details:", error);
+    // Reset verifier so subsequent attempts don't fail with stale widget
     if (window.recaptchaVerifier) {
       try {
         window.recaptchaVerifier.clear();
