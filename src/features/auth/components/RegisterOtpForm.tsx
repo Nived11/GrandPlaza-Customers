@@ -253,19 +253,12 @@ const RegisterOtpForm = ({
     return true;
   };
 
-  /* Verify OTP */
-  const handleVerifyOtp = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
-    e.preventDefault();
-
-    if (!validateOtp()) return;
-
-    const enteredOtp = otp.join("");
+  const processVerify = async (codeToVerify: string) => {
+    if (isVerifying || justVerified || !storedPhone) return;
 
     const response = await verifyOtp(
       storedPhone,
-      enteredOtp
+      codeToVerify
     );
 
     if (!response) return;
@@ -280,6 +273,65 @@ const RegisterOtpForm = ({
       router.replace("/");
     }, 650);
   };
+
+  /* Verify OTP */
+  const handleVerifyOtp = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
+
+    if (!validateOtp()) return;
+
+    const enteredOtp = otp.join("");
+    await processVerify(enteredOtp);
+  };
+
+  /* Mobile WebOTP Auto-fetch SMS listener */
+  useEffect(() => {
+    if (typeof window === "undefined" || !("OTPCredential" in window)) {
+      return;
+    }
+
+    const ac = new AbortController();
+
+    navigator.credentials
+      .get({
+        otp: { transport: ["sms"] },
+        signal: ac.signal,
+      } as any)
+      .then((otpCredential: any) => {
+        if (otpCredential?.code) {
+          const digits = otpCredential.code
+            .replace(/\D/g, "")
+            .slice(0, 6)
+            .split("");
+
+          if (digits.length === 6) {
+            setOtp(digits);
+            processVerify(digits.join(""));
+          }
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      ac.abort();
+    };
+  }, [storedPhone]);
+
+  /* Auto-submit when all 6 digits are filled */
+  useEffect(() => {
+    const fullCode = otp.join("");
+    if (
+      fullCode.length === 6 &&
+      /^\d{6}$/.test(fullCode) &&
+      !isVerifying &&
+      !justVerified
+    ) {
+      processVerify(fullCode);
+    }
+  }, [otp]);
+
 
   /* Resend OTP */
   const handleResend = async () => {

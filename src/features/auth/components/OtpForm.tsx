@@ -72,10 +72,8 @@ const OtpForm = ({
     return true;
   };
 
-  const handleVerifyOtp = async () => {
-    if (isVerifyingOtp) return;
-
-    if (!validateOtp()) return;
+  const processVerify = async (codeToVerify: string) => {
+    if (isVerifyingOtp || justVerified) return;
 
     const mobileNumber =
       phone ||
@@ -89,11 +87,9 @@ const OtpForm = ({
       return;
     }
 
-    const enteredOtp = otp.join("");
-
     const response = await verifyOtp(
       mobileNumber,
-      enteredOtp
+      codeToVerify
     );
 
     if (response) {
@@ -117,6 +113,59 @@ const OtpForm = ({
       }, 700);
     }
   };
+
+  const handleVerifyOtp = async () => {
+    if (!validateOtp()) return;
+    const enteredOtp = otp.join("");
+    await processVerify(enteredOtp);
+  };
+
+  /* Mobile WebOTP Auto-fetch SMS listener */
+  useEffect(() => {
+    if (typeof window === "undefined" || !("OTPCredential" in window)) {
+      return;
+    }
+
+    const ac = new AbortController();
+
+    navigator.credentials
+      .get({
+        otp: { transport: ["sms"] },
+        signal: ac.signal,
+      } as any)
+      .then((otpCredential: any) => {
+        if (otpCredential?.code) {
+          const digits = otpCredential.code
+            .replace(/\D/g, "")
+            .slice(0, 6)
+            .split("");
+
+          if (digits.length === 6) {
+            setOtp(digits);
+            processVerify(digits.join(""));
+          }
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      ac.abort();
+    };
+  }, [phone]);
+
+  /* Auto-submit when all 6 digits are filled */
+  useEffect(() => {
+    const fullCode = otp.join("");
+    if (
+      fullCode.length === 6 &&
+      /^\d{6}$/.test(fullCode) &&
+      !isVerifyingOtp &&
+      !justVerified
+    ) {
+      processVerify(fullCode);
+    }
+  }, [otp]);
+
 
   const handleResend = async () => {
     if (isResendingOtp || seconds > 0) return;
@@ -210,6 +259,7 @@ const OtpForm = ({
               }}
               type="text"
               inputMode="numeric"
+              autoComplete={index === 0 ? "one-time-code" : "off"}
               maxLength={6}
               value={digit}
               onChange={(e) =>
