@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import useRegister from "../hook/useRegister";
+import useOtpTimer from "../hook/useOtpTimer";
 import {
   getOtpRemainingCooldown,
   setOtpCooldown,
@@ -27,6 +28,7 @@ const RegisterForm = ({
   const [emailError, setEmailError] = useState("");
 
   const { register, isLoading } = useRegister();
+  const { seconds } = useOtpTimer(phoneNumber, 45);
 
   useEffect(() => {
     if (phone) {
@@ -113,12 +115,9 @@ const RegisterForm = ({
       return;
     }
 
-    // Prevent re-sending OTP if cooldown is still active for this phone number
+    // If cooldown is still active, route directly to OTP verification
     const remaining = getOtpRemainingCooldown(phoneNumber);
     if (remaining > 0) {
-      toast.info(
-        `OTP already sent! Please wait ${remaining}s before requesting a new code.`
-      );
       onSuccess(phoneNumber);
       return;
     }
@@ -590,6 +589,22 @@ const RegisterForm = ({
         .
       </motion.p>
 
+      {/* Active Cooldown Banner */}
+      {seconds > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between rounded-2xl border border-[#0F3D2E]/15 bg-[#0F3D2E]/5 px-4 py-3 text-xs text-[#0F3D2E]"
+        >
+          <span className="font-medium text-[#1E2A22]/70">
+            OTP already sent to this number
+          </span>
+          <span className="font-semibold text-[#0F3D2E]">
+            Resend in {seconds}s
+          </span>
+        </motion.div>
+      )}
+
       {/* Register Button */}
       <motion.button
         type="submit"
@@ -641,7 +656,11 @@ const RegisterForm = ({
         "
       >
         <span className="relative z-10">
-          {isLoading ? "REGISTERING..." : "REGISTER"}
+          {isLoading
+            ? "REGISTERING..."
+            : seconds > 0
+              ? `CONTINUE TO OTP (${seconds}s)`
+              : "REGISTER"}
         </span>
 
         {!isLoading && (

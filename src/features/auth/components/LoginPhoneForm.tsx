@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import useLogin from "../hook/useLogin";
+import useOtpTimer from "../hook/useOtpTimer";
 import {
   getOtpRemainingCooldown,
   setOtpCooldown,
@@ -20,6 +21,7 @@ const LoginPhoneForm = ({
   const [phoneError, setPhoneError] = useState("");
 
   const { login, isLoading } = useLogin();
+  const { seconds } = useOtpTimer(phone, 45);
 
   const validatePhone = () => {
     if (!phone) {
@@ -63,12 +65,9 @@ const LoginPhoneForm = ({
 
     if (!validatePhone()) return;
 
-    // Prevent re-sending OTP to the same number if 45s cooldown is still active
+    // If cooldown is still active, route directly to OTP verification
     const remaining = getOtpRemainingCooldown(phone);
     if (remaining > 0) {
-      toast.info(
-        `OTP already sent! Please wait ${remaining}s before requesting a new code.`
-      );
       onSuccess(phone);
       return;
     }
@@ -290,6 +289,22 @@ const LoginPhoneForm = ({
         .
       </motion.p>
 
+      {/* Active Cooldown Banner */}
+      {seconds > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between rounded-2xl border border-[#0F3D2E]/15 bg-[#0F3D2E]/5 px-4 py-3 text-xs text-[#0F3D2E]"
+        >
+          <span className="font-medium text-[#1E2A22]/70">
+            OTP already sent to this number
+          </span>
+          <span className="font-semibold text-[#0F3D2E]">
+            Resend in {seconds}s
+          </span>
+        </motion.div>
+      )}
+
       {/* Send OTP */}
       <motion.button
         type="submit"
@@ -341,7 +356,11 @@ const LoginPhoneForm = ({
         "
       >
         <span className="relative z-10">
-          {isLoading ? "SENDING..." : "SEND OTP"}
+          {isLoading
+            ? "SENDING..."
+            : seconds > 0
+              ? `CONTINUE TO OTP (${seconds}s)`
+              : "SEND OTP"}
         </span>
 
         {!isLoading && (
