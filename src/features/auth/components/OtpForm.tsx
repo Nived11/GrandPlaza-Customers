@@ -239,9 +239,17 @@ const OtpForm = ({
         className="mb-5"
       >
         <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-[#1E2A22]">
-            {formattedPhone}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium text-[#1E2A22]">
+              {formattedPhone}
+            </p>
+            {seconds > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#0F3D2E]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#0F3D2E]">
+                <span>⏱️</span>
+                <span>{seconds}s</span>
+              </span>
+            )}
+          </div>
 
           <button
             type="button"
@@ -333,11 +341,11 @@ const OtpForm = ({
       </motion.button>
 
       {/* Resend OTP */}
-      <div className="mt-5 text-center">
+      <div className="mt-4 sm:mt-5 text-center pb-2">
         {seconds > 0 ? (
-          <p className="text-xs text-[#1E2A22]/55">
+          <p className="text-xs font-medium text-[#1E2A22]/70">
             Resend OTP in{" "}
-            <span className="font-semibold text-[#0F3D2E]">
+            <span className="font-bold text-[#0F3D2E]">
               {seconds}s
             </span>
           </p>

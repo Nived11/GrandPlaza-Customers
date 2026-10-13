@@ -26,7 +26,7 @@ const LoginMain = () => {
   }, []);
 
   return (
-    <main className="relative h-[100svh] max-h-[100svh] w-full overflow-hidden bg-[#FBF6EC]">
+    <main className="relative min-h-[100dvh] w-full overflow-x-hidden overflow-y-auto bg-[#FBF6EC]">
       {/* Firebase Invisible reCAPTCHA Anchor */}
       <div id="recaptcha-container"></div>
 
@@ -189,28 +189,27 @@ const LoginMain = () => {
 
       {/* Auth Content */}
       <section
-        className="
+        className={`
           relative
           z-20
           flex
-          h-full
-          max-h-full
+          min-h-[100dvh]
           w-full
           items-center
           justify-center
-          overflow-hidden
+          overflow-y-auto
           px-4
-          py-2
-          pt-54
+          py-6
+          ${showOtp ? "pt-20 sm:pt-28" : "pt-28 sm:pt-40"}
           sm:px-8
-          sm:py-4
+          sm:py-8
           lg:items-center
           lg:justify-end
           lg:px-14
           lg:py-0
           xl:px-20
           2xl:px-28
-        "
+        `}
       >
         <motion.div
           initial={{
@@ -314,130 +313,134 @@ const LoginMain = () => {
           {/* =====================================================
               3. WELCOME HEADING
           ===================================================== */}
-          <motion.div
-            initial={{
-              opacity: 0,
-              y: 10,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            transition={{
-              duration: 0.5,
-              delay: 0.08,
-            }}
-            className="
-              mb-6
-              text-center
-            "
-          >
-            <h1
+          {!showOtp && (
+            <motion.div
+              initial={{
+                opacity: 0,
+                y: 10,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{
+                duration: 0.5,
+                delay: 0.08,
+              }}
               className="
-                font-serif
-                text-4xl
-                font-medium
-                leading-none
-                tracking-tight
-                text-[#0F3D2E]
-                sm:text-5xl
-                lg:text-[52px]
+                mb-6
+                text-center
               "
             >
-              Welcome Back
-            </h1>
+              <h1
+                className="
+                  font-serif
+                  text-4xl
+                  font-medium
+                  leading-none
+                  tracking-tight
+                  text-[#0F3D2E]
+                  sm:text-5xl
+                  lg:text-[52px]
+                "
+              >
+                Welcome Back
+              </h1>
 
-            <p
-              className="
-                mt-3
-                text-sm
-                text-[#1E2A22]/60
-                sm:text-base
-              "
-            >
-              Your food journey starts here.
-            </p>
+              <p
+                className="
+                  mt-3
+                  text-sm
+                  text-[#1E2A22]/60
+                  sm:text-base
+                "
+              >
+                Your food journey starts here.
+              </p>
 
-            {/* Gold Divider */}
-            <div
-              className="
-                mx-auto
-                mt-5
-                h-[2px]
-                w-12
-                bg-[#D9A441]
-              "
-            />
-          </motion.div>
+              {/* Gold Divider */}
+              <div
+                className="
+                  mx-auto
+                  mt-5
+                  h-[2px]
+                  w-12
+                  bg-[#D9A441]
+                "
+              />
+            </motion.div>
+          )}
 
           {/* =====================================================
               4. SIGN IN / CREATE ACCOUNT
           ===================================================== */}
-          <motion.div
-            initial={{
-              opacity: 0,
-              y: 10,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            transition={{
-              duration: 0.45,
-              delay: 0.15,
-            }}
-            className="
-              mb-6
-              flex
-              h-[52px]
-              w-full
-              rounded-full
-              border
-              border-[#0F3D2E]/10
-              bg-white/45
-              p-0.5
-              sm:mb-7
-            "
-          >
-            {/* Sign In */}
-            <button
-              type="button"
+          {!showOtp && (
+            <motion.div
+              initial={{
+                opacity: 0,
+                y: 10,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{
+                duration: 0.45,
+                delay: 0.15,
+              }}
               className="
+                mb-6
                 flex
-                flex-1
-                items-center
-                justify-center
+                h-[52px]
+                w-full
                 rounded-full
-                bg-[#0F3D2E]
-                text-sm
-                font-medium
-                text-white
-                shadow-sm
+                border
+                border-[#0F3D2E]/10
+                bg-white/45
+                p-0.5
+                sm:mb-7
               "
             >
-              Sign In
-            </button>
+              {/* Sign In */}
+              <button
+                type="button"
+                className="
+                  flex
+                  flex-1
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-[#0F3D2E]
+                  text-sm
+                  font-medium
+                  text-white
+                  shadow-sm
+                "
+              >
+                Sign In
+              </button>
 
-            {/* Create Account */}
-            <button
-              type="button"
-              onClick={() => router.push("/signup")}
-              className="
-                flex
-                flex-1
-                items-center
-                justify-center
-                rounded-full
-                text-sm
-                font-medium
-                text-[#1E2A22]
-                transition-colors
-                hover:text-[#0F3D2E]
-              "
-            >
-              Create Account
-            </button>
-          </motion.div>
+              {/* Create Account */}
+              <button
+                type="button"
+                onClick={() => router.push("/signup")}
+                className="
+                  flex
+                  flex-1
+                  items-center
+                  justify-center
+                  rounded-full
+                  text-sm
+                  font-medium
+                  text-[#1E2A22]
+                  transition-colors
+                  hover:text-[#0F3D2E]
+                "
+              >
+                Create Account
+              </button>
+            </motion.div>
+          )}
 
           {/* =====================================================
               5. LOGIN FORM

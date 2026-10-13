@@ -429,13 +429,23 @@ const RegisterOtpForm = ({
         <p
           className="
             mt-1
+            flex
+            items-center
+            justify-center
+            gap-2
             text-xs
             font-semibold
             text-[#0F3D2E]
             sm:text-sm
           "
         >
-          +91 {formattedPhone}
+          <span>+91 {formattedPhone}</span>
+          {seconds > 0 && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#0F3D2E]/10 px-2 py-0.5 text-[11px] font-semibold text-[#0F3D2E]">
+              <span>⏱️</span>
+              <span>{seconds}s</span>
+            </span>
+          )}
         </p>
       </motion.div>
 
