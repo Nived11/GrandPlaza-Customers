@@ -25,8 +25,12 @@ export default function PaymentSummary({
   const cartItems = useSelector((state: RootState) => state.cart.items);
 
   const itemsTotal = cartItems.reduce((total, item) => total + item.total_price, 0);
+  const packingTotal = cartItems.reduce(
+    (total, item) => total + Number(item.packing_charge || 0) * (item.quantity || 1),
+    0
+  );
   const deliveryFee = cartItems.length > 0 ? 30 : 0;
-  const totalPayable = itemsTotal + deliveryFee;
+  const totalPayable = itemsTotal + packingTotal + deliveryFee;
 
   const getButtonText = () => {
     if (isProcessing) return "Processing Payment...";
@@ -79,6 +83,12 @@ export default function PaymentSummary({
           <span>Items Total</span>
           <span className="font-semibold text-slate-800">₹{itemsTotal.toFixed(2)}</span>
         </div>
+        {packingTotal > 0 && (
+          <div className="flex justify-between">
+            <span>Packing Charges</span>
+            <span className="font-semibold text-slate-800">₹{packingTotal.toFixed(2)}</span>
+          </div>
+        )}
         <div className="flex justify-between">
           <span>Delivery Fee</span>
           <span className="font-semibold text-slate-800">

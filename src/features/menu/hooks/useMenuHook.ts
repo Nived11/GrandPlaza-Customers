@@ -21,6 +21,7 @@ export interface MenuVariant {
   size_name: string;
   actual_price: string;
   offer_price: string;
+  packing_charge?: string | number | null;
   is_available: boolean;
 }
 
@@ -37,6 +38,7 @@ export interface MenuItem {
   has_variants: boolean;
   actual_price: string | null;
   offer_price: string | null;
+  packing_charge?: string | number | null;
   is_available: boolean;
   created_at: string;
   variants: MenuVariant[];

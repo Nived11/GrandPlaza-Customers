@@ -47,6 +47,7 @@ interface CartVariant {
   size_name: string;
   actual_price: string;
   offer_price: string;
+  packing_charge?: string | number | null;
   is_available: boolean;
 }
 

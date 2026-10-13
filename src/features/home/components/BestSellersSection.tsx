@@ -81,12 +81,17 @@ export default function BestSellersSection({
         offer_price: item.has_variants
           ? selectedVariant?.offer_price ?? null
           : item.offer_price ?? null,
+        packing_charge:
+          selectedVariant && Number(selectedVariant.packing_charge) > 0
+            ? Number(selectedVariant.packing_charge)
+            : Number(item.packing_charge || 0),
         variant: selectedVariant
           ? {
               id: selectedVariant.id,
               size_name: selectedVariant.size_name,
               actual_price: selectedVariant.actual_price,
               offer_price: selectedVariant.offer_price,
+              packing_charge: selectedVariant.packing_charge,
               is_available: selectedVariant.is_available,
             }
           : null,
