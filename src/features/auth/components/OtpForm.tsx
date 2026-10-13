@@ -50,7 +50,7 @@ const OtpForm = ({
   const {
     resendOtp,
     isResendingOtp,
-  } = useResendOtp(phone, resetTimer);
+  } = useResendOtp(activePhone, resetTimer);
 
   useEffect(() => {
     const savedPhone =
@@ -200,12 +200,11 @@ const OtpForm = ({
     onEditNumber();
   };
 
-  const formattedPhone = phone
-    ? phone.replace(
-        /^(\+91)(\d{5})(\d{5})$/,
-        "$1 $2 $3"
-      )
-    : "";
+  const cleanDigits = activePhone.replace(/\D/g, "").slice(-10);
+  const formattedPhone =
+    cleanDigits.length === 10
+      ? `+91 ${cleanDigits.slice(0, 5)} ${cleanDigits.slice(5)}`
+      : activePhone;
 
   return (
     <div className="w-full">

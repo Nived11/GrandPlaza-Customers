@@ -10,7 +10,12 @@ const LoginForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("auth_phone") || "";
+    }
+    return "";
+  });
 
   const showOtp = searchParams.get("step") === "otp";
 
@@ -20,7 +25,7 @@ const LoginForm = () => {
     if (savedPhone) {
       setPhone(savedPhone);
     }
-  }, []);
+  }, [showOtp]);
 
   const handleOtpStep = (mobileNumber: string) => {
     sessionStorage.setItem("auth_phone", mobileNumber);

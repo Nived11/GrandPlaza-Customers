@@ -48,8 +48,14 @@ const RegisterOtpForm = ({
     (HTMLInputElement | null)[]
   >([]);
 
-  const [storedPhone, setStoredPhone] =
-    useState(phone);
+  const [storedPhone, setStoredPhone] = useState(() => {
+    return (
+      phone ||
+      (typeof window !== "undefined"
+        ? sessionStorage.getItem("register_phone") || ""
+        : "")
+    );
+  });
 
   const { seconds, resetTimer } = useOtpTimer(storedPhone, 45);
 

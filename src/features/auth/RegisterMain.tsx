@@ -14,7 +14,12 @@ const RegisterMain = () => {
   const showOtp =
     searchParams.get("step") === "otp";
 
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("register_phone") || "";
+    }
+    return "";
+  });
 
   /*
    * Restore registered phone number
@@ -26,7 +31,7 @@ const RegisterMain = () => {
     if (savedPhone) {
       setPhone(savedPhone);
     }
-  }, []);
+  }, [showOtp]);
 
   /*
    * Registration successful

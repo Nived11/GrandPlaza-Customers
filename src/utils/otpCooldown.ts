@@ -7,8 +7,15 @@ const COOLDOWN_KEY_PREFIX = "otp_cooldown_end_";
 export const DEFAULT_OTP_COOLDOWN_SECONDS = 45;
 
 export const getCleanPhone = (phone?: string): string => {
-  if (!phone) return "";
-  return phone.replace(/\D/g, "").slice(-10);
+  let raw = phone;
+  if (!raw && typeof window !== "undefined") {
+    raw =
+      sessionStorage.getItem("auth_phone") ||
+      sessionStorage.getItem("register_phone") ||
+      "";
+  }
+  if (!raw) return "";
+  return raw.replace(/\D/g, "").slice(-10);
 };
 
 export const getOtpRemainingCooldown = (phone?: string): number => {
