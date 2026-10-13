@@ -30,7 +30,13 @@ const OtpForm = ({
   const { login, isLoading: isLoggingIn } =
     useLogin();
 
-  const { seconds, resetTimer } = useOtpTimer();
+  const activePhone =
+    phone ||
+    (typeof window !== "undefined"
+      ? sessionStorage.getItem("auth_phone") || ""
+      : "");
+
+  const { seconds, resetTimer } = useOtpTimer(activePhone, 45);
 
   const {
     otp,

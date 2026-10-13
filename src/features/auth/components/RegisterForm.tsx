@@ -2,7 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import useRegister from "../hook/useRegister";
+import {
+  getOtpRemainingCooldown,
+  setOtpCooldown,
+} from "@/utils/otpCooldown";
 
 interface RegisterFormProps {
   phone: string;
@@ -108,6 +113,16 @@ const RegisterForm = ({
       return;
     }
 
+    // Prevent re-sending OTP if cooldown is still active for this phone number
+    const remaining = getOtpRemainingCooldown(phoneNumber);
+    if (remaining > 0) {
+      toast.info(
+        `OTP already sent! Please wait ${remaining}s before requesting a new code.`
+      );
+      onSuccess(phoneNumber);
+      return;
+    }
+
     const data = {
       full_name: fullName.trim(),
       phone_number: phoneNumber,
@@ -117,6 +132,7 @@ const RegisterForm = ({
     const response = await register(data);
 
     if (response?.status === true) {
+      setOtpCooldown(phoneNumber, 45);
       onSuccess(phoneNumber);
     }
   };

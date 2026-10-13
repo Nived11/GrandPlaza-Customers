@@ -2,7 +2,12 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import useLogin from "../hook/useLogin";
+import {
+  getOtpRemainingCooldown,
+  setOtpCooldown,
+} from "@/utils/otpCooldown";
 
 interface LoginPhoneFormProps {
   onSuccess: (phone: string) => void;
@@ -58,12 +63,25 @@ const LoginPhoneForm = ({
 
     if (!validatePhone()) return;
 
+    // Prevent re-sending OTP to the same number if 45s cooldown is still active
+    const remaining = getOtpRemainingCooldown(phone);
+    if (remaining > 0) {
+      toast.info(
+        `OTP already sent! Please wait ${remaining}s before requesting a new code.`
+      );
+      onSuccess(phone);
+      return;
+    }
+
     const response = await login(phone);
 
     if (!response) return;
 
+    // Start 45s cooldown for this number
+    setOtpCooldown(phone, 45);
     onSuccess(phone);
   };
+
 
   return (
     <form

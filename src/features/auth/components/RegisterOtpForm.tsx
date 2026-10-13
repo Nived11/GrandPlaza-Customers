@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import useVerifyOtp from "../hook/useVerifyOtp";
 import useLogin from "../hook/useLogin";
+import useOtpTimer from "../hook/useOtpTimer";
 
 interface OtpFormProps {
   phone: string;
@@ -30,7 +31,6 @@ const RegisterOtpForm = ({
     "",
   ]);
 
-  const [seconds, setSeconds] = useState(24);
   const [otpError, setOtpError] = useState("");
   const [justVerified, setJustVerified] = useState(false);
 
@@ -51,6 +51,8 @@ const RegisterOtpForm = ({
   const [storedPhone, setStoredPhone] =
     useState(phone);
 
+  const { seconds, resetTimer } = useOtpTimer(storedPhone, 45);
+
   useEffect(() => {
     const savedPhone =
       sessionStorage.getItem("register_phone");
@@ -61,19 +63,6 @@ const RegisterOtpForm = ({
       setStoredPhone(phone);
     }
   }, [phone]);
-
-  /* OTP Countdown */
-  useEffect(() => {
-    if (seconds <= 0) return;
-
-    const timer = setInterval(() => {
-      setSeconds((previous) =>
-        Math.max(previous - 1, 0)
-      );
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [seconds]);
 
   /* OTP Input */
   const handleOtpChange = (
@@ -335,7 +324,7 @@ const RegisterOtpForm = ({
 
   /* Resend OTP */
   const handleResend = async () => {
-    if (isResending || !storedPhone) {
+    if (isResending || !storedPhone || seconds > 0) {
       return;
     }
 
@@ -343,7 +332,7 @@ const RegisterOtpForm = ({
 
     if (!response) return;
 
-    setSeconds(24);
+    resetTimer();
 
     setOtp([
       "",
