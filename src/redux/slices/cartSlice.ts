@@ -22,6 +22,7 @@ export interface CartItem {
   has_variants: boolean;
   actual_price: string | null;
   offer_price: string | null;
+  packing_charge?: number | string | null;
   variant: CartVariant | null;
   quantity: number;
   unit_price: number;

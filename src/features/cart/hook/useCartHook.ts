@@ -38,6 +38,7 @@ interface CartMenuItem {
   has_variants: boolean;
   actual_price: string;
   offer_price: string | null;
+  packing_charge?: string | number | null;
   is_available: boolean;
 }
 

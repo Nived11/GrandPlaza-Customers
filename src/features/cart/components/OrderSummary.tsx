@@ -22,9 +22,15 @@ const OrderSummary = () => {
     0
   );
 
+  const packingTotal = cartItems.reduce(
+    (total, item) =>
+      total + Number(item.packing_charge || 0) * (item.quantity || 1),
+    0
+  );
+
   // Delivery fee: flat ₹30 if cart has items, ₹0 if empty
   const deliveryFee = cartItems.length > 0 ? 30 : 0;
-  const totalPayable = itemsTotal + deliveryFee;
+  const totalPayable = itemsTotal + packingTotal + deliveryFee;
 
   const handleCheckout = async () => {
     if (cartItems.length === 0) {
@@ -68,6 +74,21 @@ const OrderSummary = () => {
             ₹{itemsTotal.toFixed(2)}
           </span>
         </div>
+
+        {/* Packaging Fee */}
+        {packingTotal > 0 && (
+          <div className="flex justify-between items-center text-slate-600">
+            <span className="inline-flex items-center gap-1">
+              Packing Charges
+              <span title="Restaurant packaging and container fee">
+                <Info size={14} className="text-gray-400 cursor-help" />
+              </span>
+            </span>
+            <span className="font-semibold text-slate-800">
+              ₹{packingTotal.toFixed(2)}
+            </span>
+          </div>
+        )}
 
         {/* Delivery Fee with info tooltip */}
         <div className="flex justify-between items-center text-slate-600">
