@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { addToCart, setCart } from "@/redux/slices/cartSlice";
 import type { AppDispatch, RootState } from "@/redux/store";
 import useCartHook from "@/features/cart/hook/useCartHook";
+import { useStoreStatus } from "@/hooks/useStoreStatus";
 import type { HomeMenuItem } from "../hooks/useHomeHook";
 
 interface HotPicksSectionProps {
@@ -21,10 +22,18 @@ export default function HotPicksSection({
   const dispatch = useDispatch<AppDispatch>();
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const { addToCart: addToCartApi, getCart } = useCartHook();
+  const storeStatus = useStoreStatus();
 
   const handleAddToCart = async (e: React.MouseEvent, item: HomeMenuItem) => {
     // Card-     stopPropagation
     e.stopPropagation();
+
+    if (!storeStatus.isOpen) {
+      toast.error(
+        "Empire Plaza is currently closed for online orders. Browsing is enabled, but new orders are paused until opening hours."
+      );
+      return;
+    }
 
     //     (Half, Full etc.)  Modal  
     if (item.has_variants && item.variants && item.variants.length > 1) {

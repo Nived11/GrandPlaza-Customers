@@ -4,13 +4,16 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { FileText, Info, Lock, ArrowRight, Bike, ShieldCheck, Leaf, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import axiosInstance from "@/lib/axios";
+import { useStoreStatus } from "@/hooks/useStoreStatus";
 import type { RootState } from "@/redux/store";
 
 const OrderSummary = () => {
   const router = useRouter();
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
   const [baseFee, setBaseFee] = useState<number>(20);
+  const storeStatus = useStoreStatus();
 
   const cartItems = useSelector((state: RootState) => state.cart.items);
 
@@ -52,6 +55,13 @@ const OrderSummary = () => {
 
   const handleCheckout = async () => {
     if (cartItems.length === 0) {
+      return;
+    }
+
+    if (!storeStatus.isOpen) {
+      toast.error(
+        "Empire Plaza is currently closed for online orders. Browsing is enabled, but new orders are paused until opening hours."
+      );
       return;
     }
 
@@ -140,25 +150,46 @@ const OrderSummary = () => {
         </div>
       </div>
 
+      {/* Closed Warning Banner */}
+      {!storeStatus.isOpen && (
+        <div className="bg-rose-50 border border-rose-200 rounded-xl p-3.5 flex items-start gap-2.5 text-rose-800">
+          <span className="text-base leading-none shrink-0 mt-0.5">🔴</span>
+          <div className="text-xs space-y-0.5">
+            <p className="font-bold">Store Currently Closed</p>
+            <p className="text-rose-700">
+              Empire Plaza is not accepting online orders right now. Browsing the menu is enabled, but checkout is paused until opening hours{storeStatus.formattedHoursText ? ` (${storeStatus.formattedHoursText})` : ""}.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Checkout Primary Button */}
       <div className="pt-1">
         <button
           type="button"
           onClick={handleCheckout}
-          disabled={isCheckoutLoading || cartItems.length === 0}
-          className="w-full py-3.5 px-6 rounded-full bg-[#0F3D2E] hover:bg-[#165742] text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-sm transition active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed group"
+          disabled={isCheckoutLoading || cartItems.length === 0 || !storeStatus.isOpen}
+          className={`w-full py-3.5 px-6 rounded-full font-semibold text-sm flex items-center justify-center gap-2 shadow-sm transition active:scale-[0.99] disabled:cursor-not-allowed group ${
+            !storeStatus.isOpen
+              ? "bg-rose-700 text-white opacity-90 cursor-not-allowed"
+              : "bg-[#0F3D2E] hover:bg-[#165742] text-white disabled:opacity-50"
+          }`}
         >
           {isCheckoutLoading ? (
             <Loader2 size={18} className="animate-spin text-white" />
           ) : (
-            <Lock size={16} className="text-emerald-200" />
+            <Lock size={16} className={!storeStatus.isOpen ? "text-rose-200" : "text-emerald-200"} />
           )}
 
           <span>
-            {isCheckoutLoading ? "Processing..." : "Proceed to Checkout"}
+            {!storeStatus.isOpen
+              ? "Store Currently Closed"
+              : isCheckoutLoading
+              ? "Processing..."
+              : "Proceed to Checkout"}
           </span>
 
-          {!isCheckoutLoading && (
+          {storeStatus.isOpen && !isCheckoutLoading && (
             <ArrowRight
               size={16}
               className="text-emerald-200 group-hover:translate-x-1 transition-transform"

@@ -1,8 +1,18 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import axiosInstance from "@/lib/axios";
 import type { AddressData } from "../hook/useAddressHook";
+
+interface DeliveryEstimateData {
+  distance_km: number;
+  delivery_fee: number;
+  delivery_radius: number;
+  is_within_radius: boolean;
+  radius_message: string;
+  is_store_open: boolean;
+}
 
 interface AddressSummaryProps {
   selectedAddress: AddressData | null;
@@ -15,7 +25,9 @@ const AddressSummary = ({
   onConfirm,
   isCreatingOrder,
 }: AddressSummaryProps) => {
-  const [estimate, setEstimate] = useState<{ distance_km: number; delivery_fee: number } | null>(null);
+  const router = useRouter();
+  const [estimate, setEstimate] = useState<DeliveryEstimateData | null>(null);
+  const [isLoadingEstimate, setIsLoadingEstimate] = useState(false);
 
   useEffect(() => {
     if (!selectedAddress) {
@@ -23,6 +35,7 @@ const AddressSummary = ({
       return;
     }
     let isMounted = true;
+    setIsLoadingEstimate(true);
     axiosInstance
       .get(`/orders/delivery-estimate?address_id=${selectedAddress.id}`)
       .then((res) => {
@@ -30,7 +43,10 @@ const AddressSummary = ({
           setEstimate(res.data.data);
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (isMounted) setIsLoadingEstimate(false);
+      });
     return () => {
       isMounted = false;
     };
@@ -85,6 +101,34 @@ const AddressSummary = ({
           </div>
         )}
 
+        {/* Closed / Radius Notification Banners */}
+        {estimate && !estimate.is_store_open && (
+          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-rose-800 space-y-1">
+            <div className="flex items-center gap-2 font-bold text-xs">
+              <span>🔴</span>
+              <span>Restaurant Currently Closed</span>
+            </div>
+            <p className="text-[11px] text-rose-700 leading-relaxed">
+              Empire Plaza is closed for online orders right now. Ordering is paused until opening hours.
+            </p>
+          </div>
+        )}
+
+        {estimate && estimate.is_within_radius === false && (
+          <div className="bg-red-50 border border-red-300 rounded-2xl p-4 text-red-800 space-y-1.5 shadow-sm">
+            <div className="flex items-center gap-2 font-bold text-xs text-red-700">
+              <span className="text-sm">⛔</span>
+              <span>Delivery Unavailable to this Address</span>
+            </div>
+            <p className="text-[11px] text-red-700 leading-snug">
+              This address is <strong>{estimate.distance_km} KM</strong> away, which exceeds our maximum delivery radius of <strong>{estimate.delivery_radius} KM</strong>.
+            </p>
+            <p className="text-[10px] text-stone-500 font-medium">
+              Please select or add an address located within {estimate.delivery_radius} KM of Empire Plaza.
+            </p>
+          </div>
+        )}
+
         <div className="flex items-center justify-between gap-2 text-xs font-medium text-[#0F3D2E] bg-[#FDFBF7] p-3 rounded-xl border border-[#EADBCA]">
           <div className="flex items-center gap-2">
             <span className="text-base leading-none text-[#D9A441]">⚡</span>
@@ -93,47 +137,76 @@ const AddressSummary = ({
             </span>
           </div>
           {estimate && estimate.distance_km > 0 && (
-            <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 shrink-0">
+            <span
+              className={`text-[10px] font-bold px-2 py-0.5 rounded border shrink-0 ${
+                estimate.is_within_radius === false
+                  ? "text-red-700 bg-red-100 border-red-300"
+                  : "text-amber-800 bg-amber-50 border-amber-200"
+              }`}
+            >
               {estimate.distance_km} KM
             </span>
           )}
         </div>
 
-        <button
-          type="button"
-          disabled={!selectedAddress || isCreatingOrder}
-          onClick={() => {
-            if (selectedAddress) {
-              onConfirm(selectedAddress.id);
-            }
-          }}
-          className={`w-full py-4 px-6 rounded-full font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-200 group ${
-            selectedAddress && !isCreatingOrder
-              ? "bg-[#0F3D2E] hover:bg-[#185843] text-white shadow-[0_8px_24px_-4px_rgba(15,61,46,0.09)]"
-              : "bg-[#CBD5E1] text-stone-500 cursor-not-allowed"
-          }`}
-        >
-          <span>Proceed to Payment</span>
-        
-          <svg
-            className="w-4 h-4 text-[#D9A441] group-hover:translate-x-1 transition-transform"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M14 5l7 7m0 0l-7 7m7-7H3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+        {(() => {
+          const isOutOfRadius = Boolean(estimate && estimate.is_within_radius === false);
+          const isStoreClosed = Boolean(estimate && estimate.is_store_open === false);
+          const canProceed = Boolean(
+            selectedAddress && !isCreatingOrder && !isOutOfRadius && !isStoreClosed && !isLoadingEstimate
+          );
+
+          return (
+            <button
+              type="button"
+              disabled={!canProceed}
+              onClick={() => {
+                if (selectedAddress && canProceed) {
+                  onConfirm(selectedAddress.id);
+                }
+              }}
+              className={`w-full py-4 px-6 rounded-full font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-200 group ${
+                canProceed
+                  ? "bg-[#0F3D2E] hover:bg-[#185843] text-white shadow-[0_8px_24px_-4px_rgba(15,61,46,0.09)] cursor-pointer"
+                  : isOutOfRadius || isStoreClosed
+                  ? "bg-rose-100 text-rose-700 border border-rose-300 cursor-not-allowed"
+                  : "bg-[#CBD5E1] text-stone-500 cursor-not-allowed"
+              }`}
+            >
+              <span>
+                {isLoadingEstimate
+                  ? "Checking Delivery Area..."
+                  : isStoreClosed
+                  ? "Store Currently Closed"
+                  : isOutOfRadius
+                  ? `Outside Delivery Radius (${estimate?.distance_km} KM)`
+                  : "Proceed to Payment"}
+              </span>
+
+              {canProceed && (
+                <svg
+                  className="w-4 h-4 text-[#D9A441] group-hover:translate-x-1 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              )}
+            </button>
+          );
+        })()}
 
         <div className="text-center pt-1">
           <button
             type="button"
-            className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-stone-500 hover:text-[#0F3D2E] transition-colors"
+            onClick={() => router.push("/cart")}
+            className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-stone-500 hover:text-[#0F3D2E] transition-colors cursor-pointer"
           >
             ‹ Back to Cart
           </button>

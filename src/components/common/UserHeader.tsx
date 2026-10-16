@@ -38,11 +38,13 @@ import ReservationModal from "@/features/reservation/ReservationMain";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import useDeliveryLocationHook from "@/features/address/hook/useDeliveryLocationHook";
+import { useStoreStatus } from "@/hooks/useStoreStatus";
 
 export default function UserHeader() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const storeStatus = useStoreStatus();
 
   const {
     location,
@@ -530,6 +532,15 @@ export default function UserHeader() {
 
           </div>
         </div>
+
+        {!storeStatus.loading && !storeStatus.isOpen && (
+          <div className="bg-rose-700 text-white text-xs py-2 px-6 flex items-center justify-center gap-2 font-semibold shadow-inner border-t border-rose-800 tracking-wide">
+            <span className="w-2 h-2 rounded-full bg-white animate-pulse shrink-0" />
+            <span>
+              🔴 Restaurant is currently closed for online orders. Browsing the menu is available, but ordering is paused{storeStatus.formattedHoursText ? ` (Opening Hours: ${storeStatus.formattedHoursText})` : ""}.
+            </span>
+          </div>
+        )}
       </header>
 
       {/* =========================================
@@ -681,6 +692,15 @@ export default function UserHeader() {
             </div>
           </div>
         </div>
+
+        {!storeStatus.loading && !storeStatus.isOpen && (
+          <div className="bg-rose-700 text-white text-[11px] py-1.5 px-3 flex items-center justify-center gap-1.5 font-bold tracking-wide text-center border-t border-rose-800">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse shrink-0" />
+            <span className="leading-tight">
+              🔴 Online Ordering Paused (Store Closed){storeStatus.formattedHoursText ? ` • ${storeStatus.formattedHoursText}` : ""}
+            </span>
+          </div>
+        )}
       </header>
 
       {/* =========================================

@@ -34,6 +34,10 @@ export default function PaymentSummary({
   const [deliveryInfo, setDeliveryInfo] = useState<{
     distance_km: number;
     delivery_fee: number;
+    delivery_radius: number;
+    is_within_radius: boolean;
+    radius_message: string;
+    is_store_open: boolean;
     per_km_charge: number;
     base_delivery_charge: number;
     is_free: boolean;
@@ -79,7 +83,12 @@ export default function PaymentSummary({
 
   const totalPayable = itemsTotal + packingTotal + deliveryFee;
 
+  const isOutOfRadius = Boolean(deliveryInfo && deliveryInfo.is_within_radius === false);
+  const isStoreClosed = Boolean(deliveryInfo && deliveryInfo.is_store_open === false);
+
   const getButtonText = () => {
+    if (isStoreClosed) return "Store Currently Closed";
+    if (isOutOfRadius) return `Outside Delivery Radius (${deliveryInfo?.distance_km} KM)`;
     if (isProcessing) return "Processing Payment...";
     if (selectedMethod === "gpay") return `Pay ₹${totalPayable.toFixed(2)} with GPay`;
     if (selectedMethod === "phonepe") return `Pay ₹${totalPayable.toFixed(2)} with PhonePe`;
@@ -99,6 +108,35 @@ export default function PaymentSummary({
           Step 3 of 3
         </span>
       </div>
+
+      {/* Store Closed Warning */}
+      {isStoreClosed && (
+        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-rose-800 space-y-1">
+          <div className="flex items-center gap-2 font-bold text-xs">
+            <span>🔴</span>
+            <span>Restaurant Currently Closed</span>
+          </div>
+          <p className="text-[11px] text-rose-700 leading-relaxed">
+            Empire Plaza is closed for online orders right now. Ordering is paused until opening hours.
+          </p>
+        </div>
+      )}
+
+      {/* Radius Exceeded Warning */}
+      {isOutOfRadius && (
+        <div className="bg-red-50 border border-red-300 rounded-2xl p-4 text-red-800 space-y-1.5 shadow-sm">
+          <div className="flex items-center gap-2 font-bold text-xs text-red-700">
+            <span className="text-sm">⛔</span>
+            <span>Delivery Unavailable to this Address</span>
+          </div>
+          <p className="text-[11px] text-red-700 leading-snug">
+            This address is <strong>{deliveryInfo?.distance_km} KM</strong> away, which exceeds our maximum delivery radius of <strong>{deliveryInfo?.delivery_radius} KM</strong>.
+          </p>
+          <p className="text-[10px] text-stone-500 font-medium">
+            Please choose an address closer to Empire Plaza.
+          </p>
+        </div>
+      )}
 
       {/* Selected Address Preview */}
       {selectedAddress && (
@@ -172,9 +210,22 @@ export default function PaymentSummary({
       {/* Pay Now Button */}
       <button
         type="button"
-        disabled={isProcessing || !selectedAddress || cartItems.length === 0}
+        disabled={
+          isProcessing ||
+          !selectedAddress ||
+          cartItems.length === 0 ||
+          isCalculatingFee ||
+          isOutOfRadius ||
+          isStoreClosed
+        }
         onClick={onPayNow}
-        className="w-full py-4 px-6 rounded-full font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-200 bg-[#0F3D2E] hover:bg-[#185843] text-white shadow-[0_8px_24px_-4px_rgba(15,61,46,0.09)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-98"
+        className={`w-full py-4 px-6 rounded-full font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-200 ${
+          !isProcessing && selectedAddress && cartItems.length > 0 && !isOutOfRadius && !isStoreClosed && !isCalculatingFee
+            ? "bg-[#0F3D2E] hover:bg-[#185843] text-white shadow-[0_8px_24px_-4px_rgba(15,61,46,0.09)] cursor-pointer active:scale-98"
+            : isOutOfRadius || isStoreClosed
+            ? "bg-rose-100 text-rose-700 border border-rose-300 cursor-not-allowed"
+            : "bg-[#CBD5E1] text-stone-500 cursor-not-allowed"
+        }`}
       >
         {isProcessing && <Loader2 size={16} className="animate-spin text-white" />}
         <span>{getButtonText()}</span>

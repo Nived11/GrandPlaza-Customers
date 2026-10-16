@@ -24,6 +24,7 @@ import {
 } from "@/features/home/hooks/useHomeHook";
 
 import useCartHook from "@/features/cart/hook/useCartHook";
+import { useStoreStatus } from "@/hooks/useStoreStatus";
 
 interface ProductQuickViewModalProps {
   product: HomeMenuItem | null;
@@ -36,6 +37,7 @@ const ProductQuickViewModal = ({
 }: ProductQuickViewModalProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const cartItems = useSelector((state: RootState) => state.cart.items);
+  const storeStatus = useStoreStatus();
 
   const {
     addToCart: addToCartApi,
@@ -344,6 +346,16 @@ const ProductQuickViewModal = ({
       return;
     }
 
+    /*
+     * Check if store is open.
+     */
+    if (!storeStatus.isOpen) {
+      toast.error(
+        "Empire Plaza is currently closed for online orders. Browsing is enabled, but new orders are paused until opening hours."
+      );
+      return;
+    }
+
     try {
       setIsAdding(true);
 
@@ -635,6 +647,15 @@ const ProductQuickViewModal = ({
 
           {/* BOTTOM ACTION */}
           <div className="shrink-0 border-t border-[#0F3D2E]/10 bg-white px-5 py-4 sm:px-6">
+            {!storeStatus.isOpen && (
+              <div className="mb-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium flex items-center gap-2">
+                <span className="text-sm shrink-0">🔴</span>
+                <span>
+                  <strong>Store Currently Closed:</strong> Empire Plaza is paused for online orders right now. Browsing the menu is available.
+                </span>
+              </div>
+            )}
+
             <div className="flex items-center gap-3">
               {/* Quantity */}
               <div className="flex h-12 shrink-0 items-center rounded-[12px] border border-[#0F3D2E]/15 bg-[#FBF6EC]">
@@ -648,7 +669,7 @@ const ProductQuickViewModal = ({
                       )
                     )
                   }
-                  disabled={quantity <= 1}
+                  disabled={quantity <= 1 || !storeStatus.isOpen}
                   aria-label="Decrease quantity"
                   className="flex h-full w-10 items-center justify-center text-[#0F3D2E] transition hover:bg-[#0F3D2E]/5 disabled:cursor-not-allowed disabled:opacity-30"
                 >
@@ -669,7 +690,7 @@ const ProductQuickViewModal = ({
                       )
                     )
                   }
-                  disabled={quantity >= 20}
+                  disabled={quantity >= 20 || !storeStatus.isOpen}
                   aria-label="Increase quantity"
                   className="flex h-full w-10 items-center justify-center text-[#0F3D2E] transition hover:bg-[#0F3D2E]/5 disabled:cursor-not-allowed disabled:opacity-30"
                 >
@@ -685,14 +706,21 @@ const ProductQuickViewModal = ({
                   isAdding ||
                   !product.is_available ||
                   (product.has_variants &&
-                    !selectedVariant)
+                    !selectedVariant) ||
+                  !storeStatus.isOpen
                 }
-                className="flex h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-[12px] bg-[#0F3D2E] px-4 text-[12px] font-bold uppercase tracking-[0.08em] text-white transition hover:bg-[#16533F] disabled:cursor-not-allowed disabled:opacity-50"
+                className={`flex h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-[12px] px-4 text-[12px] font-bold uppercase tracking-[0.08em] text-white transition disabled:cursor-not-allowed ${
+                  !storeStatus.isOpen
+                    ? "bg-rose-700 hover:bg-rose-800 opacity-90"
+                    : "bg-[#0F3D2E] hover:bg-[#16533F] disabled:opacity-50"
+                }`}
               >
                 <ShoppingBag size={16} />
 
                 <span className="truncate">
-                  {isAdding
+                  {!storeStatus.isOpen
+                    ? "Store Currently Closed"
+                    : isAdding
                     ? "Adding..."
                     : `Add to Cart · ₹${totalPrice.toFixed(
                         0

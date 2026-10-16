@@ -16,6 +16,7 @@ import {
 } from "@/redux/slices/cartSlice";
 
 import useCartHook from "@/features/cart/hook/useCartHook";
+import { useStoreStatus } from "@/hooks/useStoreStatus";
 
 import type { HomeMenuItem } from "@/features/home/hooks/useHomeHook";
 
@@ -34,6 +35,7 @@ const MenuItemCard = ({
   onOpen,
 }: MenuItemCardProps) => {
   const dispatch = useDispatch<AppDispatch>();
+  const storeStatus = useStoreStatus();
 
   const cartItems = useSelector(
     (state: RootState) => state.cart.items
@@ -119,6 +121,16 @@ const MenuItemCard = ({
     if (!orderable) {
       toast.error(
         `${item.name} is currently unavailable`
+      );
+      return;
+    }
+
+    /*
+     * Check if the store is open for orders.
+     */
+    if (!storeStatus.isOpen) {
+      toast.error(
+        "Empire Plaza is currently closed for online orders. Browsing is enabled, but new orders are paused until opening hours."
       );
       return;
     }
@@ -602,8 +614,13 @@ const MenuItemCard = ({
             type="button"
             onClick={handleAddToCart}
             disabled={!orderable}
-            aria-label={`Add ${item.name} to cart`}
-            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[var(--brand-gold)]/30 bg-[var(--brand-green-dark)] text-[var(--brand-gold)] shadow-sm transition-all hover:scale-110 hover:bg-[#024532] active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 sm:h-8 sm:w-8 sm:shadow-md"
+            aria-label={!storeStatus.isOpen ? "Store currently closed" : `Add ${item.name} to cart`}
+            title={!storeStatus.isOpen ? "Store is currently closed for online orders" : `Add ${item.name} to cart`}
+            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border shadow-sm transition-all sm:h-8 sm:w-8 sm:shadow-md ${
+              !storeStatus.isOpen
+                ? "border-rose-300 bg-rose-50 text-rose-600 hover:bg-rose-100"
+                : "border-[var(--brand-gold)]/30 bg-[var(--brand-green-dark)] text-[var(--brand-gold)] hover:scale-110 hover:bg-[#024532] active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+            }`}
           >
             <Plus
               size={14}
