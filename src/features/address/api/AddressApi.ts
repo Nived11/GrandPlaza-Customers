@@ -8,6 +8,8 @@ export interface AddressPayload {
     city: string;
     state: string;
     pincode: string;
+    latitude?: number | null;
+    longitude?: number | null;
     is_default: boolean;
 }
 

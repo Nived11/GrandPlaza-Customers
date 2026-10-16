@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axiosInstance from "@/lib/axios";
 import type { AddressData } from "../hook/useAddressHook";
 
 interface AddressSummaryProps {
@@ -14,6 +15,26 @@ const AddressSummary = ({
   onConfirm,
   isCreatingOrder,
 }: AddressSummaryProps) => {
+  const [estimate, setEstimate] = useState<{ distance_km: number; delivery_fee: number } | null>(null);
+
+  useEffect(() => {
+    if (!selectedAddress) {
+      setEstimate(null);
+      return;
+    }
+    let isMounted = true;
+    axiosInstance
+      .get(`/orders/delivery-estimate?address_id=${selectedAddress.id}`)
+      .then((res) => {
+        if (isMounted && res.data?.status && res.data?.data) {
+          setEstimate(res.data.data);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedAddress]);
 
   return (
     <div className="lg:col-span-4 lg:sticky lg:top-28">
@@ -64,15 +85,18 @@ const AddressSummary = ({
           </div>
         )}
 
-        <div className="flex items-center gap-2.5 text-xs font-medium text-[#0F3D2E] bg-[#FDFBF7] p-3 rounded-xl border border-[#EADBCA]">
-          <span className="text-base leading-none text-[#D9A441]">
-            ⚡
-          </span>
-
-          <span className="text-xs text-[#0F3D2E]">
-            <strong>30–35 mins</strong> Delivery from Malappuram Central
-            Kitchen
-          </span>
+        <div className="flex items-center justify-between gap-2 text-xs font-medium text-[#0F3D2E] bg-[#FDFBF7] p-3 rounded-xl border border-[#EADBCA]">
+          <div className="flex items-center gap-2">
+            <span className="text-base leading-none text-[#D9A441]">⚡</span>
+            <span className="text-xs text-[#0F3D2E]">
+              <strong>30–35 mins</strong> Delivery from Empire Plaza Kitchen
+            </span>
+          </div>
+          {estimate && estimate.distance_km > 0 && (
+            <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 shrink-0">
+              {estimate.distance_km} KM
+            </span>
+          )}
         </div>
 
         <button

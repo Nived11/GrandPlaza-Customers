@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import { Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
+import { Loader2, ArrowLeft, ShieldCheck, Bike } from "lucide-react";
+import axiosInstance from "@/lib/axios";
 import type { RootState } from "@/redux/store";
 import type { AddressData } from "@/features/address/hook/useAddressHook";
 import type { PaymentMethod } from "../hook/usePaymentHook";
@@ -29,7 +30,53 @@ export default function PaymentSummary({
     (total, item) => total + Number(item.packing_charge || 0) * (item.quantity || 1),
     0
   );
-  const deliveryFee = cartItems.length > 0 ? 30 : 0;
+
+  const [deliveryInfo, setDeliveryInfo] = useState<{
+    distance_km: number;
+    delivery_fee: number;
+    per_km_charge: number;
+    base_delivery_charge: number;
+    is_free: boolean;
+  } | null>(null);
+  const [isCalculatingFee, setIsCalculatingFee] = useState(false);
+
+  useEffect(() => {
+    if (!selectedAddress) return;
+    let isMounted = true;
+
+    const fetchEstimate = async () => {
+      try {
+        setIsCalculatingFee(true);
+        const params = new URLSearchParams();
+        if (selectedAddress.id) params.append("address_id", String(selectedAddress.id));
+        if (selectedAddress.latitude) params.append("latitude", String(selectedAddress.latitude));
+        if (selectedAddress.longitude) params.append("longitude", String(selectedAddress.longitude));
+        params.append("subtotal", String(itemsTotal));
+
+        const res = await axiosInstance.get(`/orders/delivery-estimate?${params.toString()}`);
+        if (isMounted && res.data?.status && res.data?.data) {
+          setDeliveryInfo(res.data.data);
+        }
+      } catch (err) {
+        console.warn("Delivery fee estimate error:", err);
+      } finally {
+        if (isMounted) setIsCalculatingFee(false);
+      }
+    };
+
+    fetchEstimate();
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedAddress, itemsTotal]);
+
+  const deliveryFee =
+    deliveryInfo !== null
+      ? deliveryInfo.delivery_fee
+      : cartItems.length > 0
+      ? 30
+      : 0;
+
   const totalPayable = itemsTotal + packingTotal + deliveryFee;
 
   const getButtonText = () => {
@@ -89,10 +136,31 @@ export default function PaymentSummary({
             <span className="font-semibold text-slate-800">₹{packingTotal.toFixed(2)}</span>
           </div>
         )}
-        <div className="flex justify-between">
-          <span>Delivery Fee</span>
+        <div className="flex justify-between items-center">
+          <div className="flex flex-col">
+            <span className="flex items-center gap-1.5 font-medium">
+              <span>Delivery Fee</span>
+              {deliveryInfo && deliveryInfo.distance_km > 0 && (
+                <span className="text-[10px] text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 font-bold flex items-center gap-0.5">
+                  <Bike size={11} className="text-amber-600" />
+                  <span>{deliveryInfo.distance_km} KM</span>
+                </span>
+              )}
+            </span>
+            {deliveryInfo && deliveryInfo.per_km_charge > 0 && (
+              <span className="text-[10px] text-stone-400">
+                Rate: ₹{deliveryInfo.per_km_charge}/KM
+              </span>
+            )}
+          </div>
           <span className="font-semibold text-slate-800">
-            {deliveryFee === 0 ? "Free" : `₹${deliveryFee.toFixed(2)}`}
+            {isCalculatingFee ? (
+              <span className="text-gray-400 text-[11px] animate-pulse">Calculating...</span>
+            ) : deliveryFee === 0 ? (
+              <span className="text-emerald-700 font-bold">Free</span>
+            ) : (
+              `₹${deliveryFee.toFixed(2)}`
+            )}
           </span>
         </div>
         <div className="border-t border-[#EADBCA] pt-2.5 flex justify-between items-baseline">

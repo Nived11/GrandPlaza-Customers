@@ -1,16 +1,34 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { FileText, Info, Lock, ArrowRight, Bike, ShieldCheck, Leaf, Loader2 } from "lucide-react";
+import axiosInstance from "@/lib/axios";
 import type { RootState } from "@/redux/store";
 
 const OrderSummary = () => {
   const router = useRouter();
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+  const [baseFee, setBaseFee] = useState<number>(20);
 
   const cartItems = useSelector((state: RootState) => state.cart.items);
+
+  useEffect(() => {
+    let isMounted = true;
+    axiosInstance
+      .get("/settings/site-settings")
+      .then((res) => {
+        if (isMounted && res.data) {
+          const b = Number(res.data.base_delivery_charge ?? res.data.baseDeliveryCharge ?? 20);
+          setBaseFee(b);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const totalQuantity = cartItems.reduce(
     (total, item) => total + (item.quantity || 0),
@@ -28,8 +46,8 @@ const OrderSummary = () => {
     0
   );
 
-  // Delivery fee: flat ₹30 if cart has items, ₹0 if empty
-  const deliveryFee = cartItems.length > 0 ? 30 : 0;
+  // Delivery fee: based on configured base fee if items in cart, 0 if empty
+  const deliveryFee = cartItems.length > 0 ? baseFee : 0;
   const totalPayable = itemsTotal + packingTotal + deliveryFee;
 
   const handleCheckout = async () => {
@@ -93,14 +111,22 @@ const OrderSummary = () => {
         {/* Delivery Fee with info tooltip */}
         <div className="flex justify-between items-center text-slate-600">
           <span className="inline-flex items-center gap-1">
-            Delivery Fee
-            <span title="Standard delivery charge">
+            <span>Delivery Fee</span>
+            <span
+              title="Base rate. Exact fee is calculated dynamically based on your address distance at checkout."
+              className="inline-flex items-center"
+            >
               <Info size={14} className="text-gray-400 cursor-help" />
             </span>
           </span>
-          <span className="font-semibold text-slate-800">
-            {deliveryFee === 0 ? "Free" : `₹${deliveryFee.toFixed(2)}`}
-          </span>
+          <div className="text-right">
+            <span className="font-semibold text-slate-800">
+              {deliveryFee === 0 ? "Free" : `₹${deliveryFee.toFixed(2)}`}
+            </span>
+            <span className="text-[10px] text-stone-400 block -mt-0.5">
+              by distance
+            </span>
+          </div>
         </div>
 
         {/* Divider */}

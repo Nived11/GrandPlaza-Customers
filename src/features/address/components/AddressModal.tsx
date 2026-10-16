@@ -45,6 +45,8 @@ const AddressModal = ({
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [pincode, setPincode] = useState("");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
   const [isDefault, setIsDefault] = useState(false);
 
   const [isLocating, setIsLocating] = useState(false);
@@ -56,6 +58,8 @@ const AddressModal = ({
     if (data.city) setCity(data.city);
     if (data.state) setState(data.state);
     if (data.pincode) setPincode(data.pincode);
+    if (data.lat !== undefined) setLatitude(data.lat);
+    if (data.lng !== undefined) setLongitude(data.lng);
     setLocationError("");
   };
 
@@ -70,6 +74,8 @@ const AddressModal = ({
       setCity(address.city);
       setState(address.state);
       setPincode(address.pincode);
+      setLatitude(address.latitude ?? null);
+      setLongitude(address.longitude ?? null);
       setIsDefault(address.is_default);
     } else {
       setAddressType("home");
@@ -79,6 +85,8 @@ const AddressModal = ({
       setCity("");
       setState("");
       setPincode("");
+      setLatitude(null);
+      setLongitude(null);
       setIsDefault(false);
     }
 
@@ -126,10 +134,12 @@ const populateCurrentLocation = () => {
   navigator.geolocation.getCurrentPosition(
     async (position) => {
       try {
-        const { latitude, longitude } = position.coords;
+        const { latitude: detectedLat, longitude: detectedLng } = position.coords;
+        setLatitude(detectedLat);
+        setLongitude(detectedLng);
 
         const response = await fetch(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${detectedLat}&longitude=${detectedLng}&localityLanguage=en`
         );
 
         if (!response.ok) {
@@ -239,6 +249,8 @@ const populateCurrentLocation = () => {
       city,
       state,
       pincode,
+      latitude: latitude !== null ? latitude : undefined,
+      longitude: longitude !== null ? longitude : undefined,
       is_default: isDefault,
     });
   };
