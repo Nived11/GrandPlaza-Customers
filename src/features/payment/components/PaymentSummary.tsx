@@ -13,6 +13,8 @@ interface PaymentSummaryProps {
   selectedAddress: AddressData | null;
   selectedMethod: PaymentMethod;
   isProcessing: boolean;
+  specialInstructions: string;
+  setSpecialInstructions: (val: string) => void;
   onPayNow: () => void;
 }
 
@@ -20,6 +22,8 @@ export default function PaymentSummary({
   selectedAddress,
   selectedMethod,
   isProcessing,
+  specialInstructions,
+  setSpecialInstructions,
   onPayNow,
 }: PaymentSummaryProps) {
   const router = useRouter();
@@ -161,6 +165,67 @@ export default function PaymentSummary({
           </p>
         </div>
       )}
+
+      {/* Special Cooking / Packing Instructions Note */}
+      <div className="bg-white rounded-2xl p-4 border border-[#EADBCA] shadow-sm space-y-2.5">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[#78716C] flex items-center gap-1.5">
+            <span>👨‍🍳</span> Cooking / Packing Note
+          </span>
+          <span className="text-[10px] text-stone-400 font-medium">Optional</span>
+        </div>
+
+        {/* Quick Suggestion Pills */}
+        <div className="flex flex-wrap gap-1.5">
+          {["Extra Mayo", "Skip Onion", "Less Spicy", "Extra Cutlery"].map((suggestion) => {
+            const isSelected = specialInstructions.includes(suggestion);
+            return (
+              <button
+                key={suggestion}
+                type="button"
+                onClick={() => {
+                  if (isSelected) {
+                    const updated = specialInstructions
+                      .split(",")
+                      .map((s) => s.trim())
+                      .filter((s) => s && s !== suggestion)
+                      .join(", ");
+                    setSpecialInstructions(updated);
+                  } else {
+                    const updated = specialInstructions.trim()
+                      ? `${specialInstructions.trim()}, ${suggestion}`
+                      : suggestion;
+                    setSpecialInstructions(updated.slice(0, 120));
+                  }
+                }}
+                className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
+                  isSelected
+                    ? "bg-[#0F3D2E] text-white border-[#0F3D2E] shadow-xs"
+                    : "bg-stone-50 hover:bg-stone-100 text-stone-600 border-stone-200"
+                }`}
+              >
+                {isSelected ? "✓ " : "+ "}
+                {suggestion}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Compact Text Input */}
+        <div className="relative">
+          <input
+            type="text"
+            value={specialInstructions}
+            onChange={(e) => setSpecialInstructions(e.target.value.slice(0, 120))}
+            placeholder="e.g. Extra mayo, skip onion..."
+            className="w-full text-xs px-3 py-2 pr-14 rounded-xl border border-stone-200 focus:outline-none focus:border-[#0F3D2E] focus:ring-1 focus:ring-[#0F3D2E] text-slate-800 placeholder:text-stone-400 bg-stone-50/50"
+            maxLength={120}
+          />
+          <span className="absolute right-2.5 top-2.5 text-[9px] text-stone-400 font-mono">
+            {specialInstructions.length}/120
+          </span>
+        </div>
+      </div>
 
       {/* Bill Details */}
       <div className="space-y-2.5 text-xs text-stone-600">

@@ -18,7 +18,7 @@ export const usePaymentHook = () => {
   const [createdOrder, setCreatedOrder] = useState<OrderData | null>(null);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
-  const processPayment = async (addressId: number) => {
+  const processPayment = async (addressId: number, specialInstructions: string = "") => {
     try {
       setIsProcessing(true);
 
@@ -29,7 +29,7 @@ export const usePaymentHook = () => {
       }
 
       //  Backend Order Checkout API  
-      const response = await createOrder(addressId);
+      const response = await createOrder(addressId, specialInstructions);
 
       if (response?.status && response?.data) {
         dispatch(clearCart());

@@ -42,9 +42,11 @@ export default function PaymentMain() {
     }
   }, [addresses, addressIdParam]);
 
+  const [specialInstructions, setSpecialInstructions] = useState("");
+
   const handlePayNow = async () => {
     if (!selectedAddress) return;
-    await processPayment(selectedAddress.id);
+    await processPayment(selectedAddress.id, specialInstructions);
   };
 
   return (
@@ -98,6 +100,8 @@ export default function PaymentMain() {
               selectedAddress={selectedAddress}
               selectedMethod={selectedMethod}
               isProcessing={isProcessing}
+              specialInstructions={specialInstructions}
+              setSpecialInstructions={setSpecialInstructions}
               onPayNow={handlePayNow}
             />
           </aside>

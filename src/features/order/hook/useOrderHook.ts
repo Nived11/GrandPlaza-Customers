@@ -8,12 +8,13 @@ import { createOrderApi } from "../api/orderApi";
 export const useOrderHook = () => {
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
 
-  const createOrder = async (addressId: number) => {
+  const createOrder = async (addressId: number, specialInstructions: string = "") => {
     try {
       setIsCreatingOrder(true);
 
       const response = await createOrderApi({
         address_id: addressId,
+        special_instructions: specialInstructions.trim() || undefined,
       });
 
       toast.success(

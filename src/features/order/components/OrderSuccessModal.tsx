@@ -25,6 +25,8 @@ export interface OrderData {
     items: OrderItem[];
     created_at: string;
     updated_at: string;
+    packed_at?: string | null;
+    packing_duration_mins?: number | null;
 }
 
 interface OrderSuccessModalProps {
@@ -275,7 +277,13 @@ const OrderSuccessModal = ({
                         )}
 
                         <div className="pt-1 font-mono text-[10px] text-[#A3ADA7]">
-                            Placed {formatDate(order.created_at)}
+                            <span>Placed {formatDate(order.created_at)}</span>
+                            {order.packed_at && (
+                                <span className="ml-2 font-semibold text-emerald-700">
+                                    • Food Packed {formatDate(order.packed_at)}
+                                    {order.packing_duration_mins != null && ` (${order.packing_duration_mins}m prep)`}
+                                </span>
+                            )}
                         </div>
                     </div>
                 </div>

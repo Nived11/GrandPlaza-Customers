@@ -53,6 +53,8 @@ export interface Order {
   delivery_boy?: DeliveryBoyInfo | null;
   created_at: string;
   updated_at: string;
+  packed_at?: string | null;
+  packing_duration_mins?: number | null;
 }
 
 export const useProfileHook = () => {

@@ -170,16 +170,43 @@ export default function OrderDetailModal({
               </span>
             </div>
 
-            <p className="text-[10px] text-gray-400 font-medium">
-              Placed on{" "}
-              {new Date(order.created_at).toLocaleString("en-IN", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-              })}
-            </p>
+            <div className="text-[11px] text-gray-500 font-medium space-y-1 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Order Placed:</span>
+                <span className="font-semibold text-slate-700">
+                  {new Date(order.created_at).toLocaleString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </div>
+              {order.packed_at ? (
+                <div className="flex items-center justify-between border-t border-slate-200/50 pt-1">
+                  <span className="text-gray-500">Food Packed:</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-semibold text-emerald-700">
+                      {new Date(order.packed_at).toLocaleString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                    {order.packing_duration_mins != null && (
+                      <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
+                        {order.packing_duration_mins}m prep
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-[10px] text-amber-600 font-semibold italic border-t border-slate-200/50 pt-1">
+                  Kitchen is preparing your order...
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
