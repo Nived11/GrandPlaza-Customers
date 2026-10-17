@@ -7,9 +7,14 @@ import type { PaymentMethod } from "../hook/usePaymentHook";
 interface PaymentMethodsProps {
   selectedMethod: PaymentMethod;
   onSelectMethod: (method: PaymentMethod) => void;
+  isCodEnabled?: boolean;
 }
 
-export default function PaymentMethods({ selectedMethod, onSelectMethod }: PaymentMethodsProps) {
+export default function PaymentMethods({
+  selectedMethod,
+  onSelectMethod,
+  isCodEnabled = false,
+}: PaymentMethodsProps) {
   const upiApps = [
     {
       id: "gpay" as PaymentMethod,
@@ -139,31 +144,33 @@ export default function PaymentMethods({ selectedMethod, onSelectMethod }: Payme
           )}
         </button>
 
-        {/* CASH ON DELIVERY */}
-        <button
-          type="button"
-          onClick={() => onSelectMethod("cod")}
-          className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer ${
-            selectedMethod === "cod"
-              ? "border-[#0F3D2E] bg-[#F4F9F6] ring-2 ring-[#0F3D2E]/10"
-              : "border-gray-200 hover:border-gray-300 bg-white"
-          }`}
-        >
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-800">
-              <Banknote size={20} />
+        {/* CASH ON DELIVERY (Only shown when enabled by restaurant admin) */}
+        {isCodEnabled && (
+          <button
+            type="button"
+            onClick={() => onSelectMethod("cod")}
+            className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer ${
+              selectedMethod === "cod"
+                ? "border-[#0F3D2E] bg-[#F4F9F6] ring-2 ring-[#0F3D2E]/10"
+                : "border-gray-200 hover:border-gray-300 bg-white"
+            }`}
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-800">
+                <Banknote size={20} />
+              </div>
+              <div className="text-left">
+                <span className="font-semibold text-sm text-slate-800 block">Cash on Delivery</span>
+                <span className="text-[11px] text-gray-500">Pay cash or UPI at your doorstep</span>
+              </div>
             </div>
-            <div className="text-left">
-              <span className="font-semibold text-sm text-slate-800 block">Cash on Delivery</span>
-              <span className="text-[11px] text-gray-500">Pay cash or UPI at your doorstep</span>
-            </div>
-          </div>
-          {selectedMethod === "cod" ? (
-            <CheckCircle2 size={18} className="text-[#0F3D2E]" />
-          ) : (
-            <div className="w-4 h-4 rounded-full border border-gray-300" />
-          )}
-        </button>
+            {selectedMethod === "cod" ? (
+              <CheckCircle2 size={18} className="text-[#0F3D2E]" />
+            ) : (
+              <div className="w-4 h-4 rounded-full border border-gray-300" />
+            )}
+          </button>
+        )}
       </div>
 
       {/* Trust Badge */}

@@ -42,6 +42,7 @@ export default function PaymentSummary({
     is_within_radius: boolean;
     radius_message: string;
     is_store_open: boolean;
+    is_cod_enabled?: boolean;
     per_km_charge: number;
     base_delivery_charge: number;
     is_free: boolean;
@@ -96,7 +97,7 @@ export default function PaymentSummary({
     if (isProcessing) return "Processing Payment...";
     if (selectedMethod === "gpay") return `Pay ₹${totalPayable.toFixed(2)} with GPay`;
     if (selectedMethod === "phonepe") return `Pay ₹${totalPayable.toFixed(2)} with PhonePe`;
-    if (selectedMethod === "cod") return `Place Order (Cash on Delivery)`;
+    if (selectedMethod === "cod" && deliveryInfo?.is_cod_enabled !== false) return `Place Order (Cash on Delivery)`;
     return `Pay ₹${totalPayable.toFixed(2)}`;
   };
 

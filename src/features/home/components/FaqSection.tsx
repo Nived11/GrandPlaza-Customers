@@ -10,8 +10,8 @@ const faqs = [
     answer: "Our standard delivery time is 30-45 minutes depending on your location and traffic conditions. You can track your order live once it's dispatched."
   },
   {
-    question: "Is cash on delivery (COD) available?",
-    answer: "Yes, we accept Cash on Delivery (COD) along with all major UPI apps, credit/debit cards, and net banking."
+    question: "What payment methods are supported?",
+    answer: "We support fast and 100% secure online prepaid payments including UPI (Google Pay, PhonePe, Paytm), Credit/Debit Cards, and Net Banking."
   },
   {
     question: "Can I return the food?",

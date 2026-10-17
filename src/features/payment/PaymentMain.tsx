@@ -23,6 +23,7 @@ export default function PaymentMain() {
   const {
     selectedMethod,
     setSelectedMethod,
+    isCodEnabled,
     isProcessing,
     createdOrder,
     isSuccessModalOpen,
@@ -91,6 +92,7 @@ export default function PaymentMain() {
             <PaymentMethods
               selectedMethod={selectedMethod}
               onSelectMethod={setSelectedMethod}
+              isCodEnabled={isCodEnabled}
             />
           </section>
 
