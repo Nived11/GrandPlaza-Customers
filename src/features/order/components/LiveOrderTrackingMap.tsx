@@ -272,7 +272,7 @@ export default function LiveOrderTrackingMap({
         </div>
       </div>
 
-      {/* Bottom Rider Info Card (Swiggy / Zomato style) */}
+      {/* Bottom Rider Info Card */}
       <div className="p-3.5 bg-stone-50 border-t border-stone-100 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-full bg-[#0F3D2E] text-amber-300 flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
