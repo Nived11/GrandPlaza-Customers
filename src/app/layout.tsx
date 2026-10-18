@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "@/app/globals.css";
 import { Toaster } from "sonner";
+import Script from "next/script";
 import ReduxProvider from "@/redux/provider";
 import QueryProvider from "@/providers/QueryProvider";
 
@@ -40,6 +41,10 @@ export default function RootLayout({
         <Toaster
           position="top-center"
           richColors
+        />
+        <Script
+          src="https://checkout.razorpay.com/v1/checkout.js"
+          strategy="lazyOnload"
         />
       </body>
     </html>
