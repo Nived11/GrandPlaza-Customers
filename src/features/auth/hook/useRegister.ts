@@ -40,7 +40,7 @@ const useRegister = () => {
         const fbCode = fbError?.code || "";
         const fbMsg = fbError?.message || "";
         if (fbCode === "auth/unauthorized-domain") {
-          toast.error("Firebase error: Server IP (187.127.167.18) must be added to Authorised Domains!");
+          toast.error("Firebase error: Domain (grandeplaza.com) must be added to Authorized Domains in Firebase Console!");
         } else {
           toast.error(`Firebase error: ${fbCode ? fbCode.replace("auth/", "") : fbMsg}`);
         }

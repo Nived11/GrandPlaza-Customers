@@ -38,7 +38,7 @@ const useLogin = () => {
         const fbMsg = fbError?.message || "";
 
         if (fbCode === "auth/unauthorized-domain") {
-          toast.error("Firebase error: Server IP (187.127.167.18) must be added to Authorised Domains in Firebase Console!");
+          toast.error("Firebase error: Domain (grandeplaza.com) must be added to Authorized Domains in Firebase Console!");
           return null;
         } else if (fbCode === "auth/too-many-requests") {
           toast.error("Google: Too many attempts for this number. Please wait a few minutes or add as test number.");
