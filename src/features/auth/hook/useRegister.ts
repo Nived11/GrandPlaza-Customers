@@ -9,7 +9,7 @@ import { sendFirebaseOtp } from "@/lib/firebaseAuth";
 interface RegisterData {
   phone_number: string;
   full_name: string;
-  email: string;
+  email?: string;
 }
 
 interface RegisterResponse {

@@ -58,12 +58,7 @@ const RegisterForm = ({
       isValid = false;
     }
 
-    if (!email.trim()) {
-      setEmailError("Email is required");
-      isValid = false;
-    } else if (
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-    ) {
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       setEmailError("Enter a valid email address");
       isValid = false;
     }
@@ -447,7 +442,9 @@ const RegisterForm = ({
           htmlFor="emailInput"
           className="
             mb-1
-            block
+            flex
+            items-center
+            justify-between
             text-[10px]
             font-semibold
             uppercase
@@ -456,8 +453,10 @@ const RegisterForm = ({
             sm:text-xs
           "
         >
-          Email
-          <span className="text-[#D9A441]"> *</span>
+          <span>Email</span>
+          <span className="text-[10px] font-normal lowercase tracking-normal text-gray-400">
+            (optional)
+          </span>
         </label>
 
         <motion.div
@@ -494,7 +493,7 @@ const RegisterForm = ({
             type="email"
             value={email}
             onChange={handleEmailChange}
-            placeholder="Enter your email address"
+            placeholder="Enter your email address (optional)"
             autoComplete="email"
             className="
               w-full

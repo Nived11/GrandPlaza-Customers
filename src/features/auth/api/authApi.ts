@@ -12,7 +12,7 @@ export const VerifyOTPApi = async (data: {  phone_number: string;  otp: string;}
   return response.data;
 };
 
-export const registerApi = async (data: { phone_number: string; full_name: string ,  email: string }) => {
+export const registerApi = async (data: { phone_number: string; full_name: string; email?: string }) => {
   const response = await axiosInstance.post("/accounts/signup", data);
   return response.data;
 };
