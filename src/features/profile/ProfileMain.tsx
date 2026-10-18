@@ -113,7 +113,7 @@ const ProfileMain = () => {
         onLogout={logout}
       />
 
-      <div className="w-full max-w-[1000px] mx-auto px-6 lg:px-8 py-8 lg:py-12">
+      <div className="w-full max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-32 sm:pb-12">
 
         {/* PROFILE */}
         {activeTab === "profile" && (

@@ -57,6 +57,32 @@ export default function UserHeader() {
       ? `${location.city}${location.state ? `, ${location.state}` : ""}`
       : "Select Location";
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const updateLoginStatus = () => {
+      setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
+    };
+
+    updateLoginStatus();
+
+    // Prefetch all key routes for instantaneous 0ms page transitions
+    router.prefetch("/login");
+    router.prefetch("/login?redirect=/profile");
+    router.prefetch("/login?redirect=/address?source=header");
+    router.prefetch("/profile");
+    router.prefetch("/address?source=header");
+    router.prefetch("/menu");
+    router.prefetch("/about");
+
+    window.addEventListener("storage", updateLoginStatus);
+    window.addEventListener("focus", updateLoginStatus);
+    return () => {
+      window.removeEventListener("storage", updateLoginStatus);
+      window.removeEventListener("focus", updateLoginStatus);
+    };
+  }, [router]);
+
   const handleLocationClick = () => {
     const loggedIn =
       localStorage.getItem("isLoggedIn") === "true";
@@ -68,7 +94,8 @@ export default function UserHeader() {
     );
   };
 
-  const handleProfileClick = () => {
+  const handleProfileClick = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
     const loggedIn =
       localStorage.getItem("isLoggedIn") === "true";
 
@@ -510,17 +537,17 @@ export default function UserHeader() {
 
             <div className="h-4 lg:h-5 w-[1px] bg-gray-300 mx-0.5 lg:mx-1 shrink-0" />
 
-            <button
-              type="button"
-              onClick={handleProfileClick}
+            <Link
+              href={isLoggedIn ? "/profile" : "/login?redirect=/profile"}
+              prefetch={true}
               aria-label="Profile"
-              className="p-2 lg:p-2.5 rounded-full bg-brand-green-dark empire-geometric-bg border-2 border-brand-gold hover:scale-105 transition text-brand-gold shrink-0"
+              className="p-2 lg:p-2.5 rounded-full bg-brand-green-dark empire-geometric-bg border-2 border-brand-gold hover:scale-105 transition text-brand-gold shrink-0 flex items-center justify-center"
             >
               <User
                 size={16}
                 className="xl:w-[18px] xl:h-[18px]"
               />
-            </button>
+            </Link>
 
           </div>
         </div>
@@ -784,11 +811,15 @@ export default function UserHeader() {
                 );
 
                 if (item.name === "Profile") {
+                  const targetHref = isLoggedIn
+                    ? "/profile"
+                    : "/login?redirect=/profile";
+
                   return (
-                    <button
+                    <Link
                       key={item.path}
-                      type="button"
-                      onClick={handleProfileClick}
+                      href={targetHref}
+                      prefetch={true}
                       aria-label="Profile"
                       style={
                         isActive
@@ -805,7 +836,7 @@ export default function UserHeader() {
                       }`}
                     >
                       {navContent}
-                    </button>
+                    </Link>
                   );
                 }
 

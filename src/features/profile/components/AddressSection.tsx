@@ -103,16 +103,16 @@ export default function AddressSection() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h2 className="text-xl sm:text-2xl font-serif font-black text-[var(--brand-green-dark)]">
           Saved Addresses
         </h2>
         <button
           onClick={openAddModal}
-          className="flex items-center gap-1.5 bg-[var(--brand-green-dark)] hover:bg-[#024532] text-white px-4 py-2 rounded-lg text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] transition-colors"
+          className="flex items-center gap-1.5 bg-[var(--brand-green-dark)] hover:bg-[#024532] text-white px-3 sm:px-4 py-2 rounded-lg text-[9px] sm:text-[10px] font-bold uppercase tracking-wider sm:tracking-[0.15em] shrink-0 transition-colors shadow-sm"
         >
-          <Plus size={14} />
-          Add New
+          <Plus size={14} className="shrink-0" />
+          <span>Add New</span>
         </button>
       </div>
 
@@ -132,14 +132,14 @@ export default function AddressSection() {
         addresses.map((address) => (
           <div
             key={address.id}
-            className="bg-white rounded-2xl border border-[var(--brand-gold)]/20 shadow-sm hover:shadow-lg transition-all p-5 sm:p-6 flex items-start justify-between gap-4"
+            className="bg-white rounded-2xl border border-[var(--brand-gold)]/20 shadow-sm hover:shadow-lg transition-all p-4 sm:p-6 flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4"
           >
-            <div className="flex items-start gap-4 min-w-0">
-              <div className="w-11 h-11 rounded-xl bg-[var(--brand-cream-soft)] flex items-center justify-center shrink-0">
+            <div className="flex items-start gap-3 sm:gap-4 min-w-0">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[var(--brand-cream-soft)] flex items-center justify-center shrink-0 mt-0.5">
                 <MapPin size={18} className="text-[var(--brand-green-dark)]" />
               </div>
 
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
                   <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-wider">
                     {address.address_type}
@@ -163,11 +163,12 @@ export default function AddressSection() {
               </div>
             </div>
 
-            <div className="flex flex-col items-end gap-2 shrink-0">
-              <div className="flex items-center gap-1">
+            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 pt-2.5 sm:pt-0 border-t sm:border-t-0 border-gray-100 shrink-0">
+              <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => openEditModal(address)}
                   className="w-8 h-8 rounded-lg border border-gray-200 hover:border-[var(--brand-gold)] hover:text-[var(--brand-gold)] flex items-center justify-center text-gray-500 transition-colors"
+                  aria-label="Edit address"
                 >
                   <Pencil size={13} />
                 </button>
@@ -175,6 +176,7 @@ export default function AddressSection() {
                   onClick={() => deleteAddress(address.id)}
                   disabled={deletingAddressId === address.id}
                   className="w-8 h-8 rounded-lg border border-gray-200 hover:border-red-300 hover:text-red-500 flex items-center justify-center text-gray-500 transition-colors disabled:opacity-50"
+                  aria-label="Delete address"
                 >
                   {deletingAddressId === address.id ? (
                     <Loader2 size={13} className="animate-spin" />

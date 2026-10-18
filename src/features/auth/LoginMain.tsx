@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import LoginForm from "./components/LoginForm";
@@ -10,14 +11,6 @@ const LoginMain = () => {
   const searchParams = useSearchParams();
 
   const showOtp = searchParams.get("step") === "otp";
-
-  /* Preload backgrounds */
-  useEffect(() => {
-    const mobileBg = new Image();
-    const desktopBg = new Image();
-    mobileBg.src = "/login-mobile-bg.png";
-    desktopBg.src = "/images/auth/authbg.png";
-  }, []);
 
   return (
     <main className="relative min-h-[100dvh] w-full overflow-x-hidden bg-[#FAF5EB] font-sans selection:bg-[#0F3D2E] selection:text-white">
@@ -30,10 +23,14 @@ const LoginMain = () => {
       <div className="flex flex-col min-h-[100dvh] w-full lg:hidden relative overflow-x-hidden overflow-y-auto">
         {/* Top Hero Image Banner */}
         <div className="relative w-full h-[44vh] min-h-[290px] max-h-[380px] overflow-hidden flex-shrink-0">
-          <img
+          <Image
             src="/login-mobile-bg.png"
             alt="Empire Plaza Ambiance"
-            className="absolute inset-0 w-full h-full object-cover object-center"
+            fill
+            priority
+            quality={75}
+            sizes="100vw"
+            className="object-cover object-center"
           />
           {/* Subtle gradient vignette */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/10 to-transparent" />
@@ -165,11 +162,15 @@ const LoginMain = () => {
       ======================================================== */}
       <div className="hidden lg:flex min-h-screen w-full relative overflow-hidden bg-[#FBF6EC]">
         {/* Full-width Background Image (Food on left, curved line, cream on right) */}
-        <img
+        <Image
           src="/images/auth/authbg.png"
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover object-center pointer-events-none"
+          fill
+          priority
+          quality={75}
+          sizes="100vw"
+          className="object-cover object-center pointer-events-none"
         />
 
         {/* Back to Home Button (Top Left) */}

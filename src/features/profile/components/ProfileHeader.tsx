@@ -12,9 +12,9 @@ interface ProfileHeaderProps {
 }
 
 const TABS: { id: ProfileTab; label: string; icon: React.ReactNode }[] = [
-  { id: "profile", label: "Profile", icon: <User size={15} strokeWidth={2.5} /> },
-  { id: "orders", label: "Orders", icon: <Package size={15} strokeWidth={2.5} /> },
-  { id: "address", label: "Address", icon: <MapPin size={15} strokeWidth={2.5} /> },
+  { id: "profile", label: "Profile", icon: <User size={14} className="shrink-0" strokeWidth={2.5} /> },
+  { id: "orders", label: "Orders", icon: <Package size={14} className="shrink-0" strokeWidth={2.5} /> },
+  { id: "address", label: "Address", icon: <MapPin size={14} className="shrink-0" strokeWidth={2.5} /> },
 ];
 
 export default function ProfileHeader({
@@ -33,11 +33,11 @@ export default function ProfileHeader({
 
   return (
     <section className="relative w-full bg-[var(--brand-green-dark)] empire-geometric-bg overflow-hidden border-b border-[var(--brand-gold)]/20">
-      <div className="max-w-[1000px] mx-auto px-6 lg:px-8 pt-8 pb-6 lg:pt-12 lg:pb-8 relative z-10">
+      <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-5 sm:pt-8 sm:pb-6 lg:pt-12 lg:pb-8 relative z-10">
         {/* Top row: avatar + name + logout */}
         <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-[var(--brand-cream-soft)] border-2 border-[var(--brand-gold)] flex items-center justify-center overflow-hidden shrink-0 shadow-md">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-full bg-[var(--brand-cream-soft)] border-2 border-[var(--brand-gold)] flex items-center justify-center overflow-hidden shrink-0 shadow-md">
               {profile?.avatar ? (
                 <img
                   src={profile.avatar}
@@ -45,21 +45,21 @@ export default function ProfileHeader({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-xl lg:text-2xl font-serif font-black text-[var(--brand-green-dark)]">
+                <span className="text-lg sm:text-xl lg:text-2xl font-serif font-black text-[var(--brand-green-dark)]">
                   {initials}
                 </span>
               )}
             </div>
 
-            <div className="flex flex-col">
-              <span className="text-[9px] sm:text-[10px] font-black text-[var(--brand-gold)] uppercase tracking-[0.2em] mb-1">
+            <div className="flex flex-col min-w-0">
+              <span className="text-[9px] sm:text-[10px] font-black text-[var(--brand-gold)] uppercase tracking-[0.2em] mb-0.5 sm:mb-1">
                 My Account
               </span>
-              <h1 className="text-xl sm:text-2xl lg:text-[28px] font-serif font-black text-white leading-tight">
+              <h1 className="text-lg sm:text-2xl lg:text-[28px] font-serif font-black text-white leading-tight truncate">
                 {profile?.name || "Welcome"}
               </h1>
               {profile?.email && (
-                <p className="text-[11px] sm:text-[12px] text-[#F4F1EA]/80 font-medium mt-0.5">
+                <p className="text-[11px] sm:text-[12px] text-[#F4F1EA]/80 font-medium mt-0.5 truncate">
                   {profile.email}
                 </p>
               )}
@@ -76,21 +76,21 @@ export default function ProfileHeader({
         </div>
 
         {/* Tabs */}
-        <div className="mt-6 lg:mt-8 flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full p-1.5 w-full sm:w-fit">
+        <div className="mt-5 sm:mt-6 lg:mt-8 flex items-center gap-1 sm:gap-2 bg-white/10 backdrop-blur-sm rounded-full p-1 sm:p-1.5 w-full sm:w-fit overflow-x-auto no-scrollbar">
           {TABS.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
-                className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 sm:px-6 py-2.5 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] transition-all ${
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-1.5 px-3 sm:px-6 py-2 sm:py-2.5 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider sm:tracking-[0.15em] whitespace-nowrap transition-all ${
                   isActive
                     ? "bg-[var(--brand-gold)] text-[var(--brand-green-dark)] shadow-md"
                     : "text-white/70 hover:text-white"
                 }`}
               >
                 {tab.icon}
-                {tab.label}
+                <span>{tab.label}</span>
               </button>
             );
           })}
