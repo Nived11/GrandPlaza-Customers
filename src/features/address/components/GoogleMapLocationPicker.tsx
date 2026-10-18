@@ -16,15 +16,19 @@ export interface SelectedLocationData {
 interface GoogleMapLocationPickerProps {
   onLocationSelect: (data: SelectedLocationData) => void;
   initialAddress?: string;
+  initialLat?: number;
+  initialLng?: number;
   className?: string;
 }
 
-// Default center: Malappuram / Kozhikode region, Kerala
+// Default center: Kozhikode region, Kerala
 const DEFAULT_CENTER = { lat: 11.2588, lng: 75.7804 };
 
 export default function GoogleMapLocationPicker({
   onLocationSelect,
   initialAddress,
+  initialLat,
+  initialLng,
   className = "",
 }: GoogleMapLocationPickerProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -44,9 +48,12 @@ export default function GoogleMapLocationPicker({
   // Helper to extract clean address details from Google Geocoder / Places components
   const parseAddressComponents = useCallback((result: any): SelectedLocationData => {
     let streetNumber = "";
+    let premise = "";
     let route = "";
-    let sublocality = "";
+    let sublocality2 = "";
+    let sublocality1 = "";
     let locality = "";
+    let district = "";
     let administrativeArea = "";
     let postalCode = "";
 
@@ -54,18 +61,19 @@ export default function GoogleMapLocationPicker({
       result.address_components.forEach((component: any) => {
         const types = component.types || [];
         if (types.includes("street_number")) streetNumber = component.long_name;
+        if (types.includes("premise") || types.includes("subpremise") || types.includes("establishment")) {
+          if (!premise) premise = component.long_name;
+        }
         if (types.includes("route")) route = component.long_name;
-        if (
-          types.includes("sublocality") ||
-          types.includes("sublocality_level_1") ||
-          types.includes("sublocality_level_2")
-        ) {
-          if (!sublocality) sublocality = component.long_name;
+        if (types.includes("sublocality_level_2") || types.includes("neighborhood")) {
+          sublocality2 = component.long_name;
+        }
+        if (types.includes("sublocality_level_1") || types.includes("sublocality")) {
+          if (!sublocality1) sublocality1 = component.long_name;
         }
         if (types.includes("locality")) locality = component.long_name;
-        // District fallback for Indian cities
-        if (!locality && types.includes("administrative_area_level_2")) {
-          locality = component.long_name;
+        if (types.includes("administrative_area_level_2")) {
+          district = component.long_name;
         }
         if (types.includes("administrative_area_level_1")) {
           administrativeArea = component.long_name;
@@ -78,14 +86,19 @@ export default function GoogleMapLocationPicker({
       ? result.formatted_address.replace(/, India$/, "").trim()
       : "";
 
-    const street = [streetNumber, route].filter(Boolean).join(" ");
-    const addressLine = cleanFormatted || [street, sublocality].filter(Boolean).join(", ") || "";
-    const city = locality || sublocality || "";
+    const buildingInfo = [premise, streetNumber, route].filter(Boolean).join(" ");
+    const areaInfo = [sublocality2, sublocality1].filter(Boolean).join(", ");
+    const addressLine = cleanFormatted || [buildingInfo, areaInfo].filter(Boolean).join(", ") || "";
+    const city = locality || sublocality1 || district || "";
     const state = administrativeArea || "Kerala";
     const pincode = postalCode || "";
 
-    const lat = typeof result.geometry?.location?.lat === "function" ? result.geometry.location.lat() : undefined;
-    const lng = typeof result.geometry?.location?.lng === "function" ? result.geometry.location.lng() : undefined;
+    const lat = typeof result.geometry?.location?.lat === "function"
+      ? result.geometry.location.lat()
+      : (typeof result.geometry?.location?.lat === "number" ? result.geometry.location.lat : undefined);
+    const lng = typeof result.geometry?.location?.lng === "function"
+      ? result.geometry.location.lng()
+      : (typeof result.geometry?.location?.lng === "number" ? result.geometry.location.lng : undefined);
 
     return {
       address_line: addressLine,
@@ -108,12 +121,22 @@ export default function GoogleMapLocationPicker({
           setIsGeocoding(false);
           if (status === "OK" && results && results[0]) {
             const parsed = parseAddressComponents(results[0]);
+            parsed.lat = lat;
+            parsed.lng = lng;
             const summary = results[0].formatted_address || parsed.address_line;
             setSelectedSummary(summary);
-            setLocateSuccessMsg("Address auto-filled from map!");
+            setLocateSuccessMsg("📍 Location pinned & address auto-filled!");
             onLocationSelect(parsed);
           } else {
             console.warn("Geocoding failed status:", status);
+            onLocationSelect({
+              address_line: "",
+              city: "",
+              state: "Kerala",
+              pincode: "",
+              lat,
+              lng,
+            });
           }
         }
       );
@@ -121,32 +144,7 @@ export default function GoogleMapLocationPicker({
     [onLocationSelect, parseAddressComponents]
   );
 
-  // Fallback to IP geolocation when browser GPS is blocked (e.g. on HTTP)
-  const getIpFallbackLocation = async (): Promise<{ lat: number; lng: number } | null> => {
-    try {
-      const res = await fetch("https://api.bigdatacloud.net/data/reverse-geocode-client");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.latitude && data.longitude) {
-          return { lat: Number(data.latitude), lng: Number(data.longitude) };
-        }
-      }
-    } catch {}
-
-    try {
-      const res2 = await fetch("https://ipapi.co/json/");
-      if (res2.ok) {
-        const data2 = await res2.json();
-        if (data2.latitude && data2.longitude) {
-          return { lat: Number(data2.latitude), lng: Number(data2.longitude) };
-        }
-      }
-    } catch {}
-
-    return null;
-  };
-
-  // Locate Current GPS Position
+  // Locate Current GPS Position using Device Hardware GPS
   const handleLocateMe = useCallback(async () => {
     setIsLocating(true);
     setLocateSuccessMsg(null);
@@ -154,7 +152,7 @@ export default function GoogleMapLocationPicker({
     const applyLocation = (lat: number, lng: number) => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.setCenter({ lat, lng });
-        mapInstanceRef.current.setZoom(16);
+        mapInstanceRef.current.setZoom(17);
       }
       if (markerInstanceRef.current) {
         markerInstanceRef.current.setPosition({ lat, lng });
@@ -162,35 +160,50 @@ export default function GoogleMapLocationPicker({
       handleReverseGeocode(lat, lng);
     };
 
-    if (typeof navigator !== "undefined" && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setIsLocating(false);
-          applyLocation(pos.coords.latitude, pos.coords.longitude);
-        },
-        async (err) => {
-          console.warn("Browser GPS unavailable, falling back to IP:", err.message);
-          const ipLoc = await getIpFallbackLocation();
-          setIsLocating(false);
-          if (ipLoc) {
-            applyLocation(ipLoc.lat, ipLoc.lng);
-          } else {
-            // Apply default Kerala center and reverse geocode
-            applyLocation(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng);
-          }
-        },
-        { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
-      );
-    } else {
-      const ipLoc = await getIpFallbackLocation();
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
       setIsLocating(false);
-      if (ipLoc) {
-        applyLocation(ipLoc.lat, ipLoc.lng);
-      } else {
-        applyLocation(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng);
-      }
+      setSelectedSummary("Geolocation is not supported by your browser");
+      return;
     }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setIsLocating(false);
+        applyLocation(pos.coords.latitude, pos.coords.longitude);
+      },
+      (err) => {
+        console.warn("First GPS attempt timed out/failed, retrying with high accuracy:", err);
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            setIsLocating(false);
+            applyLocation(pos.coords.latitude, pos.coords.longitude);
+          },
+          (err2) => {
+            setIsLocating(false);
+            console.error("Geolocation failed:", err2);
+            let msg = "Could not detect GPS location. Please allow GPS access in your browser or drag the pin on map.";
+            if (err2.code === 1) {
+              msg = "Location permission denied. Please enable GPS permissions in browser settings.";
+            } else if (err2.code === 3) {
+              msg = "GPS signal timed out. Please tap or drag the pin on map.";
+            }
+            setSelectedSummary(msg);
+          },
+          { enableHighAccuracy: true, timeout: 20000, maximumAge: 60000 }
+        );
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+    );
   }, [handleReverseGeocode]);
+
+  // Keep map & marker synced if initialLat/initialLng changes externally
+  useEffect(() => {
+    if (initialLat && initialLng && mapInstanceRef.current && markerInstanceRef.current) {
+      const pos = { lat: initialLat, lng: initialLng };
+      mapInstanceRef.current.setCenter(pos);
+      markerInstanceRef.current.setPosition(pos);
+    }
+  }, [initialLat, initialLng]);
 
   // Initialize Map
   useEffect(() => {
@@ -205,10 +218,14 @@ export default function GoogleMapLocationPicker({
         // Geocoder
         geocoderInstanceRef.current = new google.maps.Geocoder();
 
+        const initialPosition = initialLat && initialLng
+          ? { lat: initialLat, lng: initialLng }
+          : DEFAULT_CENTER;
+
         // Create Map
         const map = new google.maps.Map(mapContainerRef.current, {
-          center: DEFAULT_CENTER,
-          zoom: 14,
+          center: initialPosition,
+          zoom: initialLat && initialLng ? 16 : 14,
           mapTypeControl: false,
           streetViewControl: false,
           fullscreenControl: false,
@@ -225,7 +242,7 @@ export default function GoogleMapLocationPicker({
 
         // Create Draggable Marker
         const marker = new google.maps.Marker({
-          position: DEFAULT_CENTER,
+          position: initialPosition,
           map,
           draggable: true,
           title: "Drag to pin delivery location",
@@ -268,12 +285,14 @@ export default function GoogleMapLocationPicker({
             const lng = place.geometry.location.lng();
 
             map.setCenter({ lat, lng });
-            map.setZoom(16);
+            map.setZoom(17);
             marker.setPosition({ lat, lng });
 
             const parsed = parseAddressComponents(place);
+            parsed.lat = lat;
+            parsed.lng = lng;
             setSelectedSummary(place.formatted_address || parsed.address_line);
-            setLocateSuccessMsg("Place selected & address auto-filled!");
+            setLocateSuccessMsg("📍 Place selected & address auto-filled!");
             onLocationSelect(parsed);
           });
         }

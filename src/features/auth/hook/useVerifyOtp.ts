@@ -75,12 +75,14 @@ const useVerifyOtp = () => {
       if (data?.status === true) {
         saveAuthSession(data);
 
-        toast.success(
-          data.message || "OTP verified successfully",
-          {
-            duration: 5000,
-          }
-        );
+        const welcomeMsg =
+          !data.message || data.message.includes("Firebase") || data.message.includes("OTP verified")
+            ? "Welcome to Empire Plaza!"
+            : data.message;
+
+        toast.success(welcomeMsg, {
+          duration: 4000,
+        });
 
         return data;
       }

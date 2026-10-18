@@ -49,7 +49,6 @@ const AddressModal = ({
   const [longitude, setLongitude] = useState<number | null>(null);
   const [isDefault, setIsDefault] = useState(false);
 
-  const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState("");
   const [showMapPicker, setShowMapPicker] = useState(false);
 
@@ -91,7 +90,6 @@ const AddressModal = ({
     }
 
     setLocationError("");
-    setIsLocating(false);
     setShowMapPicker(false);
   }, [isOpen, address]);
 
@@ -115,126 +113,7 @@ const AddressModal = ({
 
   if (!isOpen) return null;
 
-  /**
-   * Get user's current device location
-   * and convert coordinates into an address.
-   */
-const populateCurrentLocation = () => {
-  setLocationError("");
 
-  if (!navigator.geolocation) {
-    setLocationError(
-      "Location is not supported by this browser."
-    );
-    return;
-  }
-
-  setIsLocating(true);
-
-  navigator.geolocation.getCurrentPosition(
-    async (position) => {
-      try {
-        const { latitude: detectedLat, longitude: detectedLng } = position.coords;
-        setLatitude(detectedLat);
-        setLongitude(detectedLng);
-
-        const response = await fetch(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${detectedLat}&longitude=${detectedLng}&localityLanguage=en`
-        );
-
-        if (!response.ok) {
-          throw new Error("Reverse geocoding failed");
-        }
-
-        const data = await response.json();
-
-        console.log("Location response:", data);
-
-        /*
-         * City
-         */
-        const detectedCity =
-          data.city ||
-          data.locality ||
-          data.localityName ||
-          "";
-
-        /*
-         * State
-         */
-        const detectedState =
-          data.principalSubdivision || "";
-
-        /*
-         * PINCODE
-         *
-         * BigDataCloud returns the postal code
-         * in the `postcode` field.
-         */
-        const detectedPincode =
-          data.postcode ||
-          "";
-
-        /*
-         * Address / locality
-         */
-        const detectedAddress =
-          data.locality ||
-          data.localityName ||
-          data.city ||
-          "";
-
-        setAddressLine(detectedAddress);
-        setCity(detectedCity);
-        setState(detectedState);
-        setPincode(detectedPincode);
-
-        setLocationError("");
-      } catch (error) {
-        console.error(
-          "Reverse geocoding error:",
-          error
-        );
-
-        setLocationError(
-          "Unable to find your address. Please enter it manually."
-        );
-      } finally {
-        setIsLocating(false);
-      }
-    },
-    (error) => {
-      console.error("Geolocation error:", error);
-
-      setIsLocating(false);
-
-      if (error.code === error.PERMISSION_DENIED) {
-        setLocationError(
-          "Location permission was denied. Please allow location access and try again."
-        );
-      } else if (
-        error.code === error.POSITION_UNAVAILABLE
-      ) {
-        setLocationError(
-          "Your current location could not be determined."
-        );
-      } else if (error.code === error.TIMEOUT) {
-        setLocationError(
-          "Location request timed out. Please try again."
-        );
-      } else {
-        setLocationError(
-          "Unable to get your current location."
-        );
-      }
-    },
-    {
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 0,
-    }
-  );
-};
 
   const handleSubmit = (
     event: React.FormEvent<HTMLFormElement>
@@ -375,6 +254,8 @@ const populateCurrentLocation = () => {
               <GoogleMapLocationPicker
                 onLocationSelect={handleLocationSelect}
                 initialAddress={addressLine ? `${addressLine}, ${city}` : undefined}
+                initialLat={latitude ?? undefined}
+                initialLng={longitude ?? undefined}
               />
             </div>
           )}
