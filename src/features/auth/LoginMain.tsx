@@ -186,43 +186,57 @@ const LoginMain = () => {
           <span>Back to Home</span>
         </motion.button>
 
-        {/* LEFT SIDE: Luxury Branding & Story Text Overlay */}
-        <div className="w-[52%] h-screen flex flex-col justify-end p-12 xl:p-16 2xl:p-20 relative z-20 pb-16">
+        {/* LEFT SIDE: Elegant Branding, Quote & Stats (Upper Area) */}
+        <div className="w-[52%] h-screen flex flex-col justify-start pt-24 xl:pt-28 px-12 xl:px-16 2xl:px-20 relative z-20 pointer-events-none">
           <motion.div
-            initial={{ opacity: 0, y: 25 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.15, ease: "easeOut" }}
-            className="max-w-[460px] bg-black/40 backdrop-blur-md rounded-3xl p-7 xl:p-8 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.35)] text-white pointer-events-auto"
+            transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+            className="pointer-events-auto max-w-[460px]"
           >
-            {/* Golden Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#D9A441]/50 bg-[#D9A441]/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#D9A441] mb-3 backdrop-blur-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#D9A441] animate-pulse" />
-              <span>Estd 1927 • Royal Heritage</span>
+            {/* Empire Gold Logo */}
+            <div className="mb-4">
+              <img
+                src="/empiregoldlogo.png"
+                alt="Empire Plaza"
+                className="w-[170px] xl:w-[200px] h-auto drop-shadow-[0_4px_16px_rgba(0,0,0,0.7)]"
+              />
             </div>
 
-            {/* Title */}
-            <h2 className="font-serif text-2xl xl:text-3xl font-bold leading-tight text-white tracking-tight mb-2.5 drop-shadow-sm">
-              A Symphony of <span className="text-[#E7AA31] italic font-serif">Authentic</span> Flavours
-            </h2>
-
-            {/* Paragraph */}
-            <p className="text-white/80 text-xs xl:text-sm leading-relaxed mb-4 font-normal">
-              Immerse yourself in centuries of culinary perfection. Every dish is masterfully prepared with handpicked spices, authentic recipes, and royal hospitality.
+            {/* Tagline */}
+            <p className="text-[#E7AA31] text-[10px] xl:text-[11px] font-bold tracking-[0.25em] uppercase mb-2 drop-shadow-sm flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E7AA31]" />
+              <span>Royal Heritage • Authentic Taste</span>
             </p>
 
-            {/* Feature Highlights Grid */}
-            <div className="grid grid-cols-3 gap-2.5 pt-3.5 border-t border-white/15 text-center">
-              <div className="bg-white/5 rounded-xl p-2 border border-white/5">
-                <span className="block text-xs xl:text-sm font-bold text-[#E7AA31]">100%</span>
-                <span className="text-[9px] text-white/70 uppercase tracking-wider font-medium">Hygienic</span>
+            {/* Heading */}
+            <h2 className="font-serif text-2xl xl:text-3xl 2xl:text-4xl text-white font-medium leading-[1.2] drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
+              The Finest Flavours,<br />
+              <span className="italic text-[#E7AA31] font-serif">Curated for Connoisseurs.</span>
+            </h2>
+
+            {/* Quote with Gold Left Border */}
+            <div className="mt-5 border-l-2 border-[#E7AA31] pl-4 py-1.5 bg-black/25 backdrop-blur-sm rounded-r-xl max-w-[420px]">
+              <p className="text-white/85 text-xs xl:text-[13px] italic leading-relaxed drop-shadow-sm font-light">
+                &ldquo;Every dish is an invitation to celebrate centuries of authentic hospitality and culinary perfection.&rdquo;
+              </p>
+            </div>
+
+            {/* Stats Pills */}
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md rounded-full px-3.5 py-1.5 border border-white/15 shadow-sm">
+                <span className="text-xs font-bold text-[#E7AA31]">★ 4.9</span>
+                <span className="text-[10px] text-white/75 font-semibold tracking-wide uppercase">Top Rated</span>
               </div>
-              <div className="bg-white/5 rounded-xl p-2 border border-white/5">
-                <span className="block text-xs xl:text-sm font-bold text-[#E7AA31]">30 MIN</span>
-                <span className="text-[9px] text-white/70 uppercase tracking-wider font-medium">Fast Delivery</span>
+
+              <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md rounded-full px-3.5 py-1.5 border border-white/15 shadow-sm">
+                <span className="text-xs font-bold text-[#E7AA31]">30 MIN</span>
+                <span className="text-[10px] text-white/75 font-semibold tracking-wide uppercase">Fast Delivery</span>
               </div>
-              <div className="bg-white/5 rounded-xl p-2 border border-white/5">
-                <span className="block text-xs xl:text-sm font-bold text-[#E7AA31]">★ 4.9</span>
-                <span className="text-[9px] text-white/70 uppercase tracking-wider font-medium">Top Rated</span>
+
+              <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md rounded-full px-3.5 py-1.5 border border-white/15 shadow-sm">
+                <span className="text-xs font-bold text-[#E7AA31]">100%</span>
+                <span className="text-[10px] text-white/75 font-semibold tracking-wide uppercase">Fresh & Hot</span>
               </div>
             </div>
           </motion.div>

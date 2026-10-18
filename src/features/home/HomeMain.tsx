@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import BannerSection from "./components/BannerSection";
 import CravingSection from "./components/CravingSection";
@@ -28,6 +28,7 @@ import type {
 } from "./hooks/useHomeHook";
 
 const HomeMain = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const searchQuery =
@@ -42,6 +43,18 @@ const HomeMain = () => {
   const [selectedProduct, setSelectedProduct] =
     useState<HomeMenuItem | null>(null);
 
+  const handleBannerClick = (banner: any) => {
+    const text = `${banner?.name || ""} ${banner?.category_name || ""} ${banner?.description || ""}`.toLowerCase();
+    if (text.includes("combo")) {
+      const el = document.getElementById("combo-section");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+    }
+    router.push("/menu");
+  };
+
   if (loading) {
     return <HomeSkeleton />;
   }
@@ -51,6 +64,7 @@ const HomeMain = () => {
 
       <BannerSection
         data={homeData?.banners ?? []}
+        onBannerClick={handleBannerClick}
       />
       <section className="bg-white w-full max-w-[1400px] mx-auto px-4 lg:px-10 pt-4 lg:pt-0">
 

@@ -14,7 +14,7 @@ export default function ComboOffersSection({
   onProductClick,
 }: ComboOffersSectionProps) {
   return (
-    <div className="w-full mt-16 lg:mt-24">
+    <div id="combo-section" className="w-full mt-16 lg:mt-24 scroll-mt-24">
       
       {/* Header Section */}
       <div className="relative flex items-center justify-center mb-8">

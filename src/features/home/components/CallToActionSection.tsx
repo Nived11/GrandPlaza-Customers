@@ -1,11 +1,12 @@
 import React from 'react';
+import Link from 'next/link';
 import { ArrowRight, ChefHat } from 'lucide-react';
 
 export default function CallToActionSection() {
   return (
     <div className="w-full mt-8 lg:mt-12 mb-10 relative overflow-hidden flex flex-col items-center justify-center py-8 lg:py-10">
 
-      {/* 🎨 Watermark Icon (Only ChefHat, removed Sparkles) */}
+      {/* 🎨 Watermark Icon */}
       <div className="absolute right-4 lg:right-20 top-0 text-[var(--brand-gold)] opacity-[0.04] transform rotate-12 pointer-events-none">
         <ChefHat size={180} strokeWidth={1} />
       </div>
@@ -34,9 +35,12 @@ export default function CallToActionSection() {
         </p>
         
         {/* CTA Button */}
-        <button className="bg-[var(--brand-green-dark)] hover:bg-[#024532] text-[var(--brand-gold)] px-7 py-3 md:py-3.5 md:px-8 rounded-lg font-black uppercase tracking-[0.15em] text-[9px] md:text-[10px] transition-all inline-flex items-center gap-2 shadow-[0_10px_30px_rgba(1,90,65,0.15)] hover:shadow-[0_10px_30px_rgba(1,90,65,0.25)] active:scale-95 border border-[var(--brand-gold)]/20">
+        <Link
+          href="/menu"
+          className="bg-[var(--brand-green-dark)] hover:bg-[#024532] text-[var(--brand-gold)] px-7 py-3 md:py-3.5 md:px-8 rounded-lg font-black uppercase tracking-[0.15em] text-[9px] md:text-[10px] transition-all inline-flex items-center gap-2 shadow-[0_10px_30px_rgba(1,90,65,0.15)] hover:shadow-[0_10px_30px_rgba(1,90,65,0.25)] active:scale-95 border border-[var(--brand-gold)]/20 cursor-pointer"
+        >
           Explore Everything <ArrowRight size={14} className="text-[var(--brand-gold)]" />
-        </button>
+        </Link>
         
       </div>
       
