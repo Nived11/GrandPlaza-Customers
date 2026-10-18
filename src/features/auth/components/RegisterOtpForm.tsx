@@ -11,7 +11,7 @@ import useVerifyOtp from "../hook/useVerifyOtp";
 import useLogin from "../hook/useLogin";
 import useOtpTimer from "../hook/useOtpTimer";
 
-interface OtpFormProps {
+interface RegisterOtpFormProps {
   phone: string;
   onEditNumber: () => void;
 }
@@ -19,7 +19,7 @@ interface OtpFormProps {
 const RegisterOtpForm = ({
   phone,
   onEditNumber,
-}: OtpFormProps) => {
+}: RegisterOtpFormProps) => {
   const router = useRouter();
 
   const [otp, setOtp] = useState([
@@ -60,8 +60,7 @@ const RegisterOtpForm = ({
   const { seconds, resetTimer } = useOtpTimer(storedPhone, 45);
 
   useEffect(() => {
-    const savedPhone =
-      sessionStorage.getItem("register_phone");
+    const savedPhone = sessionStorage.getItem("register_phone");
 
     if (savedPhone) {
       setStoredPhone(savedPhone);
@@ -70,7 +69,7 @@ const RegisterOtpForm = ({
     }
   }, [phone]);
 
-  /* OTP Input */
+  /* OTP Input change */
   const handleOtpChange = (
     value: string,
     index: number
@@ -120,19 +119,14 @@ const RegisterOtpForm = ({
 
     /* Single digit */
     const newOtp = [...otp];
-
     newOtp[index] = numbersOnly;
-
     setOtp(newOtp);
 
     if (otpError) {
       setOtpError("");
     }
 
-    if (
-      numbersOnly &&
-      index < otp.length - 1
-    ) {
+    if (numbersOnly && index < otp.length - 1) {
       otpRefs.current[index + 1]?.focus();
     }
   };
@@ -150,17 +144,11 @@ const RegisterOtpForm = ({
       otpRefs.current[index - 1]?.focus();
     }
 
-    if (
-      e.key === "ArrowLeft" &&
-      index > 0
-    ) {
+    if (e.key === "ArrowLeft" && index > 0) {
       otpRefs.current[index - 1]?.focus();
     }
 
-    if (
-      e.key === "ArrowRight" &&
-      index < otp.length - 1
-    ) {
+    if (e.key === "ArrowRight" && index < otp.length - 1) {
       otpRefs.current[index + 1]?.focus();
     }
   };
@@ -172,11 +160,10 @@ const RegisterOtpForm = ({
   ) => {
     e.preventDefault();
 
-    const pastedValue =
-      e.clipboardData
-        .getData("text")
-        .replace(/\D/g, "")
-        .slice(0, 6);
+    const pastedValue = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
 
     if (!pastedValue) return;
 
@@ -210,41 +197,27 @@ const RegisterOtpForm = ({
     const enteredOtp = otp.join("");
 
     if (!enteredOtp) {
-      setOtpError(
-        "Verification code is required"
-      );
-
+      setOtpError("Verification code is required");
       otpRefs.current[0]?.focus();
-
       return false;
     }
 
     if (enteredOtp.length !== 6) {
-      setOtpError(
-        "Enter the complete 6-digit verification code"
-      );
-
+      setOtpError("Enter the complete 6-digit verification code");
       return false;
     }
 
     if (!/^\d{6}$/.test(enteredOtp)) {
-      setOtpError(
-        "Verification code must contain only numbers"
-      );
-
+      setOtpError("Verification code must contain only numbers");
       return false;
     }
 
     if (!storedPhone) {
-      setOtpError(
-        "Mobile number is missing. Please try again."
-      );
-
+      setOtpError("Mobile number is missing. Please try again.");
       return false;
     }
 
     setOtpError("");
-
     return true;
   };
 
@@ -258,10 +231,7 @@ const RegisterOtpForm = ({
 
     if (!response) return;
 
-    sessionStorage.removeItem(
-      "register_phone"
-    );
-
+    sessionStorage.removeItem("register_phone");
     setJustVerified(true);
 
     setTimeout(() => {
@@ -269,7 +239,7 @@ const RegisterOtpForm = ({
     }, 650);
   };
 
-  /* Verify OTP */
+  /* Verify OTP submit */
   const handleVerifyOtp = async (
     e: React.FormEvent<HTMLFormElement>
   ) => {
@@ -327,7 +297,6 @@ const RegisterOtpForm = ({
     }
   }, [otp]);
 
-
   /* Resend OTP */
   const handleResend = async () => {
     if (isResending || !storedPhone || seconds > 0) {
@@ -362,177 +331,83 @@ const RegisterOtpForm = ({
     onEditNumber();
   };
 
-  const formattedPhone = storedPhone.replace(
-    /(\d{5})(\d{5})/,
-    "$1 $2"
-  );
+  const cleanDigits = storedPhone.replace(/\D/g, "").slice(-10);
+  const formattedPhone =
+    cleanDigits.length === 10
+      ? `+91 ${cleanDigits.slice(0, 5)} ${cleanDigits.slice(5)}`
+      : storedPhone;
 
   return (
     <form
       onSubmit={handleVerifyOtp}
-      className="space-y-5"
+      className="w-full"
     >
-      {/* OTP Header */}
+      {/* Heading */}
       <motion.div
-        initial={{
-          opacity: 0,
-          y: 10,
-        }}
-        animate={{
-          opacity: 1,
-          y: 0,
-        }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{
           duration: 0.35,
           ease: "easeOut",
         }}
-        className="text-center"
+        className="mb-4 sm:mb-5 text-center"
       >
-        <p
-          className="
-            mb-2
-            text-[10px]
-            font-semibold
-            uppercase
-            tracking-[0.22em]
-            text-[#D9A441]
-            sm:text-xs
-          "
-        >
-          Verification
-        </p>
-
-        <h2
-          className="
-            text-xl
-            font-semibold
-            tracking-tight
-            text-[#1E2A22]
-            sm:text-2xl
-          "
-        >
-          Verify your number
+        <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight text-[#1E2A22]">
+          Verify Your Number
         </h2>
 
-        <p
-          className="
-            mt-2
-            text-[11px]
-            leading-relaxed
-            text-[#1E2A22]/55
-            sm:text-xs
-          "
-        >
-          Enter the 6-digit code sent to
-        </p>
-
-        <p
-          className="
-            mt-1
-            flex
-            items-center
-            justify-center
-            gap-2
-            text-xs
-            font-semibold
-            text-[#0F3D2E]
-            sm:text-sm
-          "
-        >
-          <span>+91 {formattedPhone}</span>
-          {seconds > 0 && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#0F3D2E]/10 px-2 py-0.5 text-[11px] font-semibold text-[#0F3D2E]">
-              <span>⏱️</span>
-              <span>{seconds}s</span>
-            </span>
-          )}
+        <p className="text-[#1E2A22]/60 text-xs sm:text-sm mt-1.5 leading-relaxed">
+          Enter the 6-digit code sent to your number.
         </p>
       </motion.div>
 
-      {/* Verification Code */}
+      {/* Phone Number Bar */}
       <motion.div
-        initial={{
-          opacity: 0,
-          y: 10,
-        }}
-        animate={{
-          opacity: 1,
-          y: 0,
-        }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{
           duration: 0.35,
-          delay: 0.08,
+          delay: 0.05,
           ease: "easeOut",
         }}
+        className="mb-4 sm:mb-5"
       >
-        <div className="mb-2 flex items-center justify-between">
-          <label
-            className="
-              text-[10px]
-              font-semibold
-              uppercase
-              tracking-wider
-              text-[#1E2A22]
-              sm:text-xs
-            "
-          >
-            Verification Code
-          </label>
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <p className="text-xs sm:text-sm font-semibold text-[#1E2A22]">
+              {formattedPhone}
+            </p>
+            {seconds > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#0F3D2E]/10 px-2 py-0.5 text-[10px] sm:text-[11px] font-semibold text-[#0F3D2E]">
+                <span>⏱️</span>
+                <span>{seconds}s</span>
+              </span>
+            )}
+          </div>
 
           <button
             type="button"
             onClick={handleEditNumber}
-            disabled={justVerified}
-            className="
-              text-[10px]
-              font-semibold
-              text-[#0F3D2E]
-              underline
-              hover:text-[#D9A441]
-              disabled:pointer-events-none
-              disabled:opacity-40
-              sm:text-[11px]
-            "
+            className="text-xs font-semibold text-[#0F3D2E] underline underline-offset-4 transition-opacity hover:opacity-70"
           >
-            Edit Number
+            Edit
           </button>
         </div>
+      </motion.div>
 
-        {/* OTP Boxes */}
-        <motion.div
-          animate={
-            otpError
-              ? {
-                  x: [0, -8, 8, -6, 6, 0],
-                }
-              : { x: 0 }
-          }
-          transition={{
-            duration: 0.4,
-          }}
-          className="
-            flex
-            items-center
-            justify-between
-            gap-1.5
-            sm:gap-2
-          "
-        >
+      {/* OTP Inputs */}
+      <div className="mb-4 sm:mb-5">
+        <div className="flex w-full justify-between gap-1.5 sm:gap-2.5">
           {otp.map((digit, index) => (
-            <motion.input
+            <input
               key={index}
               ref={(element) => {
-                otpRefs.current[index] =
-                  element;
+                otpRefs.current[index] = element;
               }}
-              id={`otp-${index}`}
+              id={`register-otp-${index}`}
               type="text"
               inputMode="numeric"
-              autoComplete={
-                index === 0
-                  ? "one-time-code"
-                  : "off"
-              }
+              autoComplete={index === 0 ? "one-time-code" : "off"}
               maxLength={6}
               value={digit}
               onChange={(e) =>
@@ -541,48 +416,26 @@ const RegisterOtpForm = ({
                   index
                 )
               }
-              onPaste={(e) =>
-                handleOtpPaste(e, index)
-              }
               onKeyDown={(e) =>
                 handleOtpKeyDown(e, index)
               }
-              disabled={
-                isVerifying ||
-                justVerified
+              onPaste={(e) =>
+                handleOtpPaste(e, index)
               }
-              whileFocus={{
-                scale: 1.05,
-              }}
-              className={`
-                h-11
-                w-9
-                appearance-none
-                rounded-xl
-                border
-                bg-white
-                text-center
-                text-lg
-                font-bold
-                text-[#1E2A22]
-                shadow-sm
-                transition-all
-                duration-200
-                focus:border-[#D9A441]
-                focus:outline-none
-                focus:ring-4
-                focus:ring-[#D9A441]/10
-                sm:h-12
-                sm:w-11
+              disabled={
+                isVerifying || justVerified
+              }
+              aria-label={`OTP digit ${index + 1}`}
+              className={`h-11 w-11 sm:h-13 sm:w-13 rounded-xl border bg-white/90 text-center text-lg font-bold text-[#1E2A22] outline-none transition-all
                 ${
                   digit
-                    ? "border-[#D9A441]/70 scale-[1.02]"
-                    : ""
+                    ? "border-[#D9A441] shadow-sm"
+                    : "border-[#1E2A22]/15"
                 }
                 ${
                   otpError
-                    ? "border-red-500"
-                    : "border-[#0F3D2E]/15"
+                    ? "border-red-400 focus:border-red-500"
+                    : "focus:border-[#D9A441] focus:ring-4 focus:ring-[#D9A441]/10"
                 }
                 ${
                   justVerified
@@ -592,72 +445,12 @@ const RegisterOtpForm = ({
               `}
             />
           ))}
-        </motion.div>
+        </div>
 
-        {/* Error */}
         {otpError && (
-          <motion.p
-            initial={{
-              opacity: 0,
-              y: -4,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            className="
-              mt-2
-              text-[10px]
-              text-red-600
-              sm:text-[11px]
-            "
-          >
+          <p className="mt-2 text-center text-xs text-red-500">
             {otpError}
-          </motion.p>
-        )}
-      </motion.div>
-
-      {/* Resend */}
-      <div
-        className="
-          flex
-          items-center
-          justify-between
-          text-[11px]
-          sm:text-xs
-        "
-      >
-        {seconds > 0 ? (
-          <span className="font-medium text-[#1E2A22]/60">
-            Resend code in{" "}
-            <strong className="font-mono font-bold text-[#D9A441]">
-              00:
-              {seconds
-                .toString()
-                .padStart(2, "0")}
-            </strong>
-          </span>
-        ) : (
-          <button
-            type="button"
-            onClick={handleResend}
-            disabled={
-              isResending ||
-              justVerified
-            }
-            className="
-              font-semibold
-              text-[#0F3D2E]
-              underline
-              hover:text-[#D9A441]
-              disabled:pointer-events-none
-              disabled:opacity-50
-            "
-          >
-            {isResending
-              ? "SENDING..."
-              : "Resend OTP Now"}
-          </button>
+          </p>
         )}
       </div>
 
@@ -668,112 +461,51 @@ const RegisterOtpForm = ({
           isVerifying ||
           justVerified
         }
-        whileHover={
-          !justVerified
-            ? { y: -1 }
-            : {}
-        }
-        whileTap={
-          !justVerified
-            ? { scale: 0.98 }
-            : {}
-        }
-        animate={
-          justVerified
-            ? {
-                backgroundColor:
-                  "#15803d",
-              }
-            : {
-                backgroundColor:
-                  "#0F3D2E",
-              }
-        }
-        transition={{
-          duration: 0.3,
+        whileTap={{
+          scale:
+            isVerifying || justVerified
+              ? 1
+              : 0.98,
         }}
-        className="
-          relative
-          flex
-          w-full
-          items-center
-          justify-center
-          gap-3
-          overflow-hidden
-          rounded-2xl
-          px-6
-          py-3.5
-          text-xs
-          font-medium
-          tracking-[0.15em]
-          text-white
-          shadow-lg
-          shadow-[#0F3D2E]/20
-          transition-shadow
-          duration-300
-          hover:shadow-xl
-          disabled:pointer-events-none
-        "
+        className="relative flex w-full items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-[#072F22] via-[#0F3D2E] to-[#0A2E22] py-3.5 text-xs sm:text-sm font-bold tracking-[0.18em] text-white shadow-[0_8px_20px_rgba(15,61,46,0.28)] border border-[#D9A441]/25 transition-all duration-300 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {justVerified ? (
-          <>
-            <motion.span
-              initial={{
-                scale: 0.5,
-                opacity: 0,
-              }}
-              animate={{
-                scale: 1,
-                opacity: 1,
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 400,
-                damping: 15,
-              }}
-            >
-              ✓
-            </motion.span>
+        <img
+          src="/images/auth/btnbg.png"
+          alt=""
+          className="pointer-events-none absolute right-0 -top-4 h-18 w-auto object-contain opacity-70"
+        />
 
-            <span>
-              VERIFIED
-            </span>
-          </>
-        ) : (
-          <>
-            <span className="relative z-10">
-              {isVerifying
-                ? "AUTHENTICATING..."
-                : "VERIFY & CONTINUE"}
-            </span>
-
-            {!isVerifying && (
-              <span className="relative z-10">
-                ✓
-              </span>
-            )}
-          </>
-        )}
-
-        {/* Decorative Button Leaf */}
-        {!justVerified && (
-          <img
-            src="/images/auth/btnbg.png"
-            alt=""
-            aria-hidden="true"
-            className="
-              pointer-events-none
-              absolute
-              right-0
-              -top-4
-              h-18
-              w-auto
-              object-contain
-              opacity-70
-            "
-          />
-        )}
+        <span className="relative z-10">
+          {isVerifying
+            ? "VERIFYING..."
+            : justVerified
+              ? "VERIFIED ✓"
+              : "VERIFY & CONTINUE →"}
+        </span>
       </motion.button>
+
+      {/* Resend OTP */}
+      <div className="mt-4 sm:mt-5 text-center pb-1">
+        {seconds > 0 ? (
+          <p className="text-xs font-medium text-[#1E2A22]/70">
+            Resend OTP in{" "}
+            <span className="font-bold text-[#0F3D2E]">
+              {seconds}s
+            </span>
+          </p>
+        ) : (
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={isResending}
+            className="text-xs font-semibold text-[#0F3D2E] underline underline-offset-4 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isResending
+              ? "Sending..."
+              : "Resend OTP"}
+          </button>
+        )}
+      </div>
     </form>
   );
 };

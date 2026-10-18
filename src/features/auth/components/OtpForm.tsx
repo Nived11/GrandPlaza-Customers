@@ -323,20 +323,20 @@ const OtpForm = ({
               ? 1
               : 0.98,
         }}
-        className=" relative flex w-full items-center justify-center overflow-hidden rounded-xl bg-[#0F3D2E] py-3.5 text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-70"
+        className=" relative flex w-full items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-[#072F22] via-[#0F3D2E] to-[#0A2E22] py-3.5 text-xs sm:text-sm font-bold tracking-[0.18em] text-white shadow-[0_8px_20px_rgba(15,61,46,0.28)] border border-[#D9A441]/25 transition-all duration-300 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70"
       >
         <img
           src="/images/auth/btnbg.png"
           alt=""
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-20"
+          className="pointer-events-none absolute right-0 -top-4 h-18 w-auto object-contain opacity-70"
         />
 
         <span className="relative z-10">
           {isVerifyingOtp
-            ? "Verifying..."
+            ? "VERIFYING..."
             : justVerified
-              ? "Verified"
-              : "Verify OTP"}
+              ? "VERIFIED"
+              : "VERIFY OTP →"}
         </span>
       </motion.button>
 

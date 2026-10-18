@@ -106,8 +106,9 @@ const LoginPhoneForm = ({
         <label
           htmlFor="phoneInput"
           className="
-            mb-2
-            block
+            mb-1.5
+            hidden
+            lg:block
             text-[10px]
             font-semibold
             uppercase
@@ -135,17 +136,17 @@ const LoginPhoneForm = ({
             items-center
             rounded-2xl
             border
-            bg-white
-            shadow-sm
+            bg-white/95
+            shadow-[0_2px_12px_rgba(217,164,65,0.06)]
             transition-all
             duration-300
             focus-within:border-[#D9A441]
             focus-within:ring-4
-            focus-within:ring-[#D9A441]/10
+            focus-within:ring-[#D9A441]/15
             ${
               phoneError
                 ? "border-red-500"
-                : "border-[#0F3D2E]/15"
+                : "border-[#D9A441]/35 hover:border-[#D9A441]/60"
             }
           `}
         >
@@ -155,24 +156,22 @@ const LoginPhoneForm = ({
               flex
               select-none
               items-center
-              gap-1.5
+              gap-1
               border-r
-              border-[#0F3D2E]/10
+              border-[#D9A441]/20
               py-3
               pl-3.5
               pr-2.5
-              text-sm
-              font-semibold
+              text-xs
+              font-bold
               text-[#1E2A22]
+              sm:text-sm
               sm:pl-4
               sm:pr-3
             "
           >
-            <span className="text-base">
-              🇮🇳
-            </span>
-
             <span>+91</span>
+            <span className="text-[10px] text-[#1E2A22]/50">▾</span>
           </div>
 
           {/* Input */}
@@ -194,27 +193,35 @@ const LoginPhoneForm = ({
               py-3
               text-sm
               font-medium
-              tracking-wider
+              tracking-wide
               text-[#1E2A22]
-              placeholder-[#1E2A22]/35
+              placeholder-[#1E2A22]/48
               focus:outline-none
               sm:text-base
             "
           />
 
           {/* Phone Icon */}
-          <div className="pr-3.5 text-[#1E2A22]/25">
+          <div className="pr-3.5 text-[#1E2A22]/60">
             <svg
               className="h-4.5 w-4.5 sm:h-5 sm:w-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path
-                d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2 0 2 0 002-2z"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <rect
+                x="6"
+                y="3"
+                width="12"
+                height="18"
+                rx="2"
                 strokeWidth="1.8"
+              />
+              <circle
+                cx="12"
+                cy="17"
+                r="1"
+                fill="currentColor"
               />
             </svg>
           </div>
@@ -258,35 +265,41 @@ const LoginPhoneForm = ({
         className="
           text-[10px]
           leading-relaxed
-          text-[#1E2A22]/55
+          text-[#1E2A22]/70
+          text-center
+          lg:text-left
           sm:text-[11px]
         "
       >
-        By continuing, you agree to Empire Plaza&apos;s{" "}
-        <a
-          href="#"
-          className="
-            font-medium
-            text-[#0F3D2E]
-            underline
-            hover:text-[#D9A441]
-          "
-        >
-          Terms
-        </a>{" "}
-        &{" "}
-        <a
-          href="#"
-          className="
-            font-medium
-            text-[#0F3D2E]
-            underline
-            hover:text-[#D9A441]
-          "
-        >
-          Privacy Policy
-        </a>
-        .
+        By creating an account, you agree to Empire Plaza&apos;s
+        <span className="block mt-0.5">
+          <a
+            href="#"
+            className="
+              font-semibold
+              text-[#0F3D2E]
+              underline
+              underline-offset-2
+              hover:text-[#D9A441]
+            "
+          >
+            Terms
+          </a>{" "}
+          &{" "}
+          <a
+            href="#"
+            className="
+              font-bold
+              text-[#0F3D2E]
+              underline
+              underline-offset-2
+              hover:text-[#D9A441]
+            "
+          >
+            Privacy Policy
+          </a>
+          .
+        </span>
       </motion.p>
 
       {/* Active Cooldown Banner */}
@@ -336,19 +349,22 @@ const LoginPhoneForm = ({
           justify-center
           gap-2
           overflow-hidden
-          rounded-2xl
-          bg-[#0F3D2E]
+          rounded-full
+          bg-gradient-to-r
+          from-[#072F22]
+          via-[#0F3D2E]
+          to-[#0A2E22]
           px-6
           py-3.5
           text-xs
-          font-medium
-          tracking-[0.15em]
+          font-bold
+          tracking-[0.18em]
           text-white
-          shadow-lg
-          shadow-[#0F3D2E]/20
+          shadow-[0_8px_20px_rgba(15,61,46,0.28)]
+          border
+          border-[#D9A441]/25
           transition-all
           duration-300
-          hover:bg-[#0A291E]
           hover:shadow-xl
           disabled:pointer-events-none
           disabled:opacity-70

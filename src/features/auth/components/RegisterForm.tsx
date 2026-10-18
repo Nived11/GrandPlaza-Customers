@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { toast } from "sonner";
 import useRegister from "../hook/useRegister";
 import useOtpTimer from "../hook/useOtpTimer";
 import {
@@ -139,7 +138,7 @@ const RegisterForm = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-2.5 sm:space-y-4"
+      className="space-y-2 sm:space-y-3"
     >
       {/* Full Name */}
       <motion.div
@@ -160,7 +159,7 @@ const RegisterForm = ({
         <label
           htmlFor="fullNameInput"
           className="
-            mb-2
+            mb-1
             block
             text-[10px]
             font-semibold
@@ -189,7 +188,7 @@ const RegisterForm = ({
             items-center
             rounded-2xl
             border
-            bg-white
+            bg-white/95
             shadow-sm
             transition-all
             duration-300
@@ -199,7 +198,7 @@ const RegisterForm = ({
             ${
               fullNameError
                 ? "border-red-500"
-                : "border-[#0F3D2E]/15"
+                : "border-[#D9A441]/35"
             }
           `}
         >
@@ -214,18 +213,19 @@ const RegisterForm = ({
               w-full
               appearance-none
               bg-transparent
-              px-4
-              py-3
+              px-3.5
+              py-2
               text-sm
               font-medium
               text-[#1E2A22]
-              placeholder-[#1E2A22]/35
+              placeholder-[#1E2A22]/48
               focus:outline-none
+              sm:py-2.5
               sm:text-base
             "
           />
 
-          <div className="pr-3.5 text-[#1E2A22]/25">
+          <div className="pr-3.5 text-[#1E2A22]/60">
             <svg
               className="h-4.5 w-4.5 sm:h-5 sm:w-5"
               fill="none"
@@ -253,10 +253,11 @@ const RegisterForm = ({
               y: 0,
             }}
             className="
-              mt-2
-              text-[10px]
+              mt-0.5
+              text-[9.5px]
+              font-medium
               text-red-600
-              sm:text-[11px]
+              sm:text-[10.5px]
             "
           >
             {fullNameError}
@@ -283,7 +284,7 @@ const RegisterForm = ({
         <label
           htmlFor="phoneInput"
           className="
-            mb-2
+            mb-1
             block
             text-[10px]
             font-semibold
@@ -312,7 +313,7 @@ const RegisterForm = ({
             items-center
             rounded-2xl
             border
-            bg-white
+            bg-white/95
             shadow-sm
             transition-all
             duration-300
@@ -322,36 +323,33 @@ const RegisterForm = ({
             ${
               phoneError
                 ? "border-red-500"
-                : "border-[#0F3D2E]/15"
+                : "border-[#D9A441]/35"
             }
           `}
         >
-          {/* Country Code */}
+          {/* Country Code: +91 only (no IN, no flag) */}
           <div
             className="
               flex
               select-none
               items-center
-              gap-1.5
+              gap-1
               border-r
-              border-[#0F3D2E]/10
-              py-3
+              border-[#D9A441]/20
+              py-2
               pl-3.5
               pr-2.5
-              text-sm
-              font-semibold
+              text-xs
+              font-bold
               text-[#1E2A22]
+              sm:py-2.5
+              sm:text-sm
               sm:pl-4
               sm:pr-3
             "
           >
-            <span className="text-base">
-              🇮🇳
-            </span>
-
-            <span>
-              +91
-            </span>
+            <span>+91</span>
+            <span className="text-[10px] text-[#1E2A22]/50">▾</span>
           </div>
 
           <input
@@ -368,30 +366,39 @@ const RegisterForm = ({
               appearance-none
               bg-transparent
               px-3
-              py-3
+              py-2
               text-sm
               font-medium
-              tracking-wider
+              tracking-wide
               text-[#1E2A22]
-              placeholder-[#1E2A22]/35
+              placeholder-[#1E2A22]/48
               focus:outline-none
+              sm:py-2.5
               sm:text-base
             "
           />
 
           {/* Phone Icon */}
-          <div className="pr-3.5 text-[#1E2A22]/25">
+          <div className="pr-3.5 text-[#1E2A22]/60">
             <svg
               className="h-4.5 w-4.5 sm:h-5 sm:w-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path
-                d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2 0 002-2z"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <rect
+                x="6"
+                y="3"
+                width="12"
+                height="18"
+                rx="2"
                 strokeWidth="1.8"
+              />
+              <circle
+                cx="12"
+                cy="17"
+                r="1"
+                fill="currentColor"
               />
             </svg>
           </div>
@@ -408,10 +415,11 @@ const RegisterForm = ({
               y: 0,
             }}
             className="
-              mt-2
-              text-[10px]
+              mt-0.5
+              text-[9.5px]
+              font-medium
               text-red-600
-              sm:text-[11px]
+              sm:text-[10.5px]
             "
           >
             {phoneError}
@@ -438,7 +446,7 @@ const RegisterForm = ({
         <label
           htmlFor="emailInput"
           className="
-            mb-2
+            mb-1
             block
             text-[10px]
             font-semibold
@@ -467,7 +475,7 @@ const RegisterForm = ({
             items-center
             rounded-2xl
             border
-            bg-white
+            bg-white/95
             shadow-sm
             transition-all
             duration-300
@@ -477,7 +485,7 @@ const RegisterForm = ({
             ${
               emailError
                 ? "border-red-500"
-                : "border-[#0F3D2E]/15"
+                : "border-[#D9A441]/35"
             }
           `}
         >
@@ -492,19 +500,20 @@ const RegisterForm = ({
               w-full
               appearance-none
               bg-transparent
-              px-4
-              py-3
+              px-3.5
+              py-2
               text-sm
               font-medium
               text-[#1E2A22]
-              placeholder-[#1E2A22]/35
+              placeholder-[#1E2A22]/48
               focus:outline-none
+              sm:py-2.5
               sm:text-base
             "
           />
 
           {/* Email Icon */}
-          <div className="pr-3.5 text-[#1E2A22]/25">
+          <div className="pr-3.5 text-[#1E2A22]/60">
             <svg
               className="h-4.5 w-4.5 sm:h-5 sm:w-5"
               fill="none"
@@ -532,10 +541,11 @@ const RegisterForm = ({
               y: 0,
             }}
             className="
-              mt-2
-              text-[10px]
+              mt-0.5
+              text-[9.5px]
+              font-medium
               text-red-600
-              sm:text-[11px]
+              sm:text-[10.5px]
             "
           >
             {emailError}
@@ -558,35 +568,41 @@ const RegisterForm = ({
         className="
           text-[10px]
           leading-relaxed
-          text-[#1E2A22]/55
+          text-[#1E2A22]/70
+          text-center
+          lg:text-left
           sm:text-[11px]
         "
       >
-        By creating an account, you agree to Empire Plaza&apos;s{" "}
-        <a
-          href="#"
-          className="
-            font-medium
-            text-[#0F3D2E]
-            underline
-            hover:text-[#D9A441]
-          "
-        >
-          Terms
-        </a>{" "}
-        &{" "}
-        <a
-          href="#"
-          className="
-            font-medium
-            text-[#0F3D2E]
-            underline
-            hover:text-[#D9A441]
-          "
-        >
-          Privacy Policy
-        </a>
-        .
+        By creating an account, you agree to Empire Plaza&apos;s
+        <span className="block mt-0.5">
+          <a
+            href="#"
+            className="
+              font-semibold
+              text-[#0F3D2E]
+              underline
+              underline-offset-2
+              hover:text-[#D9A441]
+            "
+          >
+            Terms
+          </a>{" "}
+          &{" "}
+          <a
+            href="#"
+            className="
+              font-semibold
+              text-[#0F3D2E]
+              underline
+              underline-offset-2
+              hover:text-[#D9A441]
+            "
+          >
+            Privacy Policy
+          </a>
+          .
+        </span>
       </motion.p>
 
       {/* Active Cooldown Banner */}
@@ -594,7 +610,7 @@ const RegisterForm = ({
         <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between rounded-2xl border border-[#0F3D2E]/15 bg-[#0F3D2E]/5 px-4 py-3 text-xs text-[#0F3D2E]"
+          className="flex items-center justify-between rounded-2xl border border-[#0F3D2E]/15 bg-[#0F3D2E]/5 px-4 py-2.5 text-xs text-[#0F3D2E]"
         >
           <span className="font-medium text-[#1E2A22]/70">
             OTP already sent to this number
@@ -636,19 +652,22 @@ const RegisterForm = ({
           justify-center
           gap-2
           overflow-hidden
-          rounded-2xl
-          bg-[#0F3D2E]
+          rounded-full
+          bg-gradient-to-r
+          from-[#072F22]
+          via-[#0F3D2E]
+          to-[#0A2E22]
           px-6
-          py-3.5
+          py-3
           text-xs
-          font-medium
-          tracking-[0.15em]
+          font-bold
+          tracking-[0.18em]
           text-white
-          shadow-lg
-          shadow-[#0F3D2E]/20
+          shadow-[0_8px_20px_rgba(15,61,46,0.28)]
+          border
+          border-[#D9A441]/25
           transition-all
           duration-300
-          hover:bg-[#0A291E]
           hover:shadow-xl
           disabled:pointer-events-none
           disabled:opacity-70
