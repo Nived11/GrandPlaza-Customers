@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Phone, Navigation, Loader2, MapPin, Bike, Utensils, PackageCheck } from "lucide-react";
+import { Phone, Navigation, Loader2, MapPin, Bike, Crosshair, Sparkles } from "lucide-react";
 import { loadGoogleMaps } from "@/lib/loadGoogleMaps";
 import { getPusherClient } from "@/lib/pusherClient";
 import type { DeliveryBoyInfo } from "@/features/profile/hooks/useProfileHook";
@@ -21,6 +21,20 @@ const STORE_LOCATION = {
   name: "Empire Plaza Kitchen",
 };
 
+// Modern Food Delivery Map Theme: Clean, minimal clutter, soft pastel palette
+const MODERN_MAP_STYLES = [
+  { featureType: "administrative", elementType: "geometry", stylers: [{ visibility: "off" }] },
+  { featureType: "poi", stylers: [{ visibility: "off" }] },
+  { featureType: "road", elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+  { featureType: "transit", stylers: [{ visibility: "off" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#DCE9F2" }] },
+  { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#F7F8FA" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#FFFFFF" }] },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#FDEEC8" }] },
+  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#F5DF9D" }] },
+  { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#78716C" }] },
+];
+
 export default function LiveOrderTrackingMap({
   orderId,
   deliveryAddress,
@@ -30,6 +44,7 @@ export default function LiveOrderTrackingMap({
 }: LiveOrderTrackingMapProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any>(null);
+  const routePolylineRef = useRef<any>(null);
   const destinationMarkerRef = useRef<any>(null);
   const storeMarkerRef = useRef<any>(null);
   const riderMarkerRef = useRef<any>(null);
@@ -43,7 +58,7 @@ export default function LiveOrderTrackingMap({
   const [destCoords, setDestCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
 
-  // 1. Geocode Delivery Address to Lat/Lng
+  // 1. Geocode Delivery Address
   useEffect(() => {
     let isCancelled = false;
 
@@ -59,7 +74,7 @@ export default function LiveOrderTrackingMap({
             setDestCoords({ lat: loc.lat(), lng: loc.lng() });
           } else {
             console.warn("Could not geocode customer address:", status);
-            // Default near store location
+            // Default near store in Kochi
             setDestCoords({ lat: 9.967625, lng: 76.304040 });
           }
         });
@@ -72,6 +87,16 @@ export default function LiveOrderTrackingMap({
       isCancelled = true;
     };
   }, [deliveryAddress]);
+
+  // Fit bounds helper
+  const fitMapBounds = (map: any, google: any) => {
+    if (!map || !google || !destCoords) return;
+    const bounds = new google.maps.LatLngBounds();
+    bounds.extend(STORE_LOCATION);
+    bounds.extend(destCoords);
+    if (riderCoords) bounds.extend(riderCoords);
+    map.fitBounds(bounds, { top: 50, bottom: 50, left: 50, right: 50 });
+  };
 
   // 2. Initialize Map & Markers
   useEffect(() => {
@@ -93,73 +118,106 @@ export default function LiveOrderTrackingMap({
           mapTypeControl: false,
           streetViewControl: false,
           fullscreenControl: false,
-          zoomControl: true,
-          styles: [
-            {
-              featureType: "poi",
-              elementType: "labels",
-              stylers: [{ visibility: "off" }],
-            },
-          ],
+          zoomControl: false, // Clean mobile-app aesthetic
+          styles: MODERN_MAP_STYLES,
         });
         mapInstanceRef.current = map;
 
-        // Store Marker (Empire Plaza Restaurant)
+        // Custom SVG Pin 1: Empire Plaza Kitchen
+        const storeIcon = {
+          url:
+            "data:image/svg+xml;charset=UTF-8," +
+            encodeURIComponent(`
+              <svg width="42" height="50" viewBox="0 0 42 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 0C9.4 0 0 9.4 0 21C0 33.6 18 48.5 20 49.5C20.6 49.8 21.4 49.8 22 49.5C24 48.5 42 33.6 42 21C42 9.4 32.6 0 21 0Z" fill="#0F3D2E" stroke="#D4AF37" stroke-width="2.5"/>
+                <circle cx="21" cy="20" r="11" fill="#FAF5EB"/>
+                <path d="M17 14v11M18.5 14v5M15.5 14v5M24 14c0 3-1.5 4.5-3 5v6" stroke="#0F3D2E" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            `),
+          scaledSize: new google.maps.Size(38, 46),
+          anchor: new google.maps.Point(19, 46),
+        };
+
         const storeMarker = new google.maps.Marker({
           position: STORE_LOCATION,
           map,
           title: "Empire Plaza Kitchen",
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: "#D4AF37",
-            fillOpacity: 1,
-            strokeWeight: 3,
-            strokeColor: "#0F3D2E",
-          },
+          icon: storeIcon,
+          zIndex: 10,
         });
         storeMarkerRef.current = storeMarker;
 
-        // Destination Marker (Customer Address)
+        // Custom SVG Pin 2: Customer Destination (Home)
+        const destIcon = {
+          url:
+            "data:image/svg+xml;charset=UTF-8," +
+            encodeURIComponent(`
+              <svg width="42" height="50" viewBox="0 0 42 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 0C9.4 0 0 9.4 0 21C0 33.6 18 48.5 20 49.5C20.6 49.8 21.4 49.8 22 49.5C24 48.5 42 33.6 42 21C42 9.4 32.6 0 21 0Z" fill="#D9A441" stroke="#FFFFFF" stroke-width="2.5"/>
+                <circle cx="21" cy="20" r="11" fill="#FFFFFF"/>
+                <path d="M15 22v-4l6-4.5l6 4.5v4h-3.5v-3h-5v3h-3.5z" fill="#0F3D2E"/>
+              </svg>
+            `),
+          scaledSize: new google.maps.Size(38, 46),
+          anchor: new google.maps.Point(19, 46),
+        };
+
         const destMarker = new google.maps.Marker({
           position: destCoords,
           map,
           title: "Your Delivery Location",
-          icon: {
-            path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-            scale: 6,
-            fillColor: "#0F3D2E",
-            fillOpacity: 1,
-            strokeWeight: 2,
-            strokeColor: "#FFFFFF",
-          },
+          icon: destIcon,
+          zIndex: 15,
         });
         destinationMarkerRef.current = destMarker;
 
-        // Rider Marker (Delivery Boy)
+        // Custom SVG Pin 3: Delivery Partner (Live Bike Pin)
         if (riderCoords) {
+          const riderIcon = {
+            url:
+              "data:image/svg+xml;charset=UTF-8," +
+              encodeURIComponent(`
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="24" cy="24" r="22" fill="#0F3D2E" stroke="#D4AF37" stroke-width="3"/>
+                  <circle cx="24" cy="24" r="18" fill="#185843"/>
+                  <circle cx="16" cy="28" r="4.5" stroke="#FAF5EB" stroke-width="2"/>
+                  <circle cx="32" cy="28" r="4.5" stroke="#FAF5EB" stroke-width="2"/>
+                  <path d="M16 28l5.5-9h6l4.5 9M21.5 19l2.5 9" stroke="#FAF5EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M26 15h4" stroke="#D4AF37" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+              `),
+            scaledSize: new google.maps.Size(46, 46),
+            anchor: new google.maps.Point(23, 23),
+          };
+
           const riderMarker = new google.maps.Marker({
             position: riderCoords,
             map,
-            title: deliveryBoy?.name ? `${deliveryBoy.name} (Rider)` : "Delivery Partner",
-            icon: {
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 8,
-              fillColor: "#E09B16",
-              fillOpacity: 1,
-              strokeWeight: 3,
-              strokeColor: "#FFFFFF",
-            },
+            title: deliveryBoy?.name ? `${deliveryBoy.name} (Delivery Partner)` : "Delivery Partner",
+            icon: riderIcon,
+            zIndex: 30,
           });
           riderMarkerRef.current = riderMarker;
         }
 
-        // Fit bounds to show Restaurant, Customer & Rider
-        const bounds = new google.maps.LatLngBounds();
-        bounds.extend(STORE_LOCATION);
-        bounds.extend(destCoords);
-        if (riderCoords) bounds.extend(riderCoords);
-        map.fitBounds(bounds, { top: 40, bottom: 40, left: 40, right: 40 });
+        // Draw connecting route path
+        const routePoints = [
+          STORE_LOCATION,
+          ...(riderCoords ? [riderCoords] : []),
+          destCoords,
+        ];
+
+        const routePath = new google.maps.Polyline({
+          path: routePoints,
+          geodesic: true,
+          strokeColor: "#0F3D2E",
+          strokeOpacity: 0.7,
+          strokeWeight: 4,
+          map,
+        });
+        routePolylineRef.current = routePath;
+
+        fitMapBounds(map, google);
       })
       .catch((err) => {
         if (!isCancelled) {
@@ -177,35 +235,49 @@ export default function LiveOrderTrackingMap({
   useEffect(() => {
     if (!riderCoords || !mapInstanceRef.current) return;
 
-    if (riderMarkerRef.current) {
-      riderMarkerRef.current.setPosition(riderCoords);
-    } else {
-      loadGoogleMaps().then((google) => {
-        if (!mapInstanceRef.current) return;
+    loadGoogleMaps().then((google) => {
+      if (!mapInstanceRef.current) return;
+
+      if (riderMarkerRef.current) {
+        riderMarkerRef.current.setPosition(riderCoords);
+      } else {
+        const riderIcon = {
+          url:
+            "data:image/svg+xml;charset=UTF-8," +
+            encodeURIComponent(`
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="22" fill="#0F3D2E" stroke="#D4AF37" stroke-width="3"/>
+                <circle cx="24" cy="24" r="18" fill="#185843"/>
+                <circle cx="16" cy="28" r="4.5" stroke="#FAF5EB" stroke-width="2"/>
+                <circle cx="32" cy="28" r="4.5" stroke="#FAF5EB" stroke-width="2"/>
+                <path d="M16 28l5.5-9h6l4.5 9M21.5 19l2.5 9" stroke="#FAF5EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M26 15h4" stroke="#D4AF37" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+            `),
+          scaledSize: new google.maps.Size(46, 46),
+          anchor: new google.maps.Point(23, 23),
+        };
+
         const riderMarker = new google.maps.Marker({
           position: riderCoords,
           map: mapInstanceRef.current,
-          title: deliveryBoy?.name ? `${deliveryBoy.name} (Rider)` : "Delivery Partner",
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: "#E09B16",
-            fillOpacity: 1,
-            strokeWeight: 3,
-            strokeColor: "#FFFFFF",
-          },
+          title: deliveryBoy?.name ? `${deliveryBoy.name} (Delivery Partner)` : "Delivery Partner",
+          icon: riderIcon,
+          zIndex: 30,
         });
         riderMarkerRef.current = riderMarker;
-      });
-    }
+      }
 
-    if (destCoords && mapInstanceRef.current && (window as any).google) {
-      const bounds = new (window as any).google.maps.LatLngBounds();
-      bounds.extend(STORE_LOCATION);
-      bounds.extend(destCoords);
-      bounds.extend(riderCoords);
-      mapInstanceRef.current.fitBounds(bounds, { top: 40, bottom: 40, left: 40, right: 40 });
-    }
+      if (routePolylineRef.current && destCoords) {
+        routePolylineRef.current.setPath([
+          STORE_LOCATION,
+          riderCoords,
+          destCoords,
+        ]);
+      }
+
+      fitMapBounds(mapInstanceRef.current, google);
+    });
   }, [riderCoords, destCoords, deliveryBoy?.name]);
 
   // 4. Pusher Real-time Location & Status Listener
@@ -247,99 +319,97 @@ export default function LiveOrderTrackingMap({
   }, [orderId, deliveryBoy?.id, onStatusUpdate]);
 
   return (
-    <div className="w-full rounded-2xl overflow-hidden border border-[#EADBCA] bg-white shadow-sm flex flex-col">
-      {/* Top Live Bar */}
-      <div className="px-4 py-2.5 bg-gradient-to-r from-[#0F3D2E] to-[#185843] text-white flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-          </span>
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-300">
-            Live Order Tracking
-          </span>
-        </div>
-
-        <span className="text-[10px] font-medium text-emerald-100 uppercase tracking-widest">
-          {orderStatus.replace(/_/g, " ")}
-        </span>
-      </div>
-
-      {/* Map View */}
-      <div className="relative w-full h-56 sm:h-64 bg-stone-100">
+    <div className="w-full rounded-3xl overflow-hidden border border-[#EADBCA] bg-white shadow-[0_12px_36px_-6px_rgba(15,61,46,0.12)] flex flex-col">
+      {/* 🌟 Interactive Live Map Container */}
+      <div className="relative w-full h-64 sm:h-72 bg-stone-100">
         {isLoading && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-stone-100/90 gap-2">
-            <Loader2 size={24} className="animate-spin text-[#0F3D2E]" />
-            <span className="text-xs font-semibold text-stone-600">Connecting to live map...</span>
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-stone-100/90 gap-2">
+            <Loader2 size={26} className="animate-spin text-[#0F3D2E]" />
+            <span className="text-xs font-bold text-stone-600">Connecting live GPS radar...</span>
           </div>
         )}
 
         {mapError && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-stone-50 p-4 text-center">
-            <MapPin size={24} className="text-amber-600 mb-1" />
-            <span className="text-xs font-semibold text-stone-700">{mapError}</span>
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-stone-50 p-4 text-center">
+            <MapPin size={26} className="text-[#D9A441] mb-1" />
+            <span className="text-xs font-bold text-stone-700">{mapError}</span>
           </div>
         )}
 
         <div ref={mapContainerRef} className="w-full h-full" />
 
-        {/* Legend Overlay */}
-        <div className="absolute bottom-2 left-2 z-10 bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-stone-200 text-[10px] font-medium shadow-xs flex items-center gap-3">
-          <div className="flex items-center gap-1 text-[#0F3D2E]">
-            <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#0F3D2E]"></span>
-            <span>Your Address</span>
+        {/* Top Floating ETA Pill Badge (Just like top delivery apps!) */}
+        <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between pointer-events-none">
+          <div className="bg-[#0F3D2E]/95 backdrop-blur-md text-white px-3.5 py-1.5 rounded-full shadow-lg border border-[#D4AF37]/30 flex items-center gap-2">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-80"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <span className="text-[11px] font-black tracking-wider uppercase text-[#D4AF37]">
+              {orderStatus === "out_for_delivery"
+                ? "On the Way • Live GPS"
+                : orderStatus === "ready_for_pickup"
+                ? "Food Ready • Assigning Partner"
+                : "Cooking in Kitchen"}
+            </span>
           </div>
-          <div className="flex items-center gap-1 text-[#D4AF37]">
-            <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span>
+
+          {/* Re-center button */}
+          <button
+            type="button"
+            onClick={() => {
+              if (mapInstanceRef.current && (window as any).google) {
+                fitMapBounds(mapInstanceRef.current, (window as any).google);
+              }
+            }}
+            className="w-8 h-8 rounded-full bg-white text-stone-700 hover:text-[#0F3D2E] shadow-md border border-stone-200 flex items-center justify-center pointer-events-auto transition-transform active:scale-95"
+            aria-label="Center Map"
+          >
+            <Crosshair size={16} />
+          </button>
+        </div>
+
+        {/* Bottom Map Legend */}
+        <div className="absolute bottom-3 left-3 z-10 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#EADBCA] text-[10px] font-bold shadow-md flex items-center gap-3">
+          <div className="flex items-center gap-1.5 text-[#0F3D2E]">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#0F3D2E] border border-white"></span>
             <span>Kitchen</span>
           </div>
+          <div className="flex items-center gap-1.5 text-[#8C6415]">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#D9A441] border border-white"></span>
+            <span>Home</span>
+          </div>
           {deliveryBoy && (
-            <div className="flex items-center gap-1 text-amber-700">
-              <span className="inline-block w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-              <span>Rider (Live)</span>
+            <div className="flex items-center gap-1.5 text-emerald-700">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#185843] border border-white"></span>
+              <span>Rider</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Bottom Delivery / Rider Info Card */}
-      <div className="p-3.5 bg-stone-50 border-t border-stone-100 flex items-center justify-between gap-3">
+      {/* 🛵 Sleek Delivery Partner Action Card */}
+      <div className="p-4 bg-gradient-to-b from-[#FDFBF7] to-white border-t border-[#EADBCA] flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-full bg-[#0F3D2E] text-amber-300 flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
-            {deliveryBoy ? (
-              <Bike size={20} />
-            ) : orderStatus === "ready_for_pickup" ? (
-              <PackageCheck size={20} />
-            ) : (
-              <Utensils size={18} />
-            )}
+          <div className="w-12 h-12 rounded-2xl bg-[#0F3D2E] text-[#D4AF37] flex items-center justify-center font-bold text-sm shrink-0 shadow-md">
+            <Bike size={24} />
           </div>
 
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <p className="text-xs font-bold text-[#0F3D2E] truncate">
-                {deliveryBoy?.name
-                  ? deliveryBoy.name
-                  : orderStatus === "ready_for_pickup"
-                  ? "Food Ready • Assigning Partner"
-                  : orderStatus === "preparing"
-                  ? "Kitchen Cooking Your Order"
-                  : "Order Placed at Empire Plaza"}
-              </p>
-              {deliveryBoy?.employee_id && (
-                <span className="text-[9px] font-bold bg-[#EADBCA]/50 text-stone-700 px-1.5 py-0.5 rounded">
-                  {deliveryBoy.employee_id}
-                </span>
-              )}
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4 className="text-sm font-extrabold text-[#0F3D2E] truncate">
+                {deliveryBoy?.name || "Empire Plaza Delivery Fleet"}
+              </h4>
+              <span className="text-[10px] font-black bg-[#D4AF37]/20 text-[#8C6415] border border-[#D4AF37]/40 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                ★ 4.9 Verified
+              </span>
             </div>
-            <p className="text-[11px] text-stone-500 truncate mt-0.5">
+            <p className="text-xs text-stone-500 font-medium truncate mt-0.5">
               {deliveryBoy
                 ? riderCoords
-                  ? "Rider is heading to your address"
-                  : "Rider assigned • Live GPS updates will appear shortly"
-                : orderStatus === "ready_for_pickup"
-                ? "Your food is packed & ready! Connecting with nearest delivery partner."
-                : "Your meal is being carefully prepared in our kitchen."}
+                  ? "Rider is driving to your location with your food"
+                  : "Partner assigned • Heading to kitchen for pickup"
+                : "Connecting nearest delivery partner for swift dispatch"}
             </p>
           </div>
         </div>
@@ -347,10 +417,10 @@ export default function LiveOrderTrackingMap({
         {deliveryBoy?.phone && (
           <a
             href={`tel:${deliveryBoy.phone}`}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#0F3D2E] text-white text-xs font-bold hover:bg-[#16533F] transition-all shrink-0 shadow-xs"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#0F3D2E] hover:bg-[#16533F] text-[#D4AF37] text-xs font-bold transition-all shadow-md active:scale-95 shrink-0"
           >
-            <Phone size={13} className="text-amber-300" />
-            <span>Call</span>
+            <Phone size={14} className="text-[#D4AF37]" />
+            <span>Call Partner</span>
           </a>
         )}
       </div>

@@ -1,12 +1,24 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { X, MapPin, Phone, Receipt } from "lucide-react";
+import {
+  X,
+  MapPin,
+  Phone,
+  Receipt,
+  ArrowLeft,
+  CheckCircle2,
+  Clock,
+  Utensils,
+  Bike,
+  PackageCheck,
+  ShieldCheck,
+  ChevronRight,
+} from "lucide-react";
 import { toast } from "sonner";
 import { extractErrorMessages } from "@/utils/extractErrorMessages";
 import { getOrderDetailApi } from "../api/profileApi";
 import type { Order } from "../hooks/useProfileHook";
-import { getStatusBadgeClass, formatStatusLabel } from "../utils/orderStatus";
 import LiveOrderTrackingMap from "../../order/components/LiveOrderTrackingMap";
 
 interface OrderDetailModalProps {
@@ -49,216 +61,376 @@ export default function OrderDetailModal({
 
   if (orderId == null) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-      />
+  // Timeline Step Helper
+  const getStepIndex = (status: string) => {
+    switch (status) {
+      case "pending":
+        return 0;
+      case "preparing":
+        return 1;
+      case "ready_for_pickup":
+        return 2;
+      case "out_for_delivery":
+        return 3;
+      case "delivered":
+        return 4;
+      default:
+        return 0;
+    }
+  };
 
-      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-serif font-black text-[var(--brand-green-dark)]">
-            Order #{orderId}
-          </h3>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors"
-          >
-            <X size={16} />
-          </button>
+  const currentStepIdx = order ? getStepIndex(order.status) : 0;
+
+  const TIMELINE_STEPS = [
+    {
+      title: "Order Placed",
+      desc: "Order received by Empire Plaza kitchen",
+      time: order?.created_at
+        ? new Date(order.created_at).toLocaleTimeString("en-IN", {
+            hour: "numeric",
+            minute: "2-digit",
+          })
+        : null,
+      icon: Clock,
+    },
+    {
+      title: "Cooking in Kitchen",
+      desc: "Chef is preparing your fresh royal delicacies",
+      time: null,
+      icon: Utensils,
+    },
+    {
+      title: "Food Packed & Ready",
+      desc: order?.packing_duration_mins
+        ? `Sealed in tamper-proof bags (${order.packing_duration_mins}m prep)`
+        : "Packed and sealed for pickup",
+      time: order?.packed_at
+        ? new Date(order.packed_at).toLocaleTimeString("en-IN", {
+            hour: "numeric",
+            minute: "2-digit",
+          })
+        : null,
+      icon: PackageCheck,
+    },
+    {
+      title: "Out for Delivery",
+      desc: order?.delivery_boy?.name
+        ? `${order.delivery_boy.name} is on the way to your doorstep`
+        : "Delivery partner heading with your hot meal",
+      time: null,
+      icon: Bike,
+    },
+    {
+      title: "Delivered",
+      desc: "Food delivered. Enjoy your royal meal!",
+      time: null,
+      icon: CheckCircle2,
+    },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-[1000] flex flex-col justify-end sm:justify-center sm:items-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      {/* Background Dim Dismissal */}
+      <div className="absolute inset-0" onClick={onClose} />
+
+      {/* Main Container: Native app full-height sheet on mobile, rounded card on desktop */}
+      <div className="relative w-full h-[96dvh] sm:h-auto sm:max-h-[92vh] sm:max-w-2xl bg-[#FBF6EC] sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 z-10 border border-[#EADBCA]">
+        {/* ==========================================================
+            1. TOP APP BAR
+            ========================================================== */}
+        <div className="p-4 sm:p-5 bg-white border-b border-[#EADBCA] flex items-center justify-between shadow-xs shrink-0">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onClose}
+              className="w-9 h-9 rounded-full bg-[#FAF5EB] hover:bg-[#EADBCA]/60 text-[#0F3D2E] flex items-center justify-center transition-transform active:scale-95"
+              aria-label="Back"
+            >
+              <ArrowLeft size={18} />
+            </button>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-['Playfair_Display'] text-lg sm:text-xl font-bold text-[#0F3D2E]">
+                  Order #{orderId}
+                </h3>
+              </div>
+              <p className="text-[11px] font-bold text-[#D9A441] tracking-wider uppercase">
+                Empire Plaza Dining
+              </p>
+            </div>
+          </div>
+
+          {order && (
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#0F3D2E] text-[#D9A441] border border-[#D9A441]/30 shadow-xs">
+                {order.status.replace(/_/g, " ")}
+              </span>
+            </div>
+          )}
         </div>
 
-        {loading || !order ? (
-          <div className="flex flex-col gap-3">
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="h-10 rounded-lg bg-gray-100 animate-pulse"
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col gap-6">
-            {/* Status badges */}
-            <div className="flex items-center justify-between gap-2 flex-wrap">
-              <div className="flex items-center gap-2">
-                <span
-                  className={`text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full border ${getStatusBadgeClass(
-                    order.status
-                  )}`}
-                >
-                  {formatStatusLabel(order.status)}
-                </span>
-                <span
-                  className={`text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full border ${getStatusBadgeClass(
-                    order.payment_status
-                  )}`}
-                >
-                  Payment: {formatStatusLabel(order.payment_status)}
-                </span>
-              </div>
+        {/* ==========================================================
+            2. SCROLLABLE CONTENT BODY
+            ========================================================== */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
+          {loading || !order ? (
+            <div className="space-y-4">
+              <div className="h-64 rounded-3xl bg-stone-200/60 animate-pulse" />
+              <div className="h-40 rounded-2xl bg-stone-200/60 animate-pulse" />
+              <div className="h-40 rounded-2xl bg-stone-200/60 animate-pulse" />
             </div>
+          ) : (
+            <>
+              {/* ==========================================================
+                  HERO LIVE TRACKING MAP (Active for all non-completed orders)
+                  ========================================================== */}
+              {order.status !== "delivered" && order.status !== "cancelled" && (
+                <section>
+                  <LiveOrderTrackingMap
+                    orderId={order.id}
+                    deliveryAddress={order.delivery_address}
+                    deliveryBoy={order.delivery_boy}
+                    orderStatus={order.status}
+                    onStatusUpdate={(newStatus) =>
+                      setOrder((prev) => (prev ? { ...prev, status: newStatus } : null))
+                    }
+                  />
+                </section>
+              )}
 
-            {/* 🌟 Live Order Progress Stepper */}
-            {order.status !== "cancelled" && (
-              <div className="bg-[#FAF5EB] rounded-2xl p-4 border border-[#EADBCA] flex flex-col gap-2 shadow-xs">
-                <div className="flex items-center justify-between text-center relative px-2">
-                  <div className="absolute top-3 left-6 right-6 h-0.5 bg-stone-200 z-0" />
-                  {[
-                    { key: "pending", label: "Placed" },
-                    { key: "preparing", label: "Cooking" },
-                    { key: "ready_for_pickup", label: "Ready" },
-                    { key: "out_for_delivery", label: "On Way" },
-                    { key: "delivered", label: "Delivered" },
-                  ].map((s, idx) => {
-                    const stepOrder = ["pending", "preparing", "ready_for_pickup", "out_for_delivery", "delivered"];
-                    const curIdx = stepOrder.indexOf(order.status);
-                    const isDone = idx < curIdx;
-                    const isCurrent = idx === curIdx;
+              {/* ==========================================================
+                  VERTICAL LIVE ORDER TIMELINE (Top Food Delivery App Standard!)
+                  ========================================================== */}
+              {order.status !== "cancelled" && (
+                <section className="bg-white rounded-3xl p-5 sm:p-6 border border-[#EADBCA] shadow-sm">
+                  <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#FAF5EB]">
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-[#D9A441] block">
+                        Live Tracking
+                      </span>
+                      <h4 className="font-['Playfair_Display'] text-base font-bold text-[#0F3D2E]">
+                        Order Journey
+                      </h4>
+                    </div>
+
+                    <span className="text-xs font-bold text-stone-500 bg-[#FAF5EB] px-3 py-1 rounded-full border border-[#EADBCA]">
+                      {order.status === "delivered" ? "Delivered" : "In Progress"}
+                    </span>
+                  </div>
+
+                  {/* Vertical Timeline Stepper */}
+                  <div className="relative pl-2 sm:pl-4 space-y-6">
+                    {/* Connecting Vertical Track Line */}
+                    <div className="absolute left-[19px] sm:left-[27px] top-3 bottom-3 w-0.5 bg-stone-200" />
+
+                    {TIMELINE_STEPS.map((step, idx) => {
+                      const isPast = idx < currentStepIdx;
+                      const isCurrent = idx === currentStepIdx;
+                      const IconComponent = step.icon;
+
+                      return (
+                        <div key={step.title} className="relative flex items-start gap-4">
+                          {/* Step Icon Node */}
+                          <div
+                            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 z-10 transition-all ${
+                              isPast
+                                ? "bg-[#0F3D2E] text-[#D9A441] shadow-sm"
+                                : isCurrent
+                                ? "bg-[#D9A441] text-white ring-4 ring-[#D9A441]/30 shadow-md animate-pulse"
+                                : "bg-white border-2 border-stone-200 text-stone-300"
+                            }`}
+                          >
+                            <IconComponent size={18} />
+                          </div>
+
+                          {/* Step Description */}
+                          <div className="min-w-0 flex-1 pt-0.5">
+                            <div className="flex items-center justify-between gap-2">
+                              <h5
+                                className={`text-sm font-extrabold ${
+                                  isCurrent
+                                    ? "text-[#0F3D2E]"
+                                    : isPast
+                                    ? "text-stone-800"
+                                    : "text-stone-400"
+                                }`}
+                              >
+                                {step.title}
+                              </h5>
+                              {step.time && (
+                                <span className="text-[11px] font-bold text-stone-500">
+                                  {step.time}
+                                </span>
+                              )}
+                            </div>
+                            <p
+                              className={`text-xs mt-0.5 leading-relaxed ${
+                                isCurrent
+                                  ? "text-stone-700 font-semibold"
+                                  : isPast
+                                  ? "text-stone-500"
+                                  : "text-stone-400"
+                              }`}
+                            >
+                              {step.desc}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
+
+              {/* ==========================================================
+                  ITEMS ORDERED LIST (Modern Food App Layout)
+                  ========================================================== */}
+              <section className="bg-white rounded-3xl p-5 sm:p-6 border border-[#EADBCA] shadow-sm space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                  <div className="flex items-center gap-2">
+                    <Receipt size={16} className="text-[#0F3D2E]" />
+                    <h4 className="text-xs font-black uppercase tracking-wider text-[#0F3D2E]">
+                      Items Ordered ({order.items.length})
+                    </h4>
+                  </div>
+                </div>
+
+                <div className="divide-y divide-stone-100">
+                  {order.items.map((item) => {
+                    const isVeg =
+                      item.item_name.toLowerCase().includes("veg") &&
+                      !item.item_name.toLowerCase().includes("non");
 
                     return (
-                      <div key={s.key} className="flex flex-col items-center gap-1.5 relative z-10">
-                        <div
-                          className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all ${
-                            isDone
-                              ? "bg-[#0F3D2E] text-white"
-                              : isCurrent
-                              ? "bg-[#D9A441] text-white ring-4 ring-[#D9A441]/25 animate-pulse"
-                              : "bg-white border-2 border-stone-300 text-stone-400"
-                          }`}
-                        >
-                          {isDone ? "✓" : idx + 1}
+                      <div
+                        key={item.id}
+                        className="py-3 flex items-center justify-between gap-4 first:pt-0 last:pb-0"
+                      >
+                        <div className="flex items-start gap-3 min-w-0">
+                          {/* Veg / Non-Veg Indicator */}
+                          <div
+                            className={`w-4 h-4 rounded-sm border flex items-center justify-center shrink-0 mt-0.5 ${
+                              isVeg
+                                ? "border-emerald-600 bg-emerald-50"
+                                : "border-red-600 bg-red-50"
+                            }`}
+                          >
+                            <div
+                              className={`w-2 h-2 rounded-full ${
+                                isVeg ? "bg-emerald-600" : "bg-red-600"
+                              }`}
+                            />
+                          </div>
+
+                          <div className="min-w-0">
+                            <p className="text-xs sm:text-sm font-bold text-stone-800 break-words">
+                              {item.item_name}
+                            </p>
+                            {item.variant_name && (
+                              <span className="text-[10px] font-bold text-stone-500 bg-stone-100 px-1.5 py-0.5 rounded">
+                                {item.variant_name}
+                              </span>
+                            )}
+                            <p className="text-[11px] text-stone-400 font-medium pt-0.5">
+                              ₹{item.unit_price} each
+                            </p>
+                          </div>
                         </div>
-                        <span
-                          className={`text-[9px] font-extrabold uppercase tracking-wider ${
-                            isCurrent
-                              ? "text-[#0F3D2E]"
-                              : isDone
-                              ? "text-stone-700"
-                              : "text-stone-400"
-                          }`}
-                        >
-                          {s.label}
-                        </span>
+
+                        {/* Quantity Pill & Price */}
+                        <div className="flex items-center gap-3 shrink-0">
+                          <span className="text-xs font-extrabold text-[#0F3D2E] bg-[#FAF5EB] border border-[#EADBCA] px-2 py-0.5 rounded-md">
+                            {item.quantity}×
+                          </span>
+                          <span className="text-xs sm:text-sm font-black text-stone-900 min-w-[65px] text-right">
+                            ₹{item.line_total}
+                          </span>
+                        </div>
                       </div>
                     );
                   })}
                 </div>
-              </div>
-            )}
 
-            {/* Live Tracking Map (Active for all non-delivered & non-cancelled orders) */}
-            {order.status !== "delivered" && order.status !== "cancelled" && (
-              <LiveOrderTrackingMap
-                orderId={order.id}
-                deliveryAddress={order.delivery_address}
-                deliveryBoy={order.delivery_boy}
-                orderStatus={order.status}
-                onStatusUpdate={(newStatus) =>
-                  setOrder((prev) => (prev ? { ...prev, status: newStatus } : null))
-                }
-              />
-            )}
+                {/* Special Instructions */}
+                {order.special_instructions && (
+                  <div className="p-3 bg-[#FAF5EB] rounded-2xl border border-[#EADBCA] text-xs text-stone-600 italic">
+                    <span className="font-bold text-[#0F3D2E] not-italic block mb-0.5">
+                      Cooking Request:
+                    </span>
+                    “{order.special_instructions}”
+                  </div>
+                )}
+              </section>
 
-            {/* Customer / delivery info */}
-            <div className="flex flex-col gap-2 bg-[var(--brand-cream-soft)]/60 rounded-xl p-4">
-              <p className="text-[13px] font-bold text-slate-800">
-                {order.customer_name}
-              </p>
-              <div className="flex items-center gap-1.5 text-[12px] text-gray-600 font-medium">
-                <Phone size={12} className="shrink-0" />
-                {order.customer_phone}
-              </div>
-              <div className="flex items-start gap-1.5 text-[12px] text-gray-600 font-medium">
-                <MapPin size={12} className="mt-0.5 shrink-0" />
-                {order.delivery_address}
-              </div>
-              {order.special_instructions && (
-                <p className="text-[11px] text-gray-500 font-medium italic mt-1">
-                  “{order.special_instructions}”
-                </p>
-              )}
-            </div>
+              {/* ==========================================================
+                  BILL & PAYMENT SUMMARY
+                  ========================================================== */}
+              <section className="bg-white rounded-3xl p-5 sm:p-6 border border-[#EADBCA] shadow-sm space-y-3">
+                <h4 className="text-xs font-black uppercase tracking-wider text-[#0F3D2E] pb-2 border-b border-stone-100">
+                  Bill Summary
+                </h4>
 
-            {/* Items */}
-            <div>
-              <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-1.5">
-                <Receipt size={12} />
-                Items
-              </h4>
-              <div className="flex flex-col">
-                {order.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between gap-3 py-2.5 border-b border-gray-100 last:border-0"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-[12px] sm:text-[13px] font-bold text-slate-800 truncate">
-                        {item.quantity}× {item.item_name}
-                        {item.variant_name ? ` (${item.variant_name})` : ""}
-                      </p>
-                      <p className="text-[10px] text-gray-400 font-medium">
-                        ₹{item.unit_price} each
-                      </p>
-                    </div>
-                    <span className="text-[12px] sm:text-[13px] font-black text-slate-800 shrink-0">
-                      ₹{item.line_total}
+                <div className="space-y-2 text-xs sm:text-sm font-medium text-stone-600">
+                  <div className="flex justify-between">
+                    <span>Item Total</span>
+                    <span className="font-bold text-stone-800">
+                      ₹
+                      {order.items
+                        .reduce((acc, curr) => acc + Number(curr.line_total), 0)
+                        .toFixed(2)}
                     </span>
                   </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Total */}
-            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-              <span className="text-[12px] font-black text-gray-500 uppercase tracking-wider">
-                Total
-              </span>
-              <span className="text-[18px] font-black text-[var(--brand-green-dark)]">
-                ₹{order.total_price}
-              </span>
-            </div>
-
-            <div className="text-[11px] text-gray-500 font-medium space-y-1 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-500">Order Placed:</span>
-                <span className="font-semibold text-slate-700">
-                  {new Date(order.created_at).toLocaleString("en-IN", {
-                    day: "numeric",
-                    month: "short",
-                    hour: "numeric",
-                    minute: "2-digit",
-                  })}
-                </span>
-              </div>
-              {order.packed_at ? (
-                <div className="flex items-center justify-between border-t border-slate-200/50 pt-1">
-                  <span className="text-gray-500">Food Packed:</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-semibold text-emerald-700">
-                      {new Date(order.packed_at).toLocaleString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        hour: "numeric",
-                        minute: "2-digit",
-                      })}
+                  <div className="flex justify-between">
+                    <span>Delivery Fee</span>
+                    <span className="font-bold text-stone-800">
+                      {order.delivery_fee && Number(order.delivery_fee) > 0 ? (
+                        `₹${order.delivery_fee}`
+                      ) : (
+                        <span className="text-emerald-600 font-bold uppercase tracking-wider">
+                          Free
+                        </span>
+                      )}
                     </span>
-                    {order.packing_duration_mins != null && (
-                      <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
-                        {order.packing_duration_mins}m prep
-                      </span>
-                    )}
+                  </div>
+
+                  <div className="flex justify-between pt-2 border-t border-stone-100 text-sm sm:text-base font-black text-[#0F3D2E]">
+                    <span>Grand Total</span>
+                    <span>₹{order.total_price}</span>
                   </div>
                 </div>
-              ) : (
-                <div className="text-[10px] text-amber-600 font-semibold italic border-t border-slate-200/50 pt-1">
-                  Kitchen is preparing your order...
+
+                {/* Payment Status Pill */}
+                <div className="pt-2 flex items-center justify-between text-xs border-t border-stone-100">
+                  <span className="text-stone-500 font-bold">Payment Method</span>
+                  <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider text-[10px] flex items-center gap-1">
+                    <CheckCircle2 size={12} />
+                    {order.payment_status.toUpperCase()}
+                  </span>
                 </div>
-              )}
-            </div>
-          </div>
-        )}
+              </section>
+
+              {/* ==========================================================
+                  DELIVERY ADDRESS CARD
+                  ========================================================== */}
+              <section className="bg-white rounded-3xl p-5 sm:p-6 border border-[#EADBCA] shadow-sm flex items-start gap-3.5">
+                <div className="w-10 h-10 rounded-2xl bg-[#0F3D2E] text-[#D9A441] flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                  <MapPin size={20} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-[#D9A441] block">
+                    Delivering To
+                  </span>
+                  <p className="text-xs sm:text-sm font-bold text-stone-800 mt-0.5">
+                    {order.customer_name} • +91 {order.customer_phone}
+                  </p>
+                  <p className="text-xs text-stone-600 leading-relaxed mt-1 break-words">
+                    {order.delivery_address}
+                  </p>
+                </div>
+              </section>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

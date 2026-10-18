@@ -47,6 +47,8 @@ export interface Order {
   delivery_address: string;
   special_instructions: string;
   total_price: string;
+  delivery_fee?: string | null;
+  delivery_distance_km?: number | null;
   status: string;
   payment_status: string;
   items: OrderItem[];
