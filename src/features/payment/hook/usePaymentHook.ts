@@ -143,8 +143,8 @@ export const usePaymentHook = () => {
         key: razorpayKey,
         amount: amount,
         currency: currency || "INR",
-        name: "Grand Plaza Restaurant",
-        description: "Online Food Delivery Order",
+        name: "Empire Plaza",
+        description: "Food Delivery Order",
         order_id: order_id,
         prefill: {
           name: prefillUser.name,
