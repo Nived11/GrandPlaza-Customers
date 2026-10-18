@@ -79,7 +79,6 @@ export default function AddressModal({
   const [building, setBuilding] = useState("");
   const [street, setStreet] = useState("");
   const [saveAs, setSaveAs] = useState("Home");
-  const [isDefault, setIsDefault] = useState(false);
 
   // Form Errors
   const [formErrors, setFormErrors] = useState<{
@@ -147,7 +146,6 @@ export default function AddressModal({
         setPinnedLat(Number(address.latitude));
         setPinnedLng(Number(address.longitude));
       }
-      setIsDefault(Boolean(address.is_default));
     } else {
       // Add mode: start on Map step
       setStep("map");
@@ -159,7 +157,6 @@ export default function AddressModal({
       setUseAccountDetails(true);
       setCustomFullName(accountName);
       setCustomPhone(accountPhone);
-      setIsDefault(false);
     }
   }, [isOpen, address, accountName, accountPhone]);
 
@@ -434,7 +431,7 @@ export default function AddressModal({
       pincode: pincode || "682001",
       latitude: pinnedLat,
       longitude: pinnedLng,
-      is_default: isDefault,
+      is_default: Boolean(address?.is_default),
     };
 
     await onSave(payload);
@@ -457,7 +454,7 @@ export default function AddressModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-10 h-10 rounded-full flex items-center justify-center text-gray-700 hover:bg-gray-100 active:scale-95 transition-all shrink-0"
+                className="w-10 h-10 rounded-full flex items-center justify-center text-[#0F3D2E] hover:bg-[#FAF5EB] active:scale-95 transition-all shrink-0"
                 aria-label="Back"
               >
                 <ArrowLeft size={20} />
@@ -474,7 +471,7 @@ export default function AddressModal({
                   value={searchQuery}
                   onChange={handleSearchChange}
                   placeholder="Search an area or address..."
-                  className="w-full pl-10 pr-9 py-2.5 bg-gray-100/80 hover:bg-gray-100 focus:bg-white text-[13px] sm:text-sm font-medium text-slate-800 rounded-full border border-transparent focus:border-[var(--brand-gold)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-gold)]/20 transition-all placeholder:text-gray-400"
+                  className="w-full pl-10 pr-9 py-2.5 bg-gray-100/80 hover:bg-gray-100 focus:bg-white text-[13px] sm:text-sm font-medium text-slate-800 rounded-full border border-transparent focus:border-[#0F3D2E] focus:outline-none focus:ring-2 focus:ring-[#0F3D2E]/20 transition-all placeholder:text-gray-400"
                 />
                 {searchQuery && (
                   <button
@@ -498,9 +495,9 @@ export default function AddressModal({
                         key={p.place_id}
                         type="button"
                         onClick={() => handleSelectPrediction(p.place_id, p.description)}
-                        className="w-full px-4 py-3 text-left hover:bg-amber-50/50 flex items-start gap-3 transition-colors"
+                        className="w-full px-4 py-3 text-left hover:bg-[#FAF5EB] flex items-start gap-3 transition-colors"
                       >
-                        <MapPin size={16} className="text-[#D97706] mt-0.5 shrink-0" />
+                        <MapPin size={16} className="text-[#0F3D2E] mt-0.5 shrink-0" />
                         <div className="min-w-0">
                           <p className="text-xs font-bold text-slate-800 truncate">
                             {p.structured_formatting?.main_text || p.description}
@@ -520,7 +517,7 @@ export default function AddressModal({
             <div className="relative flex-1 w-full overflow-hidden">
               {isLoadingMap && (
                 <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-gray-50 gap-2">
-                  <Loader2 size={28} className="animate-spin text-[var(--brand-green-dark)]" />
+                  <Loader2 size={28} className="animate-spin text-[#0F3D2E]" />
                   <span className="text-xs font-semibold text-gray-600">Loading map...</span>
                 </div>
               )}
@@ -532,7 +529,7 @@ export default function AddressModal({
                   <button
                     type="button"
                     onClick={() => setStep("details")}
-                    className="mt-3 px-4 py-2 bg-[var(--brand-green-dark)] text-white text-xs font-bold rounded-lg"
+                    className="mt-3 px-4 py-2 bg-[#0F3D2E] text-white text-xs font-bold rounded-lg"
                   >
                     Enter Address Manually
                   </button>
@@ -541,41 +538,46 @@ export default function AddressModal({
 
               <div ref={mapContainerRef} className="w-full h-full" />
 
-              {/* Fixed Center Pin on Map */}
+              {/* 🌟 EMPIRE PLAZA ROYAL GREEN & GOLD FIXED CENTER PIN */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full pointer-events-none z-20 flex flex-col items-center">
                 <div
                   className={`transition-all duration-200 ease-out origin-bottom ${
                     isMapMoving ? "-translate-y-3 scale-110" : "translate-y-0 scale-100"
                   }`}
                 >
-                  <svg width="42" height="50" viewBox="0 0 42 50" fill="none">
+                  <svg width="44" height="52" viewBox="0 0 44 52" fill="none">
+                    {/* Royal Green Teardrop with Gold Outline */}
                     <path
-                      d="M21 0C9.402 0 0 9.402 0 21C0 33.6 17.85 48.3 19.95 50.1C20.58 50.6 21.42 50.6 22.05 50.1C24.15 48.3 42 33.6 42 21C42 9.402 32.598 0 21 0Z"
-                      fill="#D97706"
+                      d="M22 0C9.849 0 0 9.849 0 22C0 35.2 18.7 50.6 20.9 52.4C21.56 52.9 22.44 52.9 23.1 52.4C25.3 50.6 44 35.2 44 22C44 9.849 34.151 0 22 0Z"
+                      fill="#0F3D2E"
+                      stroke="#D4AF37"
+                      strokeWidth="2"
                     />
-                    <circle cx="21" cy="19" r="8" fill="white" />
-                    <circle cx="21" cy="19" r="4" fill="#0F3D2E" />
+                    {/* Cream Inner Circle */}
+                    <circle cx="22" cy="20" r="9" fill="#FAF5EB" />
+                    {/* Gold Center Core */}
+                    <circle cx="22" cy="20" r="4.5" fill="#D4AF37" />
                   </svg>
                 </div>
-                {/* Shadow */}
+                {/* Shadow underneath */}
                 <div
-                  className={`w-4 h-1.5 bg-black/30 rounded-full blur-[1px] transition-all duration-200 ${
-                    isMapMoving ? "opacity-30 scale-75" : "opacity-70 scale-100"
+                  className={`w-4 h-1.5 bg-black/35 rounded-full blur-[1px] transition-all duration-200 ${
+                    isMapMoving ? "opacity-30 scale-75" : "opacity-80 scale-100"
                   }`}
                 />
               </div>
 
-              {/* Floating "Current location" GPS button */}
+              {/* Floating "Current location" GPS button (Royal Green Accent) */}
               <button
                 type="button"
                 onClick={handleUseCurrentLocation}
                 disabled={isLocating}
-                className="absolute bottom-4 right-4 z-20 bg-white hover:bg-gray-50 text-slate-800 border border-gray-200/90 shadow-[0_4px_16px_rgba(0,0,0,0.14)] px-4 py-2.5 rounded-full flex items-center gap-2 text-xs font-bold transition-all active:scale-95 disabled:opacity-60 cursor-pointer"
+                className="absolute bottom-4 right-4 z-20 bg-white hover:bg-[#FAF5EB] text-[#0F3D2E] border border-[#0F3D2E]/20 shadow-[0_4px_16px_rgba(15,61,46,0.18)] px-4 py-2.5 rounded-full flex items-center gap-2 text-xs font-bold transition-all active:scale-95 disabled:opacity-60 cursor-pointer"
               >
                 {isLocating ? (
-                  <Loader2 size={16} className="animate-spin text-[#D97706]" />
+                  <Loader2 size={16} className="animate-spin text-[#0F3D2E]" />
                 ) : (
-                  <Crosshair size={16} className="text-[#D97706]" />
+                  <Crosshair size={16} className="text-[#0F3D2E]" />
                 )}
                 <span>{isLocating ? "Locating..." : "Current location"}</span>
               </button>
@@ -584,36 +586,36 @@ export default function AddressModal({
             {/* Bottom Card: Pinned Address Details & CTA */}
             <div className="relative z-30 bg-white rounded-t-3xl sm:rounded-b-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.12)] p-4 sm:p-6 border-t border-gray-100 flex flex-col gap-3.5">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0 mt-0.5">
-                  <MapPin size={20} className="text-[#D97706]" />
+                <div className="w-10 h-10 rounded-full bg-[#0F3D2E]/10 border border-[#0F3D2E]/25 flex items-center justify-center shrink-0 mt-0.5">
+                  <MapPin size={20} className="text-[#0F3D2E]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-gray-400 block mb-0.5">
-                    Place the pin at exact delivery location
+                  <span className="text-[10px] font-black uppercase tracking-wider text-[#D4AF37] block mb-0.5">
+                    Place pin at exact delivery location
                   </span>
-                  <h3 className="text-base sm:text-lg font-serif font-black text-slate-900 truncate">
+                  <h3 className="text-base sm:text-lg font-serif font-black text-[#0F3D2E] truncate">
                     {isGeocoding ? (
                       <span className="inline-flex items-center gap-2 text-gray-400 font-sans text-xs">
-                        <Loader2 size={13} className="animate-spin" /> Detecting address...
+                        <Loader2 size={13} className="animate-spin text-[#0F3D2E]" /> Detecting address...
                       </span>
                     ) : (
                       areaTitle || "Pin Selected Location"
                     )}
                   </h3>
-                  <p className="text-xs text-gray-500 line-clamp-2 mt-0.5 font-medium leading-relaxed">
+                  <p className="text-xs text-gray-600 line-clamp-2 mt-0.5 font-medium leading-relaxed">
                     {fullAddress || "Drag map under pin to set exact building"}
                   </p>
                 </div>
               </div>
 
-              {/* Confirm & Proceed Button */}
+              {/* Confirm & Proceed Button (Empire Plaza Royal Green + Gold Border) */}
               <button
                 type="button"
                 onClick={() => setStep("details")}
-                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#D97706] to-[#B45309] hover:from-[#B45309] hover:to-[#D97706] text-white font-bold text-sm tracking-wide shadow-md active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                className="w-full py-3.5 px-6 rounded-2xl bg-[#0F3D2E] hover:bg-[#024532] text-white font-bold text-sm tracking-wide shadow-md active:scale-[0.99] transition-all flex items-center justify-center gap-2 border border-[#D4AF37]/35 cursor-pointer"
               >
                 <span>Confirm & proceed</span>
-                <span>→</span>
+                <span className="text-[#D4AF37]">→</span>
               </button>
             </div>
           </div>
@@ -633,13 +635,13 @@ export default function AddressModal({
                 <button
                   type="button"
                   onClick={() => setStep("map")}
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100 active:scale-95 transition-all shrink-0"
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-[#0F3D2E] hover:bg-[#FAF5EB] active:scale-95 transition-all shrink-0"
                   aria-label="Back to Map"
                 >
                   <ArrowLeft size={18} />
                 </button>
                 <div className="min-w-0">
-                  <h2 className="text-base sm:text-lg font-serif font-black text-slate-900 truncate">
+                  <h2 className="text-base sm:text-lg font-serif font-black text-[#0F3D2E] truncate">
                     {areaTitle || "Address Details"}
                   </h2>
                   <p className="text-[11px] text-gray-500 truncate">
@@ -662,8 +664,8 @@ export default function AddressModal({
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-5">
               
               {/* 1. Receiver Details */}
-              <div className="bg-gray-50/80 rounded-2xl p-4 border border-gray-200/70">
-                <span className="text-[10px] font-black uppercase tracking-wider text-gray-400 block mb-2.5">
+              <div className="bg-[#FAF5EB]/60 rounded-2xl p-4 border border-[#0F3D2E]/15">
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#D4AF37] block mb-2.5">
                   Receiver Details
                 </span>
 
@@ -673,7 +675,7 @@ export default function AddressModal({
                       type="checkbox"
                       checked={useAccountDetails}
                       onChange={(e) => setUseAccountDetails(e.target.checked)}
-                      className="w-4 h-4 mt-0.5 rounded border-gray-300 text-[#0F3D2E] focus:ring-[#D97706]"
+                      className="w-4 h-4 mt-0.5 rounded border-gray-300 text-[#0F3D2E] focus:ring-[#D4AF37]"
                     />
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-bold text-slate-900">
@@ -690,7 +692,7 @@ export default function AddressModal({
                 {(!useAccountDetails || !accountName || !accountPhone) && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 pt-3 border-t border-gray-200/60">
                     <div>
-                      <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wide block mb-1">
+                      <label className="text-[10px] font-bold text-gray-700 uppercase tracking-wide block mb-1">
                         Receiver Name *
                       </label>
                       <input
@@ -711,7 +713,7 @@ export default function AddressModal({
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wide block mb-1">
+                      <label className="text-[10px] font-bold text-gray-700 uppercase tracking-wide block mb-1">
                         Receiver Phone *
                       </label>
                       <input
@@ -738,7 +740,7 @@ export default function AddressModal({
 
               {/* 2. Location Details */}
               <div className="flex flex-col gap-4">
-                <span className="text-[10px] font-black uppercase tracking-wider text-gray-400 block -mb-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#D4AF37] block -mb-1">
                   Location Details
                 </span>
 
@@ -753,7 +755,7 @@ export default function AddressModal({
                     className={`flex-1 py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                       addressType === "home"
                         ? "bg-[#0F3D2E] border-[#0F3D2E] text-white shadow-sm"
-                        : "border-gray-200 text-gray-600 hover:border-gray-300"
+                        : "border-gray-200 text-gray-700 hover:border-[#0F3D2E]/30 hover:bg-[#FAF5EB]"
                     }`}
                   >
                     <Home size={14} />
@@ -769,7 +771,7 @@ export default function AddressModal({
                     className={`flex-1 py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                       addressType === "work"
                         ? "bg-[#0F3D2E] border-[#0F3D2E] text-white shadow-sm"
-                        : "border-gray-200 text-gray-600 hover:border-gray-300"
+                        : "border-gray-200 text-gray-700 hover:border-[#0F3D2E]/30 hover:bg-[#FAF5EB]"
                     }`}
                   >
                     <Briefcase size={14} />
@@ -785,7 +787,7 @@ export default function AddressModal({
                     className={`flex-1 py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                       addressType === "other"
                         ? "bg-[#0F3D2E] border-[#0F3D2E] text-white shadow-sm"
-                        : "border-gray-200 text-gray-600 hover:border-gray-300"
+                        : "border-gray-200 text-gray-700 hover:border-[#0F3D2E]/30 hover:bg-[#FAF5EB]"
                     }`}
                   >
                     <Compass size={14} />
@@ -830,13 +832,13 @@ export default function AddressModal({
                 </div>
 
                 {/* Area / Locality Box with "Change" button */}
-                <div className="flex items-center justify-between p-3.5 bg-gray-50 border border-gray-200 rounded-2xl gap-3">
+                <div className="flex items-center justify-between p-3.5 bg-[#FAF5EB]/60 border border-[#0F3D2E]/15 rounded-2xl gap-3">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center shrink-0">
-                      <MapPin size={17} className="text-[#D97706]" />
+                    <div className="w-9 h-9 rounded-xl bg-white border border-[#0F3D2E]/20 flex items-center justify-center shrink-0">
+                      <MapPin size={17} className="text-[#0F3D2E]" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[10px] font-black uppercase tracking-wider text-gray-400">
+                      <p className="text-[10px] font-black uppercase tracking-wider text-[#D4AF37]">
                         Area / Locality
                       </p>
                       <p className="text-xs font-bold text-slate-800 truncate">
@@ -851,7 +853,7 @@ export default function AddressModal({
                   <button
                     type="button"
                     onClick={() => setStep("map")}
-                    className="text-xs font-bold text-[#D97706] hover:text-[#B45309] shrink-0 border border-[#D97706]/30 bg-amber-50/60 px-3 py-1.5 rounded-lg active:scale-95 transition-all"
+                    className="text-xs font-bold text-[#0F3D2E] hover:text-white border border-[#0F3D2E]/30 bg-white hover:bg-[#0F3D2E] px-3.5 py-1.5 rounded-lg active:scale-95 transition-all shadow-xs shrink-0 cursor-pointer"
                   >
                     Change
                   </button>
@@ -870,37 +872,24 @@ export default function AddressModal({
                     className="w-full px-4 py-2.5 text-xs sm:text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-[#0F3D2E] font-medium"
                   />
                 </div>
-
-                {/* Default Address Checkbox */}
-                <label className="flex items-center gap-2.5 cursor-pointer select-none pt-1">
-                  <input
-                    type="checkbox"
-                    checked={isDefault}
-                    onChange={(e) => setIsDefault(e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 text-[#0F3D2E] focus:ring-[#D97706]"
-                  />
-                  <span className="text-xs font-semibold text-gray-700">
-                    Set as default delivery address
-                  </span>
-                </label>
               </div>
             </div>
 
-            {/* Footer: Save Button */}
+            {/* Footer: Save Button (Royal Green & Gold) */}
             <div className="p-4 sm:p-5 border-t border-gray-100 bg-white shrink-0">
               <button
                 type="submit"
                 disabled={isSaving}
-                className="w-full py-3.5 px-6 rounded-2xl bg-[var(--brand-green-dark)] hover:bg-[#024532] text-white font-bold text-sm tracking-wide shadow-md active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+                className="w-full py-3.5 px-6 rounded-2xl bg-[#0F3D2E] hover:bg-[#024532] text-white font-bold text-sm tracking-wide shadow-md active:scale-[0.99] transition-all flex items-center justify-center gap-2 border border-[#D4AF37]/30 disabled:opacity-70 cursor-pointer"
               >
                 {isSaving ? (
                   <>
-                    <Loader2 size={16} className="animate-spin text-[#D9A441]" />
+                    <Loader2 size={16} className="animate-spin text-[#D4AF37]" />
                     <span>Saving Address...</span>
                   </>
                 ) : (
                   <>
-                    <Check size={16} className="text-[#D9A441]" />
+                    <Check size={16} className="text-[#D4AF37]" />
                     <span>Save Address & Proceed</span>
                   </>
                 )}
