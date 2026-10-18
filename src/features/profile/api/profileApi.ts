@@ -11,9 +11,9 @@ export const getProfileApi = async () => {
 };
 
 export const updateProfileApi = async (payload: {
-  first_name: string;
-  email: string;
-  phone_number: string;
+  first_name?: string;
+  name?: string;
+  email?: string;
 }) => {
   const response = await axiosInstance.patch("/accounts/profile", payload);
   return response.data;

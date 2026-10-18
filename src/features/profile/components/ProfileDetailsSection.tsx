@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Pencil, X, Check } from "lucide-react";
+import { Pencil, X, Check, Lock } from "lucide-react";
 import type { UserProfile } from "../hooks/useProfileHook";
 
 interface ProfileDetailsSectionProps {
@@ -10,7 +10,7 @@ interface ProfileDetailsSectionProps {
   onSave: (payload: {
     name: string;
     email: string;
-    phone: string;
+    phone?: string;
   }) => Promise<boolean>;
 }
 
@@ -106,16 +106,40 @@ export default function ProfileDetailsSection({
             key={field.key}
             className={field.key === "name" ? "sm:col-span-2" : ""}
           >
-            <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] block mb-2">
-              {field.label}
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] block">
+                {field.label}
+              </label>
+              {field.key === "phone" && isEditing && (
+                <span className="inline-flex items-center gap-1 text-[9px] font-bold text-amber-800 bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  <Lock size={10} className="text-amber-700" />
+                  Primary Account ID (Locked)
+                </span>
+              )}
+            </div>
+
             {isEditing ? (
-              <input
-                type={field.type}
-                value={form[field.key]}
-                onChange={(e) => handleChange(field.key, e.target.value)}
-                className="w-full border border-gray-200 focus:border-[var(--brand-gold)] focus:outline-none rounded-lg px-4 py-3 text-[13px] font-medium text-slate-800 transition-colors"
-              />
+              field.key === "phone" ? (
+                <div className="relative">
+                  <input
+                    type="tel"
+                    value={form.phone}
+                    disabled
+                    readOnly
+                    className="w-full border border-gray-200 bg-slate-100/80 text-slate-500 font-semibold rounded-lg px-4 py-3 text-[13px] cursor-not-allowed select-none opacity-85"
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Lock size={14} />
+                  </div>
+                </div>
+              ) : (
+                <input
+                  type={field.type}
+                  value={form[field.key]}
+                  onChange={(e) => handleChange(field.key, e.target.value)}
+                  className="w-full border border-gray-200 focus:border-[var(--brand-gold)] focus:outline-none rounded-lg px-4 py-3 text-[13px] font-medium text-slate-800 transition-colors"
+                />
+              )
             ) : (
               <p className="text-[14px] font-bold text-slate-800 border border-transparent px-4 py-3 bg-[var(--brand-cream-soft)]/60 rounded-lg">
                 {form[field.key] || "—"}

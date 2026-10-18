@@ -107,27 +107,31 @@ export const useProfileHook = () => {
     }
   };
 
-  const updateProfile = async (payload: { name: string; email: string; phone: string;}) => {
+  const updateProfile = async (payload: { name: string; email: string; phone?: string }) => {
     setSaving(true);
 
     try {
       const response = await updateProfileApi({
-        first_name: payload.name,
-        email: payload.email,
-        phone_number: payload.phone,
+        first_name: payload.name.trim(),
+        name: payload.name.trim(),
+        email: payload.email.trim(),
       });
 
       if (response?.status && response?.data) {
-        setProfile({
-          id: response.data.id,
-          name: response.data.first_name || "",
-          email: response.data.email || "",
-          phone: response.data.phone_number || "",
-          avatar: null,
-          joined_at: "",
-        });
+        const updatedName = response.data.first_name || response.data.name || payload.name.trim();
+        const updatedEmail = response.data.email || payload.email.trim();
+        const phone = response.data.phone_number || profile?.phone || "";
 
-        toast.success("Profile updated");
+        setProfile((prev) => ({
+          id: response.data.id || prev?.id || 0,
+          name: updatedName,
+          email: updatedEmail,
+          phone: phone,
+          avatar: prev?.avatar || null,
+          joined_at: prev?.joined_at || "",
+        }));
+
+        toast.success("Profile updated successfully!");
         return true;
       }
 
