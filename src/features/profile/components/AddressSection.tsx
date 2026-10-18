@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { MapPin, Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import {
   useAddressHook,
@@ -8,6 +8,7 @@ import {
 } from "../../address/hook/useAddressHook";
 import AddressSkeleton from "./AddressSkeleton";
 import AddressModal from "../../address/components/AddressModal";
+import DeleteConfirmModal from "../../address/components/DeleteConfirmModal";
 
 export default function AddressSection() {
   const {
@@ -20,11 +21,16 @@ export default function AddressSection() {
     addAddress,
     editAddress,
     deleteAddress,
+    toggleDefaultAddress,
     getAddresses,
     openAddModal,
     openEditModal,
     closeModal,
   } = useAddressHook();
+
+  // Delete Confirmation State
+  const [addressToDelete, setAddressToDelete] = useState<AddressData | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const handleSaveAddress = async (payload: Omit<AddressData, "id">) => {
     if (editingAddress) {
@@ -38,8 +44,22 @@ export default function AddressSection() {
     closeModal();
   };
 
-  const handleSetDefault = async (address: AddressData) => {
-    await editAddress(address.id, { is_default: true });
+  const handlePromptDelete = (address: AddressData) => {
+    setAddressToDelete(address);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!addressToDelete) return;
+    await deleteAddress(addressToDelete.id);
+    setIsDeleteModalOpen(false);
+    setAddressToDelete(null);
+  };
+
+  const handleCloseDeleteModal = () => {
+    if (deletingAddressId) return;
+    setIsDeleteModalOpen(false);
+    setAddressToDelete(null);
   };
 
   if (isLoading) {
@@ -118,7 +138,7 @@ export default function AddressSection() {
                   <Pencil size={13} />
                 </button>
                 <button
-                  onClick={() => deleteAddress(address.id)}
+                  onClick={() => handlePromptDelete(address)}
                   disabled={deletingAddressId === address.id}
                   className="w-8 h-8 rounded-lg border border-gray-200 hover:border-red-300 hover:text-red-500 flex items-center justify-center text-gray-500 transition-colors disabled:opacity-50"
                   aria-label="Delete address"
@@ -130,12 +150,21 @@ export default function AddressSection() {
                   )}
                 </button>
               </div>
-              {!address.is_default && (
+              {!address.is_default ? (
                 <button
-                  onClick={() => handleSetDefault(address)}
-                  className="text-[9px] font-bold uppercase tracking-wider text-[var(--brand-green-dark)] hover:text-[var(--brand-gold)] transition-colors"
+                  onClick={() => toggleDefaultAddress(address, true)}
+                  disabled={isSaving}
+                  className="text-[9px] font-bold uppercase tracking-wider text-[var(--brand-green-dark)] hover:text-[var(--brand-gold)] transition-colors disabled:opacity-50"
                 >
                   Set as default
+                </button>
+              ) : (
+                <button
+                  onClick={() => toggleDefaultAddress(address, false)}
+                  disabled={isSaving}
+                  className="text-[9px] font-bold uppercase tracking-wider text-stone-400 hover:text-red-500 transition-colors disabled:opacity-50"
+                >
+                  Remove default
                 </button>
               )}
             </div>
@@ -150,6 +179,15 @@ export default function AddressSection() {
         onClose={closeModal}
         onSave={handleSaveAddress}
         isSaving={isSaving}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        address={addressToDelete}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        isDeleting={Boolean(deletingAddressId)}
       />
     </div>
   );

@@ -15,6 +15,7 @@ import AddressList from "./components/AddressList";
 import AddressModal from "./components/AddressModal";
 import AddressSummary from "./components/AddressSummary";
 import AddressSkeleton from "./components/AddressSkeleton";
+import DeleteConfirmModal from "./components/DeleteConfirmModal";
 
 import {
   useAddressHook,
@@ -53,6 +54,12 @@ export default function AddressMain() {
   const [isOrderModalOpen, setIsOrderModalOpen] =
     useState(false);
 
+  // Delete Confirmation State
+  const [addressToDelete, setAddressToDelete] =
+    useState<AddressData | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] =
+    useState(false);
+
   const {
     addresses,
     isLoading,
@@ -60,6 +67,7 @@ export default function AddressMain() {
     addAddress,
     editAddress,
     deleteAddress,
+    toggleDefaultAddress,
     getAddresses,
     selectAddress,
     openAddModal,
@@ -95,6 +103,33 @@ export default function AddressMain() {
   };
 
   /*
+   * Prompt Delete Address
+   */
+  const handlePromptDelete = (address: AddressData) => {
+    setAddressToDelete(address);
+    setIsDeleteModalOpen(true);
+  };
+
+  /*
+   * Confirm Delete Address
+   */
+  const handleConfirmDelete = async () => {
+    if (!addressToDelete) return;
+    await deleteAddress(addressToDelete.id);
+    setIsDeleteModalOpen(false);
+    setAddressToDelete(null);
+  };
+
+  /*
+   * Close Delete Modal
+   */
+  const handleCloseDeleteModal = () => {
+    if (deletingAddressId) return;
+    setIsDeleteModalOpen(false);
+    setAddressToDelete(null);
+  };
+
+  /*
    * Confirm address for checkout.
    *
    * IMPORTANT:
@@ -106,7 +141,7 @@ export default function AddressMain() {
       return;
     }
 
-    // Step 3  Payment    
+    // Step 3 Payment
     router.push(`/payment?addressId=${addressId}`);
   };
 
@@ -186,7 +221,8 @@ export default function AddressMain() {
                 selectedAddress={selectedAddress}
                 onSelect={selectAddress}
                 onEdit={openEditModal}
-                onDelete={deleteAddress}
+                onDelete={handlePromptDelete}
+                onToggleDefault={toggleDefaultAddress}
                 deletingAddressId={
                   deletingAddressId
                 }
@@ -214,12 +250,21 @@ export default function AddressMain() {
         )}
       </main>
 
-      {/* ADDRESS MODAL */}
+      {/* ADDRESS MODAL (MAP & DETAILS) */}
       <AddressModal
         isOpen={isModalOpen}
         address={editingAddress}
         onClose={closeModal}
         onSave={handleSave}
+      />
+
+      {/* DELETE CONFIRMATION MODAL */}
+      <DeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        address={addressToDelete}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        isDeleting={Boolean(deletingAddressId)}
       />
 
       {/* ORDER SUCCESS MODAL */}

@@ -24,8 +24,41 @@ export interface AddressModalProps {
   isSaving?: boolean;
 }
 
-// Default center: Kerala region
-const DEFAULT_CENTER = { lat: 11.2588, lng: 75.7804 };
+// Default center: Malappuram / Kerala region (Empire Plaza)
+const DEFAULT_CENTER = { lat: 11.0732, lng: 76.0740 };
+
+const getInitialStoredCoords = (): { lat: number; lng: number } | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    const selected = localStorage.getItem("selected_delivery_address");
+    if (selected) {
+      const parsed = JSON.parse(selected);
+      if (parsed.latitude && parsed.longitude) {
+        const lat = Number(parsed.latitude);
+        const lng = Number(parsed.longitude);
+        if (!isNaN(lat) && !isNaN(lng) && lat !== 0) {
+          return { lat, lng };
+        }
+      }
+    }
+    const sessionLoc =
+      sessionStorage.getItem("delivery_location") ||
+      localStorage.getItem("delivery_location");
+    if (sessionLoc) {
+      const parsed = JSON.parse(sessionLoc);
+      if (parsed.latitude && parsed.longitude) {
+        const lat = Number(parsed.latitude);
+        const lng = Number(parsed.longitude);
+        if (!isNaN(lat) && !isNaN(lng) && lat !== 0) {
+          return { lat, lng };
+        }
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+};
 
 type Step = "map" | "details";
 type AddressType = "home" | "work" | "other";
@@ -157,6 +190,15 @@ export default function AddressModal({
       setUseAccountDetails(true);
       setCustomFullName(accountName);
       setCustomPhone(accountPhone);
+
+      const cached = getInitialStoredCoords();
+      if (cached) {
+        setPinnedLat(cached.lat);
+        setPinnedLng(cached.lng);
+      } else {
+        setPinnedLat(DEFAULT_CENTER.lat);
+        setPinnedLng(DEFAULT_CENTER.lng);
+      }
     }
   }, [isOpen, address, accountName, accountPhone]);
 
@@ -251,8 +293,17 @@ export default function AddressModal({
         geocoderRef.current = new google.maps.Geocoder();
         autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
 
-        const initialLat = address?.latitude ? Number(address.latitude) : pinnedLat;
-        const initialLng = address?.longitude ? Number(address.longitude) : pinnedLng;
+        const cached = getInitialStoredCoords();
+        const initialLat = address?.latitude
+          ? Number(address.latitude)
+          : cached
+          ? cached.lat
+          : pinnedLat;
+        const initialLng = address?.longitude
+          ? Number(address.longitude)
+          : cached
+          ? cached.lng
+          : pinnedLng;
 
         const map = new google.maps.Map(mapContainerRef.current, {
           center: { lat: initialLat, lng: initialLng },
@@ -264,6 +315,8 @@ export default function AddressModal({
         });
 
         mapInstanceRef.current = map;
+        setPinnedLat(initialLat);
+        setPinnedLng(initialLng);
         setIsLoadingMap(false);
 
         // Reverse geocode initial position
@@ -285,6 +338,33 @@ export default function AddressModal({
             reverseGeocode(curLat, curLng);
           }
         });
+
+        // 🚀 Automatically detect live GPS location for new addresses
+        if (!address && typeof navigator !== "undefined" && navigator.geolocation) {
+          setIsLocating(true);
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              if (!isSubscribed) return;
+              setIsLocating(false);
+              const lat = pos.coords.latitude;
+              const lng = pos.coords.longitude;
+
+              if (mapInstanceRef.current) {
+                mapInstanceRef.current.panTo({ lat, lng });
+                mapInstanceRef.current.setZoom(17);
+              }
+              setPinnedLat(lat);
+              setPinnedLng(lng);
+              reverseGeocode(lat, lng);
+            },
+            (err) => {
+              if (!isSubscribed) return;
+              setIsLocating(false);
+              console.warn("Auto GPS detection note:", err.message);
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+          );
+        }
       })
       .catch((err) => {
         if (!isSubscribed) return;

@@ -60,13 +60,21 @@ export const useAddressHook = () => {
 
       setAddresses(addressList);
 
-      const defaultAddress =
-        addressList.find((item) => item.is_default) ||
-        addressList[0] ||
-        null;
-
-      setSelectedAddress(defaultAddress);
-      persistDeliveryLocation(defaultAddress);
+      setSelectedAddress((prev) => {
+        if (prev) {
+          const matched = addressList.find((item) => item.id === prev.id);
+          if (matched) {
+            persistDeliveryLocation(matched);
+            return matched;
+          }
+        }
+        const defaultAddress =
+          addressList.find((item) => item.is_default) ||
+          addressList[0] ||
+          null;
+        persistDeliveryLocation(defaultAddress);
+        return defaultAddress;
+      });
     } catch (error) {
       toast.error(extractErrorMessages(error));
     } finally {
@@ -164,6 +172,34 @@ export const useAddressHook = () => {
     }
   };
 
+  // Toggle / Update default address
+  const toggleDefaultAddress = async (
+    address: AddressData,
+    makeDefault: boolean
+  ) => {
+    try {
+      setIsSaving(true);
+      await editAddressApi(String(address.id), { is_default: makeDefault });
+
+      if (makeDefault) {
+        toast.success(
+          `Set ${address.address_type ? address.address_type.toUpperCase() : "address"} as default delivery address`
+        );
+        persistDeliveryLocation({ ...address, is_default: true });
+      } else {
+        toast.success("Removed default delivery address");
+      }
+
+      await getAddresses();
+      return true;
+    } catch (error) {
+      toast.error(extractErrorMessages(error));
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // Select address
   const selectAddress = (address: AddressData) => {
     setSelectedAddress(address);
@@ -186,9 +222,10 @@ export const useAddressHook = () => {
     addAddress,
     editAddress,
     deleteAddress,
+    toggleDefaultAddress,
     selectAddress,
     openAddModal,
     openEditModal,
     closeModal,
-};
+  };
 };
