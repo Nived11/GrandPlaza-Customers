@@ -162,8 +162,8 @@ export const useProfileHook = () => {
            // Clear persisted Redux state
             await persistor.purge();
 
-           // Redirect to home
-            window.location.href = "/";
+           // Redirect to login page
+            window.location.href = "/login";
         }
     }
   };
