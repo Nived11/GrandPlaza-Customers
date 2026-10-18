@@ -1,10 +1,18 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
+import axiosInstance from '@/lib/axios';
 
-// FAQ Data
-const faqs = [
+interface FaqItem {
+  id?: number;
+  question: string;
+  answer: string;
+  is_active?: boolean;
+}
+
+// Fallback FAQ Data
+const defaultFaqs: FaqItem[] = [
   {
     question: "How long will it take to get my food?",
     answer: "Our standard delivery time is 30-45 minutes depending on your location and traffic conditions. You can track your order live once it's dispatched."
@@ -28,7 +36,25 @@ const faqs = [
 ];
 
 export default function FaqSection() {
+  const [faqs, setFaqs] = useState<FaqItem[]>(defaultFaqs);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchFaqs = async () => {
+      try {
+        const res = await axiosInstance.get('/faq/faqs');
+        const data = Array.isArray(res.data) ? res.data : res.data?.results || [];
+        const active = data.filter((item: FaqItem) => item.is_active !== false && item.question);
+        if (active.length > 0) {
+          setFaqs(active);
+        }
+      } catch (err) {
+        console.error('Failed to load FAQs from backend, using defaults:', err);
+      }
+    };
+
+    fetchFaqs();
+  }, []);
 
   const toggleFaq = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);

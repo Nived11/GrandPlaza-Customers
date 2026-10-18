@@ -26,7 +26,10 @@ export function useStoreStatus() {
     formattedHoursText: "",
   });
 
+  const lastFetchedRef = useState({ time: 0 })[0];
+
   const fetchStatus = useCallback(async () => {
+    lastFetchedRef.time = Date.now();
     try {
       const res = await axiosInstance.get("/settings/site-settings");
       if (res.data) {
@@ -57,11 +60,54 @@ export function useStoreStatus() {
     } catch {
       setStatus((prev) => ({ ...prev, loading: false }));
     }
-  }, []);
+  }, [lastFetchedRef]);
 
   useEffect(() => {
+    // Initial fetch on mount
     fetchStatus();
-  }, [fetchStatus]);
+
+    // Smart polling: Only poll when user is actively viewing the tab (zero battery/server waste)
+    let intervalId: NodeJS.Timeout | null = null;
+
+    const startPolling = () => {
+      if (intervalId) clearInterval(intervalId);
+      intervalId = setInterval(() => {
+        if (typeof document !== "undefined" && !document.hidden) {
+          fetchStatus();
+        }
+      }, 45000); // 45s relaxed interval
+    };
+
+    const stopPolling = () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    };
+
+    const handleVisibilityOrFocus = () => {
+      if (typeof document !== "undefined" && !document.hidden) {
+        // Tab became visible: if more than 30s passed since last fetch, update immediately
+        if (Date.now() - lastFetchedRef.time > 30000) {
+          fetchStatus();
+        }
+        startPolling();
+      } else {
+        // Tab hidden or phone locked: stop polling to save server resources
+        stopPolling();
+      }
+    };
+
+    startPolling();
+    document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+    window.addEventListener("focus", handleVisibilityOrFocus);
+
+    return () => {
+      stopPolling();
+      document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
+      window.removeEventListener("focus", handleVisibilityOrFocus);
+    };
+  }, [fetchStatus, lastFetchedRef]);
 
   return { ...status, refresh: fetchStatus };
 }

@@ -39,6 +39,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import useDeliveryLocationHook from "@/features/address/hook/useDeliveryLocationHook";
 import { useStoreStatus } from "@/hooks/useStoreStatus";
+import HeaderSearchDropdown from "./HeaderSearchDropdown";
 
 export default function UserHeader() {
   const pathname = usePathname();
@@ -95,6 +96,8 @@ export default function UserHeader() {
   );
 
   const [isSearchOpen, setIsSearchOpen] =
+    useState(false);
+  const [isSearchDropdownOpen, setIsSearchDropdownOpen] =
     useState(false);
 
   const [isReservationOpen, setIsReservationOpen] =
@@ -446,60 +449,72 @@ export default function UserHeader() {
             }`}
           >
 
-            <div
-              className={`flex items-center transition-all duration-500 ease-in-out overflow-hidden ${
-                isSearchOpen
-                  ? "w-48 lg:w-56 xl:w-72 bg-gray-100 border border-brand-green-dark/20 rounded-full px-3 py-1.5 lg:py-2"
-                  : "w-9 lg:w-10"
-              }`}
-            >
+            <div className="relative">
+              <div
+                className={`flex items-center transition-all duration-500 ease-in-out overflow-hidden ${
+                  isSearchOpen
+                    ? "w-48 lg:w-56 xl:w-72 bg-gray-100 border border-brand-green-dark/20 rounded-full px-3 py-1.5 lg:py-2"
+                    : "w-9 lg:w-10"
+                }`}
+              >
 
-              {isSearchOpen ? (
-                <>
-                  <Search
-                    size={16}
-                    className="text-brand-green-dark min-w-[16px]"
-                  />
+                {isSearchOpen ? (
+                  <>
+                    <Search
+                      size={16}
+                      className="text-brand-green-dark min-w-[16px]"
+                    />
 
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) =>
-                      setSearchQuery(
-                        e.target.value
-                      )
-                    }
-                    placeholder="Search food..."
-                    className="bg-transparent appearance-none border-none outline-none text-xs w-full px-2 text-brand-green-dark placeholder:text-brand-green-dark"
-                    autoFocus
-                  />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setIsSearchDropdownOpen(true);
+                      }}
+                      onFocus={() => setIsSearchDropdownOpen(true)}
+                      placeholder="Search food..."
+                      className="bg-transparent appearance-none border-none outline-none text-xs w-full px-2 text-brand-green-dark placeholder:text-brand-green-dark"
+                      autoFocus
+                    />
 
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery("");
+                        setIsSearchDropdownOpen(false);
+                        setIsSearchOpen(false);
+                      }}
+                      className="text-brand-green-dark transition"
+                    >
+                      <X size={16} />
+                    </button>
+                  </>
+                ) : (
                   <button
                     type="button"
                     onClick={() => {
-                      setSearchQuery("");
-                      setIsSearchOpen(false);
+                      setIsSearchOpen(true);
+                      setIsSearchDropdownOpen(true);
                     }}
-                    className="text-brand-green-dark transition"
+                    className="p-2 lg:p-2.5 rounded-full border border-gray-200 hover:border-[#D97706] transition text-gray-700 ml-auto"
                   >
-                    <X size={16} />
+                    <Search
+                      size={16}
+                      className="xl:w-[18px] xl:h-[18px]"
+                    />
                   </button>
-                </>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() =>
-                    setIsSearchOpen(true)
-                  }
-                  className="p-2 lg:p-2.5 rounded-full border border-gray-200 hover:border-[#D97706] transition text-gray-700 ml-auto"
-                >
-                  <Search
-                    size={16}
-                    className="xl:w-[18px] xl:h-[18px]"
-                  />
-                </button>
-              )}
+                )}
 
+              </div>
+
+              {/* Desktop Search Dropdown */}
+              <HeaderSearchDropdown
+                searchQuery={searchQuery}
+                isOpen={isSearchOpen && isSearchDropdownOpen && Boolean(searchQuery.trim())}
+                onClose={() => setIsSearchDropdownOpen(false)}
+                className="w-80 lg:w-96 right-0 left-auto"
+              />
             </div>
 
             <Link
@@ -632,13 +647,15 @@ export default function UserHeader() {
           </div>
         </div>
         {/* 2. Mobile Bottom White Bar (Search) - Smooth slide up/down, keeps clean white strip */}
-        <div className={`bg-white w-full relative z-10 px-4 transition-all duration-300 ease-in-out overflow-hidden ${
-          isScrolled ? "h-[14px] min-h-[14px] pt-0 pb-0" : "max-h-[65px] pt-[12px] pb-3"
+        <div className={`bg-white w-full relative z-10 px-4 transition-all duration-300 ease-in-out ${
+          isScrolled
+            ? "h-[14px] min-h-[14px] pt-0 pb-0 overflow-hidden"
+            : (isSearchDropdownOpen && searchQuery.trim() ? "overflow-visible max-h-[65px] pt-[12px] pb-3" : "overflow-hidden max-h-[65px] pt-[12px] pb-3")
         }`}>
           <div className={`w-full flex items-start transition-all duration-200 ${
             isScrolled ? "opacity-0 -translate-y-2 pointer-events-none" : "opacity-100 translate-y-0"
           }`}>
-            <div style={{ filter: "drop-shadow(0px 2px 4px rgba(0,0,0,0.05))" }} className="w-full">
+            <div style={{ filter: "drop-shadow(0px 2px 4px rgba(0,0,0,0.05))" }} className="w-full relative">
               {/* Green Border Wrapper */}
               <div 
                 className="w-full bg-[var(--brand-green-dark)]/60 p-[1px]"
@@ -664,18 +681,24 @@ export default function UserHeader() {
                   <input
                     type="text"
                     value={searchQuery}
-                    onChange={(e) =>
-                      setSearchQuery(
-                        e.target.value
-                      )
-                    }
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setIsSearchDropdownOpen(true);
+                    }}
+                    onFocus={() => setIsSearchDropdownOpen(true)}
                     placeholder="Search for delicious food..."
                     className="bg-transparent appearance-none border-none outline-none text-[11px] font-medium w-full text-gray-700 placeholder:text-gray-400"
                   />
 
                   <button
                     type="button"
-                    className="bg-[var(--brand-green-dark)] hover:bg-[var(--brand-gold)] transition-colors w-8 h-7 flex items-center justify-center shrink-0 ml-1"
+                    onClick={() => {
+                      if (searchQuery.trim()) {
+                        router.push(`/menu?search=${encodeURIComponent(searchQuery.trim())}`);
+                        setIsSearchDropdownOpen(false);
+                      }
+                    }}
+                    className="bg-[var(--brand-green-dark)] hover:bg-[var(--brand-gold)] transition-colors w-8 h-7 flex items-center justify-center shrink-0 ml-1 cursor-pointer"
                     style={{
                       clipPath:
                         "polygon(6px 0%, calc(100% - 6px) 0%, 100% 50%, calc(100% - 6px) 100%, 6px 100%, 0% 50%)",
@@ -689,6 +712,14 @@ export default function UserHeader() {
 
                 </div>
               </div>
+
+              {/* Mobile Search Dropdown */}
+              <HeaderSearchDropdown
+                searchQuery={searchQuery}
+                isOpen={isSearchDropdownOpen && Boolean(searchQuery.trim())}
+                onClose={() => setIsSearchDropdownOpen(false)}
+                className="w-full left-0 right-0 top-full mt-2"
+              />
             </div>
           </div>
         </div>

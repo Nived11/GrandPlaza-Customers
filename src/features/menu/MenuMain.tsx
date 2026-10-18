@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 import MenuFilters, {
   ALL_CATEGORY,
@@ -19,17 +20,31 @@ import { useMenuHook } from "./hooks/useMenuHook";
 import type { HomeMenuItem } from "@/features/home/hooks/useHomeHook";
 
 const MenuMain = () => {
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("category");
+  const searchParam = searchParams.get("search");
+
   /* =========================================================
      FILTER STATE
   ========================================================= */
 
   const [activeCategory, setActiveCategory] =
-    React.useState<CategoryFilter>(
-      ALL_CATEGORY
-    );
+    React.useState<CategoryFilter>(ALL_CATEGORY);
 
   const [activeDiet, setActiveDiet] =
     React.useState<DietFilter>("ALL");
+
+  // Sync category param from URL
+  useEffect(() => {
+    if (categoryParam) {
+      const num = Number(categoryParam);
+      if (!isNaN(num)) {
+        setActiveCategory(num);
+      }
+    } else {
+      setActiveCategory(ALL_CATEGORY);
+    }
+  }, [categoryParam]);
 
   /* =========================================================
      PRODUCT QUICK VIEW
@@ -57,6 +72,8 @@ const MenuMain = () => {
         ? undefined
         : String(activeCategory),
 
+    search: searchParam || undefined,
+
     diet:
       activeDiet === "ALL"
         ? undefined
@@ -73,6 +90,23 @@ const MenuMain = () => {
     );
 
     setActiveDiet("ALL");
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "/menu");
+    }
+  };
+
+  const handleCategoryChange = (category: CategoryFilter) => {
+    setActiveCategory(category);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (category === ALL_CATEGORY) {
+        params.delete("category");
+      } else {
+        params.set("category", String(category));
+      }
+      const q = params.toString();
+      window.history.replaceState(null, "", q ? `/menu?${q}` : "/menu");
+    }
   };
 
   /* =========================================================
@@ -121,7 +155,7 @@ const MenuMain = () => {
         }
         activeDiet={activeDiet}
         onCategoryChange={
-          setActiveCategory
+          handleCategoryChange
         }
         onDietChange={
           setActiveDiet
