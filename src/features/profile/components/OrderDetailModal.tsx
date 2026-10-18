@@ -81,25 +81,75 @@ export default function OrderDetailModal({
         ) : (
           <div className="flex flex-col gap-6">
             {/* Status badges */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span
-                className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border ${getStatusBadgeClass(
-                  order.status
-                )}`}
-              >
-                {formatStatusLabel(order.status)}
-              </span>
-              <span
-                className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border ${getStatusBadgeClass(
-                  order.payment_status
-                )}`}
-              >
-                Payment: {formatStatusLabel(order.payment_status)}
-              </span>
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span
+                  className={`text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full border ${getStatusBadgeClass(
+                    order.status
+                  )}`}
+                >
+                  {formatStatusLabel(order.status)}
+                </span>
+                <span
+                  className={`text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full border ${getStatusBadgeClass(
+                    order.payment_status
+                  )}`}
+                >
+                  Payment: {formatStatusLabel(order.payment_status)}
+                </span>
+              </div>
             </div>
 
-            {/* Live Tracking Map (Active when rider is assigned / out for delivery) */}
-            {(order.status === "out_for_delivery" || (order.delivery_boy && order.status !== "delivered" && order.status !== "cancelled")) && (
+            {/* 🌟 Live Order Progress Stepper */}
+            {order.status !== "cancelled" && (
+              <div className="bg-[#FAF5EB] rounded-2xl p-4 border border-[#EADBCA] flex flex-col gap-2 shadow-xs">
+                <div className="flex items-center justify-between text-center relative px-2">
+                  <div className="absolute top-3 left-6 right-6 h-0.5 bg-stone-200 z-0" />
+                  {[
+                    { key: "pending", label: "Placed" },
+                    { key: "preparing", label: "Cooking" },
+                    { key: "ready_for_pickup", label: "Ready" },
+                    { key: "out_for_delivery", label: "On Way" },
+                    { key: "delivered", label: "Delivered" },
+                  ].map((s, idx) => {
+                    const stepOrder = ["pending", "preparing", "ready_for_pickup", "out_for_delivery", "delivered"];
+                    const curIdx = stepOrder.indexOf(order.status);
+                    const isDone = idx < curIdx;
+                    const isCurrent = idx === curIdx;
+
+                    return (
+                      <div key={s.key} className="flex flex-col items-center gap-1.5 relative z-10">
+                        <div
+                          className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all ${
+                            isDone
+                              ? "bg-[#0F3D2E] text-white"
+                              : isCurrent
+                              ? "bg-[#D9A441] text-white ring-4 ring-[#D9A441]/25 animate-pulse"
+                              : "bg-white border-2 border-stone-300 text-stone-400"
+                          }`}
+                        >
+                          {isDone ? "✓" : idx + 1}
+                        </div>
+                        <span
+                          className={`text-[9px] font-extrabold uppercase tracking-wider ${
+                            isCurrent
+                              ? "text-[#0F3D2E]"
+                              : isDone
+                              ? "text-stone-700"
+                              : "text-stone-400"
+                          }`}
+                        >
+                          {s.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Live Tracking Map (Active for all non-delivered & non-cancelled orders) */}
+            {order.status !== "delivered" && order.status !== "cancelled" && (
               <LiveOrderTrackingMap
                 orderId={order.id}
                 deliveryAddress={order.delivery_address}

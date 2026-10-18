@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Phone, Navigation, Loader2, MapPin, Bike } from "lucide-react";
+import { Phone, Navigation, Loader2, MapPin, Bike, Utensils, PackageCheck } from "lucide-react";
 import { loadGoogleMaps } from "@/lib/loadGoogleMaps";
 import { getPusherClient } from "@/lib/pusherClient";
 import type { DeliveryBoyInfo } from "@/features/profile/hooks/useProfileHook";
@@ -14,6 +14,13 @@ interface LiveOrderTrackingMapProps {
   onStatusUpdate?: (newStatus: string) => void;
 }
 
+// Empire Plaza Kitchen location (Kadavanthra, Kochi)
+const STORE_LOCATION = {
+  lat: 9.967625,
+  lng: 76.304040,
+  name: "Empire Plaza Kitchen",
+};
+
 export default function LiveOrderTrackingMap({
   orderId,
   deliveryAddress,
@@ -24,12 +31,13 @@ export default function LiveOrderTrackingMap({
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any>(null);
   const destinationMarkerRef = useRef<any>(null);
+  const storeMarkerRef = useRef<any>(null);
   const riderMarkerRef = useRef<any>(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [riderCoords, setRiderCoords] = useState<{ lat: number; lng: number } | null>(
     deliveryBoy?.latitude && deliveryBoy?.longitude
-      ? { lat: deliveryBoy.latitude, lng: deliveryBoy.longitude }
+      ? { lat: Number(deliveryBoy.latitude), lng: Number(deliveryBoy.longitude) }
       : null
   );
   const [destCoords, setDestCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -51,8 +59,8 @@ export default function LiveOrderTrackingMap({
             setDestCoords({ lat: loc.lat(), lng: loc.lng() });
           } else {
             console.warn("Could not geocode customer address:", status);
-            // Fallback default Malappuram/Kozhikode center if geocoding fails
-            setDestCoords({ lat: 11.2588, lng: 75.7804 });
+            // Default near store location
+            setDestCoords({ lat: 9.967625, lng: 76.304040 });
           }
         });
       })
@@ -77,8 +85,7 @@ export default function LiveOrderTrackingMap({
 
         setIsLoading(false);
 
-        // Center on Rider or Destination
-        const initialCenter = riderCoords || destCoords;
+        const initialCenter = riderCoords || destCoords || STORE_LOCATION;
 
         const map = new google.maps.Map(mapContainerRef.current, {
           center: initialCenter,
@@ -97,7 +104,23 @@ export default function LiveOrderTrackingMap({
         });
         mapInstanceRef.current = map;
 
-        // Destination Marker (Customer Home)
+        // Store Marker (Empire Plaza Restaurant)
+        const storeMarker = new google.maps.Marker({
+          position: STORE_LOCATION,
+          map,
+          title: "Empire Plaza Kitchen",
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: "#D4AF37",
+            fillOpacity: 1,
+            strokeWeight: 3,
+            strokeColor: "#0F3D2E",
+          },
+        });
+        storeMarkerRef.current = storeMarker;
+
+        // Destination Marker (Customer Address)
         const destMarker = new google.maps.Marker({
           position: destCoords,
           map,
@@ -129,13 +152,14 @@ export default function LiveOrderTrackingMap({
             },
           });
           riderMarkerRef.current = riderMarker;
-
-          // Fit bounds to show both customer & rider
-          const bounds = new google.maps.LatLngBounds();
-          bounds.extend(destCoords);
-          bounds.extend(riderCoords);
-          map.fitBounds(bounds, { top: 40, bottom: 40, left: 40, right: 40 });
         }
+
+        // Fit bounds to show Restaurant, Customer & Rider
+        const bounds = new google.maps.LatLngBounds();
+        bounds.extend(STORE_LOCATION);
+        bounds.extend(destCoords);
+        if (riderCoords) bounds.extend(riderCoords);
+        map.fitBounds(bounds, { top: 40, bottom: 40, left: 40, right: 40 });
       })
       .catch((err) => {
         if (!isCancelled) {
@@ -161,7 +185,7 @@ export default function LiveOrderTrackingMap({
         const riderMarker = new google.maps.Marker({
           position: riderCoords,
           map: mapInstanceRef.current,
-          title: deliveryBoy?.name || "Delivery Partner",
+          title: deliveryBoy?.name ? `${deliveryBoy.name} (Rider)` : "Delivery Partner",
           icon: {
             path: google.maps.SymbolPath.CIRCLE,
             scale: 8,
@@ -175,9 +199,9 @@ export default function LiveOrderTrackingMap({
       });
     }
 
-    // Auto-adjust bounds if both exist
-    if (destCoords && (window as any).google?.maps) {
+    if (destCoords && mapInstanceRef.current && (window as any).google) {
       const bounds = new (window as any).google.maps.LatLngBounds();
+      bounds.extend(STORE_LOCATION);
       bounds.extend(destCoords);
       bounds.extend(riderCoords);
       mapInstanceRef.current.fitBounds(bounds, { top: 40, bottom: 40, left: 40, right: 40 });
@@ -201,7 +225,7 @@ export default function LiveOrderTrackingMap({
       const isTargetRider = deliveryBoy?.id && data.delivery_boy_id === deliveryBoy.id;
       const isTargetOrder = Array.isArray(data.active_order_ids) && data.active_order_ids.includes(orderId);
 
-      if (isTargetRider || isTargetOrder) {
+      if (isTargetRider || isTargetOrder || !deliveryBoy) {
         setRiderCoords({ lat: data.latitude, lng: data.longitude });
       }
     };
@@ -232,7 +256,7 @@ export default function LiveOrderTrackingMap({
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
           </span>
           <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-300">
-            Live Delivery Tracking
+            Live Order Tracking
           </span>
         </div>
 
@@ -260,29 +284,47 @@ export default function LiveOrderTrackingMap({
         <div ref={mapContainerRef} className="w-full h-full" />
 
         {/* Legend Overlay */}
-        <div className="absolute bottom-2 left-2 z-10 bg-white/90 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-stone-200 text-[10px] font-medium shadow-xs flex items-center gap-3">
+        <div className="absolute bottom-2 left-2 z-10 bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-stone-200 text-[10px] font-medium shadow-xs flex items-center gap-3">
           <div className="flex items-center gap-1 text-[#0F3D2E]">
             <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#0F3D2E]"></span>
-            <span>Your Location</span>
+            <span>Your Address</span>
           </div>
-          <div className="flex items-center gap-1 text-amber-700">
-            <span className="inline-block w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-            <span>Rider (Live)</span>
+          <div className="flex items-center gap-1 text-[#D4AF37]">
+            <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span>
+            <span>Kitchen</span>
           </div>
+          {deliveryBoy && (
+            <div className="flex items-center gap-1 text-amber-700">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+              <span>Rider (Live)</span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Bottom Rider Info Card */}
+      {/* Bottom Delivery / Rider Info Card */}
       <div className="p-3.5 bg-stone-50 border-t border-stone-100 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-full bg-[#0F3D2E] text-amber-300 flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
-            <Bike size={20} />
+            {deliveryBoy ? (
+              <Bike size={20} />
+            ) : orderStatus === "ready_for_pickup" ? (
+              <PackageCheck size={20} />
+            ) : (
+              <Utensils size={18} />
+            )}
           </div>
 
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <p className="text-xs font-bold text-[#0F3D2E] truncate">
-                {deliveryBoy?.name || "Assigned Delivery Partner"}
+                {deliveryBoy?.name
+                  ? deliveryBoy.name
+                  : orderStatus === "ready_for_pickup"
+                  ? "Food Ready • Assigning Partner"
+                  : orderStatus === "preparing"
+                  ? "Kitchen Cooking Your Order"
+                  : "Order Placed at Empire Plaza"}
               </p>
               {deliveryBoy?.employee_id && (
                 <span className="text-[9px] font-bold bg-[#EADBCA]/50 text-stone-700 px-1.5 py-0.5 rounded">
@@ -291,9 +333,13 @@ export default function LiveOrderTrackingMap({
               )}
             </div>
             <p className="text-[11px] text-stone-500 truncate mt-0.5">
-              {riderCoords
-                ? "Rider is heading to your address"
-                : "Rider assigned • Live GPS updates will appear shortly"}
+              {deliveryBoy
+                ? riderCoords
+                  ? "Rider is heading to your address"
+                  : "Rider assigned • Live GPS updates will appear shortly"
+                : orderStatus === "ready_for_pickup"
+                ? "Your food is packed & ready! Connecting with nearest delivery partner."
+                : "Your meal is being carefully prepared in our kitchen."}
             </p>
           </div>
         </div>
