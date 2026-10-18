@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Utensils, ArrowRight, Sparkles, Folder } from "lucide-react";
@@ -150,14 +149,12 @@ export default function HeaderSearchDropdown({
                     className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left hover:bg-[#FDFBF7] transition-colors group cursor-pointer"
                   >
                     {/* Thumbnail */}
-                    <div className="w-10 h-10 rounded-xl bg-gray-100 overflow-hidden relative shrink-0 border border-gray-200/60">
+                    <div className="w-10 h-10 rounded-xl bg-gray-100 overflow-hidden relative shrink-0 border border-gray-200/60 flex items-center justify-center">
                       {dish.image ? (
-                        <Image
+                        <img
                           src={dish.image}
                           alt={dish.name}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform"
-                          sizes="40px"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-300">

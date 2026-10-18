@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
+import Link from "next/link";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 
 export interface HomeCategory {
@@ -63,11 +64,12 @@ export default function CravingSection({ data = [] }: CravingSectionProps) {
           }}
         >
           {data.map((cat) => (
-            <div
+            <Link
               key={cat.id}
-              className="flex flex-col items-center gap-1.5 cursor-pointer group shrink-0 snap-start w-[calc((100vw-52px)/4.5)] max-w-[82px] lg:w-[82px] lg:max-w-none"
+              href={`/menu?category=${cat.id}`}
+              className="flex flex-col items-center gap-1.5 cursor-pointer group shrink-0 snap-start w-[calc((100vw-52px)/4.5)] max-w-[82px] lg:w-[82px] lg:max-w-none transition-transform hover:scale-105"
             >
-              {/*   — GPU layer promote  shiver  */}
+              {/* Image */}
               <div className="w-[64px] h-[64px] sm:w-[68px] sm:h-[68px] lg:w-[82px] lg:h-[82px] p-1 lg:p-1 rounded-full bg-white border border-gray-200 shadow-sm group-hover:border-[var(--brand-gold)] group-hover:shadow-md transform-gpu">
                 <img
                   src={cat.image}
@@ -77,11 +79,11 @@ export default function CravingSection({ data = [] }: CravingSectionProps) {
                 />
               </div>
 
-              {/*  */}
+              {/* Title */}
               <span className="text-[8.5px] sm:text-[9px] lg:text-[10px] w-full lg:w-[82px] line-clamp-1 lg:line-clamp-2 font-bold lg:font-black text-slate-700 uppercase tracking-wider text-center leading-tight group-hover:text-[var(--brand-green-dark)]">
                 {cat.name}
               </span>
-            </div>
+            </Link>
           ))}
         </div>
 

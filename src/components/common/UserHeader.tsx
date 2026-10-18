@@ -122,51 +122,27 @@ export default function UserHeader() {
 
   /*
    * ------------------------------------------------
-   * INPUT -> URL (Wait 500ms after user stops typing)
+   * SUBMIT SEARCH HANDLERS
+   * Only navigate when user explicitly presses Enter or clicks search
+   * (Does NOT reload or re-fetch page on every keystroke)
    * ------------------------------------------------
    */
-  useEffect(() => {
-    const search = searchQuery.trim();
+  const handlePerformSearch = (queryText?: string) => {
+    const q = (queryText !== undefined ? queryText : searchQuery).trim();
+    setIsSearchDropdownOpen(false);
+    if (q) {
+      router.push(`/menu?search=${encodeURIComponent(q)}`);
+    } else if (pathname === "/menu") {
+      router.push("/menu");
+    }
+  };
 
-    const timer = setTimeout(() => {
-      const currentSearch =
-        searchParams.get("search") || "";
-
-      if (search === currentSearch) {
-        return;
-      }
-
-      const params = new URLSearchParams(
-        searchParams.toString()
-      );
-
-      if (search) {
-        params.set("search", search);
-      } else {
-        params.delete("search");
-      }
-
-      const query = params.toString();
-
-      router.replace(
-        query
-          ? `${pathname}?${query}`
-          : pathname,
-        {
-          scroll: false,
-        }
-      );
-    }, 500);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [
-    searchQuery,
-    pathname,
-    router,
-    searchParams,
-  ]);
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handlePerformSearch();
+    }
+  };
 
   useEffect(() => {
     let lastY = window.scrollY;
@@ -473,6 +449,7 @@ export default function UserHeader() {
                         setIsSearchDropdownOpen(true);
                       }}
                       onFocus={() => setIsSearchDropdownOpen(true)}
+                      onKeyDown={handleSearchKeyDown}
                       placeholder="Search food..."
                       className="bg-transparent appearance-none border-none outline-none text-xs w-full px-2 text-brand-green-dark placeholder:text-brand-green-dark"
                       autoFocus
@@ -686,18 +663,14 @@ export default function UserHeader() {
                       setIsSearchDropdownOpen(true);
                     }}
                     onFocus={() => setIsSearchDropdownOpen(true)}
+                    onKeyDown={handleSearchKeyDown}
                     placeholder="Search for delicious food..."
                     className="bg-transparent appearance-none border-none outline-none text-[11px] font-medium w-full text-gray-700 placeholder:text-gray-400"
                   />
 
                   <button
                     type="button"
-                    onClick={() => {
-                      if (searchQuery.trim()) {
-                        router.push(`/menu?search=${encodeURIComponent(searchQuery.trim())}`);
-                        setIsSearchDropdownOpen(false);
-                      }
-                    }}
+                    onClick={() => handlePerformSearch()}
                     className="bg-[var(--brand-green-dark)] hover:bg-[var(--brand-gold)] transition-colors w-8 h-7 flex items-center justify-center shrink-0 ml-1 cursor-pointer"
                     style={{
                       clipPath:
