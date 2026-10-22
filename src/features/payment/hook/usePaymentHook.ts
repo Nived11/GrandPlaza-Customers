@@ -120,7 +120,7 @@ export const usePaymentHook = () => {
       }
 
       const { order_id, amount, currency, key_id } = createOrderRes.data;
-      const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || key_id;
+      const razorpayKey = key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
       // Extract user details for prefill if available in localStorage
       let prefillUser = { name: "", contact: "", email: "" };
