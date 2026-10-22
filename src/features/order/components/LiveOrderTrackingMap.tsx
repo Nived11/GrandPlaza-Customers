@@ -35,6 +35,85 @@ const MODERN_MAP_STYLES = [
   { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#78716C" }] },
 ];
 
+function getRiderBikeSvg(): string {
+  const svg = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="60" height="72" viewBox="0 0 60 72">
+    <defs>
+      <filter id="cust-pin-shadow" x="-30%" y="-30%" width="160%" height="160%">
+        <feDropShadow dx="0" dy="3.5" stdDeviation="3" flood-color="#000000" flood-opacity="0.38"/>
+      </filter>
+      <linearGradient id="cust-pin-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0F3D2E"/>
+        <stop offset="100%" stop-color="#062319"/>
+      </linearGradient>
+    </defs>
+
+    <!-- Pulsing Radar circle under needle tip -->
+    <circle cx="30" cy="64" r="7" fill="#059669" opacity="0.45">
+      <animate attributeName="r" from="3" to="12" dur="1.4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" from="0.9" to="0" dur="1.4s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Map Pin Teardrop Shape -->
+    <path d="M30 4 C16 4 6 14 6 28 C6 41 26 61 29 64.2 C29.5 64.8 30.5 64.8 31 64.2 C34 61 54 41 54 28 C54 14 44 4 30 4 Z"
+          fill="url(#cust-pin-grad)"
+          stroke="#D4AF37"
+          stroke-width="2.2"
+          filter="url(#cust-pin-shadow)"/>
+
+    <!-- High-Contrast Crisp White Inner Disc -->
+    <circle cx="30" cy="27" r="19" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="0.8"/>
+
+    <!-- Delivery Scooter & Rider Graphic -->
+    <g transform="translate(13.5, 13)">
+      <!-- Amber Delivery Thermal Bag/Box -->
+      <rect x="1" y="7" width="9" height="9" rx="1.5" fill="#D97706" stroke="#92400E" stroke-width="0.7"/>
+      <path d="M1 11.5 H10" stroke="#FDE68A" stroke-width="1"/>
+      <circle cx="5.5" cy="9.2" r="1" fill="#FFFFFF"/>
+
+      <!-- Rider Helmet -->
+      <circle cx="17" cy="4" r="4" fill="#0F3D2E" stroke="#D4AF37" stroke-width="0.8"/>
+      <path d="M19 3.5 C20 4.2 20.5 5.5 19.5 6.5 L17.5 6.5" stroke="#38BDF8" stroke-width="1" stroke-linecap="round" fill="none"/>
+
+      <!-- Rider Jacket & Arm -->
+      <path d="M13.5 8 C14.5 7 18 7 19.5 10.5 L16 14 L12 12.5 Z" fill="#0F3D2E"/>
+      <path d="M17 10 L23 11.5" stroke="#0F3D2E" stroke-width="1.8" stroke-linecap="round"/>
+
+      <!-- Handlebar & Mirror -->
+      <path d="M22 9 L24.5 9" stroke="#334155" stroke-width="1.2" stroke-linecap="round"/>
+
+      <!-- Scooter Windshield & Front Cowl -->
+      <path d="M22.5 10.5 L27 13 L25 16.5 L22 15 Z" fill="#059669"/>
+      <!-- Headlight Yellow Glow -->
+      <path d="M27 13.5 L28.8 14.2" stroke="#FACC15" stroke-width="1.8" stroke-linecap="round"/>
+
+      <!-- Scooter Body & Footboard -->
+      <path d="M10 14.5 L15 16 L22 16 L20 19.5 L10 18 Z" fill="#059669"/>
+      <path d="M9.5 17.5 L22.5 17.5" stroke="#047857" stroke-width="1.2" stroke-linecap="round"/>
+
+      <!-- Fenders -->
+      <path d="M3 18 C3 15 9.5 15 9.5 18" stroke="#059669" stroke-width="1.6" fill="none"/>
+      <path d="M20.5 18 C20.5 15 27 15 27 18" stroke="#059669" stroke-width="1.6" fill="none"/>
+
+      <!-- Rear Wheel (Black Tire + White Rim + Gold Hub) -->
+      <circle cx="6.5" cy="19.5" r="4.2" fill="#1E293B" stroke="#0F172A" stroke-width="1.2"/>
+      <circle cx="6.5" cy="19.5" r="2.2" fill="#E2E8F0"/>
+      <circle cx="6.5" cy="19.5" r="0.9" fill="#D4AF37"/>
+
+      <!-- Front Wheel (Black Tire + White Rim + Gold Hub) -->
+      <circle cx="23.5" cy="19.5" r="4.2" fill="#1E293B" stroke="#0F172A" stroke-width="1.2"/>
+      <circle cx="23.5" cy="19.5" r="2.2" fill="#E2E8F0"/>
+      <circle cx="23.5" cy="19.5" r="0.9" fill="#D4AF37"/>
+    </g>
+
+    <!-- Top Status Badge -->
+    <rect x="18" y="1" width="24" height="8.5" rx="4.25" fill="#10B981" stroke="#FFFFFF" stroke-width="0.8"/>
+    <text x="30" y="7" font-family="system-ui, -apple-system, sans-serif" font-size="6" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="0.5">LIVE</text>
+  </svg>
+  `;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg.trim())}`;
+}
+
 export default function LiveOrderTrackingMap({
   orderId,
   deliveryAddress,
@@ -174,20 +253,9 @@ export default function LiveOrderTrackingMap({
         // Custom SVG Pin 3: Delivery Partner (Live Bike Pin)
         if (riderCoords) {
           const riderIcon = {
-            url:
-              "data:image/svg+xml;charset=UTF-8," +
-              encodeURIComponent(`
-                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="24" cy="24" r="22" fill="#0F3D2E" stroke="#D4AF37" stroke-width="3"/>
-                  <circle cx="24" cy="24" r="18" fill="#185843"/>
-                  <circle cx="16" cy="28" r="4.5" stroke="#FAF5EB" stroke-width="2"/>
-                  <circle cx="32" cy="28" r="4.5" stroke="#FAF5EB" stroke-width="2"/>
-                  <path d="M16 28l5.5-9h6l4.5 9M21.5 19l2.5 9" stroke="#FAF5EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M26 15h4" stroke="#D4AF37" stroke-width="2.5" stroke-linecap="round"/>
-                </svg>
-              `),
-            scaledSize: new google.maps.Size(46, 46),
-            anchor: new google.maps.Point(23, 23),
+            url: getRiderBikeSvg(),
+            scaledSize: new google.maps.Size(56, 68),
+            anchor: new google.maps.Point(28, 65),
           };
 
           const riderMarker = new google.maps.Marker({
@@ -264,20 +332,9 @@ export default function LiveOrderTrackingMap({
         riderMarkerRef.current.setPosition(riderCoords);
       } else {
         const riderIcon = {
-          url:
-            "data:image/svg+xml;charset=UTF-8," +
-            encodeURIComponent(`
-              <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="24" cy="24" r="22" fill="#0F3D2E" stroke="#D4AF37" stroke-width="3"/>
-                <circle cx="24" cy="24" r="18" fill="#185843"/>
-                <circle cx="16" cy="28" r="4.5" stroke="#FAF5EB" stroke-width="2"/>
-                <circle cx="32" cy="28" r="4.5" stroke="#FAF5EB" stroke-width="2"/>
-                <path d="M16 28l5.5-9h6l4.5 9M21.5 19l2.5 9" stroke="#FAF5EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M26 15h4" stroke="#D4AF37" stroke-width="2.5" stroke-linecap="round"/>
-              </svg>
-            `),
-          scaledSize: new google.maps.Size(46, 46),
-          anchor: new google.maps.Point(23, 23),
+          url: getRiderBikeSvg(),
+          scaledSize: new google.maps.Size(56, 68),
+          anchor: new google.maps.Point(28, 65),
         };
 
         const riderMarker = new google.maps.Marker({
