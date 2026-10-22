@@ -200,23 +200,45 @@ export default function LiveOrderTrackingMap({
           riderMarkerRef.current = riderMarker;
         }
 
-        // Draw connecting route path
-        const routePoints = [
-          STORE_LOCATION,
-          ...(riderCoords ? [riderCoords] : []),
-          destCoords,
-        ];
+        // Draw connecting road route path
+        const startPoint = riderCoords || STORE_LOCATION;
+        const fetchAndApplyRoadRoute = async () => {
+          let roadPoints: { lat: number; lng: number }[] = [startPoint, destCoords];
+          try {
+            const res = await fetch(
+              `https://router.project-osrm.org/route/v1/driving/${startPoint.lng},${startPoint.lat};${destCoords.lng},${destCoords.lat}?overview=full&geometries=geojson`
+            );
+            if (res.ok) {
+              const data = await res.json();
+              if (data.code === "Ok" && data.routes && data.routes.length > 0) {
+                roadPoints = data.routes[0].geometry.coordinates.map((c: [number, number]) => ({
+                  lat: c[1],
+                  lng: c[0],
+                }));
+              }
+            }
+          } catch (err) {
+            console.warn("Road routing fetch failed, falling back to direct line:", err);
+          }
 
-        const routePath = new google.maps.Polyline({
-          path: routePoints,
-          geodesic: true,
-          strokeColor: "#0F3D2E",
-          strokeOpacity: 0.7,
-          strokeWeight: 4,
-          map,
-        });
-        routePolylineRef.current = routePath;
+          if (isCancelled) return;
 
+          if (routePolylineRef.current) {
+            routePolylineRef.current.setPath(roadPoints);
+          } else {
+            const routePath = new google.maps.Polyline({
+              path: roadPoints,
+              geodesic: true,
+              strokeColor: "#0F3D2E",
+              strokeOpacity: 0.85,
+              strokeWeight: 5,
+              map,
+            });
+            routePolylineRef.current = routePath;
+          }
+        };
+
+        fetchAndApplyRoadRoute();
         fitMapBounds(map, google);
       })
       .catch((err) => {
@@ -269,11 +291,26 @@ export default function LiveOrderTrackingMap({
       }
 
       if (routePolylineRef.current && destCoords) {
-        routePolylineRef.current.setPath([
-          STORE_LOCATION,
-          riderCoords,
-          destCoords,
-        ]);
+        fetch(
+          `https://router.project-osrm.org/route/v1/driving/${riderCoords.lng},${riderCoords.lat};${destCoords.lng},${destCoords.lat}?overview=full&geometries=geojson`
+        )
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (data?.code === "Ok" && data.routes?.[0]) {
+              const roadPoints = data.routes[0].geometry.coordinates.map((c: [number, number]) => ({
+                lat: c[1],
+                lng: c[0],
+              }));
+              if (routePolylineRef.current) routePolylineRef.current.setPath(roadPoints);
+            } else if (routePolylineRef.current) {
+              routePolylineRef.current.setPath([riderCoords, destCoords]);
+            }
+          })
+          .catch(() => {
+            if (routePolylineRef.current) {
+              routePolylineRef.current.setPath([riderCoords, destCoords]);
+            }
+          });
       }
 
       fitMapBounds(mapInstanceRef.current, google);
