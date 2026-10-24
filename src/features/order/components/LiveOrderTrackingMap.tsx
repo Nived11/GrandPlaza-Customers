@@ -9,6 +9,8 @@ import type { DeliveryBoyInfo } from "@/features/profile/hooks/useProfileHook";
 interface LiveOrderTrackingMapProps {
   orderId: number;
   deliveryAddress: string;
+  deliveryLat?: number | null;
+  deliveryLng?: number | null;
   deliveryBoy?: DeliveryBoyInfo | null;
   orderStatus: string;
   onStatusUpdate?: (newStatus: string) => void;
@@ -117,6 +119,8 @@ function getRiderBikeSvg(): string {
 export default function LiveOrderTrackingMap({
   orderId,
   deliveryAddress,
+  deliveryLat,
+  deliveryLng,
   deliveryBoy,
   orderStatus,
   onStatusUpdate,
@@ -137,8 +141,22 @@ export default function LiveOrderTrackingMap({
   const [destCoords, setDestCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
 
-  // 1. Geocode Delivery Address
+  // 1. Resolve Delivery Destination Coordinates (Use exact GPS coordinates if available!)
   useEffect(() => {
+    if (
+      deliveryLat !== undefined &&
+      deliveryLat !== null &&
+      deliveryLng !== undefined &&
+      deliveryLng !== null
+    ) {
+      const latNum = Number(deliveryLat);
+      const lngNum = Number(deliveryLng);
+      if (!isNaN(latNum) && !isNaN(lngNum) && latNum !== 0 && lngNum !== 0) {
+        setDestCoords({ lat: latNum, lng: lngNum });
+        return;
+      }
+    }
+
     let isCancelled = false;
 
     loadGoogleMaps()
@@ -165,7 +183,7 @@ export default function LiveOrderTrackingMap({
     return () => {
       isCancelled = true;
     };
-  }, [deliveryAddress]);
+  }, [deliveryAddress, deliveryLat, deliveryLng]);
 
   // Fit bounds helper
   const fitMapBounds = (map: any, google: any) => {

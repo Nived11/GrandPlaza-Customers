@@ -188,6 +188,8 @@ export default function OrderDetailModal({
                   <LiveOrderTrackingMap
                     orderId={order.id}
                     deliveryAddress={order.delivery_address}
+                    deliveryLat={order.delivery_latitude}
+                    deliveryLng={order.delivery_longitude}
                     deliveryBoy={order.delivery_boy}
                     orderStatus={order.status}
                     onStatusUpdate={(newStatus) =>
