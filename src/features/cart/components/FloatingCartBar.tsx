@@ -11,11 +11,19 @@ import type { RootState } from "@/redux/store";
 export default function FloatingCartBar() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const [hasActiveOrder, setHasActiveOrder] = useState(false);
 
   const cartItems = useSelector((state: RootState) => state.cart.items);
 
   useEffect(() => {
     setMounted(true);
+
+    const handleActiveOrder = (e: any) => {
+      setHasActiveOrder(Boolean(e.detail));
+    };
+
+    window.addEventListener("has-active-order", handleActiveOrder);
+    return () => window.removeEventListener("has-active-order", handleActiveOrder);
   }, []);
 
   if (!mounted) return null;
@@ -35,7 +43,9 @@ export default function FloatingCartBar() {
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0, opacity: 0 }}
           transition={{ type: "spring", stiffness: 450, damping: 25 }}
-          className="fixed bottom-[76px] right-4 z-40 md:hidden"
+          className={`fixed ${
+            hasActiveOrder ? "bottom-[148px]" : "bottom-[76px]"
+          } right-4 z-40 md:hidden transition-all duration-300`}
         >
           <Link
             href="/cart"

@@ -1,6 +1,7 @@
 import UserHeader from "@/components/common/UserHeader";
 import UserFooter from "@/components/common/UserFooter";
 import FloatingCartBar from "@/features/cart/components/FloatingCartBar";
+import FloatingLiveOrderBar from "@/features/order/components/FloatingLiveOrderBar";
 
 export default function MainLayout({
   children,
@@ -15,7 +16,10 @@ export default function MainLayout({
         {children}
       </main>
 
-      {/* 📱 Mobile Floating Cart Bar (Blinkit-style above bottom nav) */}
+      {/* 🛵 Floating Active Order Status Bar (Live GPS & Progress Tracker) */}
+      <FloatingLiveOrderBar />
+
+      {/* 📱 Mobile Floating Cart Bar */}
       <FloatingCartBar />
 
       <UserFooter />
