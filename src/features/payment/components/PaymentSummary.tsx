@@ -95,8 +95,12 @@ export default function PaymentSummary({
     if (isStoreClosed) return "Store Currently Closed";
     if (isOutOfRadius) return `Outside Delivery Radius (${deliveryInfo?.distance_km} KM)`;
     if (isProcessing) return "Processing Payment...";
-    if (selectedMethod === "gpay") return `Pay ₹${totalPayable.toFixed(2)} with GPay`;
+    if (selectedMethod === "gpay") return `Pay ₹${totalPayable.toFixed(2)} with Google Pay`;
     if (selectedMethod === "phonepe") return `Pay ₹${totalPayable.toFixed(2)} with PhonePe`;
+    if (selectedMethod === "paytm") return `Pay ₹${totalPayable.toFixed(2)} with Paytm UPI`;
+    if (selectedMethod === "upi_qr") return `Pay ₹${totalPayable.toFixed(2)} via UPI / QR`;
+    if (selectedMethod === "card") return `Pay ₹${totalPayable.toFixed(2)} via Card`;
+    if (selectedMethod === "netbanking") return `Pay ₹${totalPayable.toFixed(2)} via Net Banking`;
     if (selectedMethod === "cod" && deliveryInfo?.is_cod_enabled !== false) return `Place Order (Cash on Delivery)`;
     return `Pay ₹${totalPayable.toFixed(2)}`;
   };
