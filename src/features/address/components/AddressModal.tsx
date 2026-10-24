@@ -102,7 +102,7 @@ export default function AddressModal({
   const [pincode, setPincode] = useState("");
 
   // Details Form State
-  const [useAccountDetails, setUseAccountDetails] = useState(true);
+  const [useAccountDetails, setUseAccountDetails] = useState(false);
   const [accountName, setAccountName] = useState("");
   const [accountPhone, setAccountPhone] = useState("");
   const [customFullName, setCustomFullName] = useState("");
@@ -127,14 +127,18 @@ export default function AddressModal({
       const stored = localStorage.getItem("user");
       if (stored) {
         const user = JSON.parse(stored);
-        const name = user.first_name || user.name || "";
-        const phone = user.phone_number || user.phone || "";
+        const name = (user.first_name || user.name || "").trim();
+        const phone = (user.phone_number || user.phone || "").trim();
         setAccountName(name);
         setAccountPhone(phone);
+        const hasBoth = Boolean(name && phone);
+        setUseAccountDetails(hasBoth);
         if (!address) {
           setCustomFullName(name);
           setCustomPhone(phone);
         }
+      } else {
+        setUseAccountDetails(false);
       }
     } catch {
       // ignore
@@ -187,9 +191,10 @@ export default function AddressModal({
       setBuilding("");
       setStreet("");
       setFormErrors({});
-      setUseAccountDetails(true);
-      setCustomFullName(accountName);
-      setCustomPhone(accountPhone);
+      const hasBoth = Boolean(accountName && accountPhone);
+      setUseAccountDetails(hasBoth);
+      setCustomFullName(accountName || "");
+      setCustomPhone(accountPhone || "");
 
       const cached = getInitialStoredCoords();
       if (cached) {
@@ -478,8 +483,9 @@ export default function AddressModal({
       errors.building = "House / Flat / Building no is required";
     }
 
-    const finalName = useAccountDetails ? accountName : customFullName.trim();
-    const finalPhone = useAccountDetails ? accountPhone : customPhone.trim();
+    const isUsingAccount = Boolean(useAccountDetails && accountName.trim() && accountPhone.trim());
+    const finalName = isUsingAccount ? accountName.trim() : customFullName.trim();
+    const finalPhone = isUsingAccount ? accountPhone.trim() : customPhone.trim();
 
     if (!finalName) {
       errors.fullName = "Name is required";
