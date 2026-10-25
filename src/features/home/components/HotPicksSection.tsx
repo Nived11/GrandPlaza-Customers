@@ -93,7 +93,7 @@ export default function HotPicksSection({
           ? selectedVariant?.offer_price ?? null
           : item.offer_price ?? null,
         packing_charge:
-          selectedVariant && Number(selectedVariant.packing_charge) > 0
+          selectedVariant && selectedVariant.packing_charge !== null && selectedVariant.packing_charge !== undefined
             ? Number(selectedVariant.packing_charge)
             : Number(item.packing_charge || 0),
         variant: selectedVariant

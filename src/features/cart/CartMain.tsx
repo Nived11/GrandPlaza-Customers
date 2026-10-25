@@ -63,7 +63,7 @@ const CartMain = () => {
               actual_price: item.menu_item.actual_price ?? null,
               offer_price: item.menu_item.offer_price ?? null,
               packing_charge:
-                item.variant && Number(item.variant.packing_charge) > 0
+                item.variant && item.variant.packing_charge !== null && item.variant.packing_charge !== undefined
                   ? Number(item.variant.packing_charge)
                   : (item.menu_item.packing_charge ?? 0),
               variant: item.variant

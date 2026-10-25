@@ -392,7 +392,7 @@ const ProductQuickViewModal = ({
             ? selectedVariant?.offer_price ?? null
             : product.offer_price ?? null,
           packing_charge:
-            selectedVariant && Number(selectedVariant.packing_charge) > 0
+            selectedVariant && selectedVariant.packing_charge !== null && selectedVariant.packing_charge !== undefined
               ? Number(selectedVariant.packing_charge)
               : Number(product.packing_charge || 0),
           variant: selectedVariant
