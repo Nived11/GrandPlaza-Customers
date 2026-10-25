@@ -18,19 +18,7 @@ const useVerifyOtp = () => {
       );
     }
 
-    if (data.access_token) {
-      localStorage.setItem(
-        "access_token",
-        data.access_token
-      );
-    }
-
-    if (data.refresh_token) {
-      localStorage.setItem(
-        "refresh_token",
-        data.refresh_token
-      );
-    }
+    // Tokens are safely handled in HttpOnly cookies to prevent XSS exposure
 
     if (data.user) {
       localStorage.setItem(
@@ -70,7 +58,7 @@ const useVerifyOtp = () => {
         });
       }
 
-      console.log("VERIFY OTP RESPONSE:", data);
+
 
       if (data?.status === true) {
         saveAuthSession(data);
