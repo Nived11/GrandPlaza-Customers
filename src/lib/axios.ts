@@ -46,7 +46,16 @@ axiosInstance.interceptors.response.use(
     }
 
     // 🔄 2. Automated Token Refresh Logic (401 Unauthorized status)
-    const skipUrls = ['accounts/admin/login', 'accounts/token/refresh', 'accounts/logout'];
+    const skipUrls = [
+      'accounts/admin/login',
+      'accounts/token/refresh',
+      'accounts/logout',
+      'accounts/send-otp',
+      'accounts/verify-otp',
+      'accounts/firebase-verify',
+      'settings/site-settings',
+      'menu/public',
+    ];
     const isSkippedUrl = skipUrls.some(url => originalRequest.url?.includes(url));
 
     if (error.response?.status === 401 && !originalRequest._retry && !isSkippedUrl) {
@@ -76,11 +85,17 @@ axiosInstance.interceptors.response.use(
         processQueue(refreshError, null);
         
         if (typeof window !== 'undefined') {
+          const wasLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
           localStorage.clear();
-          toast.error('Session expired. Please login again!');
-          setTimeout(() => {
-            window.location.href = loginRedirect;
-          }, 1500);
+          const currentPath = window.location.pathname;
+          if (currentPath !== loginRedirect) {
+            if (wasLoggedIn) {
+              toast.error('Session expired. Please login again!');
+            }
+            setTimeout(() => {
+              window.location.href = loginRedirect;
+            }, 1000);
+          }
         }
         return Promise.reject(refreshError);
       }
