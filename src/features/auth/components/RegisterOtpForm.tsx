@@ -34,6 +34,9 @@ const RegisterOtpForm = ({
   const [otpError, setOtpError] = useState("");
   const [justVerified, setJustVerified] = useState(false);
 
+  const inFlightRef = useRef(false);
+  const lastSubmittedCodeRef = useRef<string>("");
+
   const {
     verifyOtp,
     isLoading: isVerifying,
@@ -82,6 +85,7 @@ const RegisterOtpForm = ({
     value: string,
     index: number
   ) => {
+    lastSubmittedCodeRef.current = "";
     const numbersOnly = value.replace(/\D/g, "");
 
     if (!numbersOnly) {
@@ -238,14 +242,21 @@ const RegisterOtpForm = ({
   };
 
   const processVerify = async (codeToVerify: string) => {
-    if (isVerifying || justVerified || !storedPhone) return;
+    if (inFlightRef.current || isVerifying || justVerified || !storedPhone) return;
+    if (lastSubmittedCodeRef.current === codeToVerify) return;
+
+    inFlightRef.current = true;
+    lastSubmittedCodeRef.current = codeToVerify;
 
     const response = await verifyOtp(
       storedPhone,
       codeToVerify
     );
 
-    if (!response) return;
+    if (!response) {
+      inFlightRef.current = false;
+      return;
+    }
 
     sessionStorage.removeItem("register_phone");
     setJustVerified(true);
@@ -288,8 +299,8 @@ const RegisterOtpForm = ({
             .split("");
 
           if (digits.length === 6) {
+            lastSubmittedCodeRef.current = "";
             setOtp(digits);
-            processVerify(digits.join(""));
           }
         }
       })
@@ -308,12 +319,13 @@ const RegisterOtpForm = ({
     if (
       fullCode.length === 6 &&
       /^\d{6}$/.test(fullCode) &&
-      !isVerifying &&
+      fullCode !== lastSubmittedCodeRef.current &&
+      !inFlightRef.current &&
       !justVerified
     ) {
       processVerify(fullCode);
     }
-  }, [otp, isVerifying, justVerified]);
+  }, [otp]);
 
   /* Resend OTP */
   const handleResend = async () => {

@@ -65,9 +65,9 @@ const LoginPhoneForm = ({
 
     if (!validatePhone()) return;
 
-    // If cooldown is still active, route directly to OTP verification
+    // If cooldown is still active and active Firebase session exists, route directly to OTP verification
     const remaining = getOtpRemainingCooldown(phone);
-    if (remaining > 0) {
+    if (remaining > 0 && typeof window !== 'undefined' && window.firebaseConfirmationResult) {
       onSuccess(phone);
       return;
     }

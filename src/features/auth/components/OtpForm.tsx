@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
@@ -24,6 +24,10 @@ const OtpForm = ({
   const [otpError, setOtpError] = useState("");
   const [justVerified, setJustVerified] = useState(false);
 
+  // Debounce & loop-prevention refs
+  const inFlightRef = useRef(false);
+  const lastSubmittedCodeRef = useRef<string>("");
+
   const { verifyOtp, isLoading: isVerifyingOtp } =
     useVerifyOtp();
 
@@ -42,17 +46,23 @@ const OtpForm = ({
     otp,
     setOtp,
     otpRefs,
-    handleOtpChange,
+    handleOtpChange: baseHandleOtpChange,
     handleOtpKeyDown,
     handleOtpPaste,
   } = useOtpInput(otpError, setOtpError);
+
+  const handleOtpChange = (value: string, index: number) => {
+    // Reset submitted code ref so new edits can be verified
+    lastSubmittedCodeRef.current = "";
+    baseHandleOtpChange(value, index);
+  };
 
   const {
     resendOtp,
     isResendingOtp,
   } = useResendOtp(activePhone, resetTimer);
 
-  // Auto-focus first input box on mount so mobile keyboard pops and iOS QuickType / Android Autofill is triggered
+  // Auto-focus first input box on mount
   useEffect(() => {
     const timer = setTimeout(() => {
       otpRefs.current[0]?.focus();
@@ -60,10 +70,9 @@ const OtpForm = ({
     return () => clearTimeout(timer);
   }, [otpRefs]);
 
+  // Ensure active phone exists
   useEffect(() => {
-    const savedPhone =
-      sessionStorage.getItem("auth_phone");
-
+    const savedPhone = sessionStorage.getItem("auth_phone");
     if (!phone && !savedPhone) {
       router.replace("/login");
     }
@@ -87,59 +96,68 @@ const OtpForm = ({
   };
 
   const processVerify = async (codeToVerify: string) => {
-    if (isVerifyingOtp || justVerified) return;
+    // Guard against concurrent executions or re-verifying same code in loop
+    if (inFlightRef.current || isVerifyingOtp || justVerified) return;
+    if (lastSubmittedCodeRef.current === codeToVerify) return;
 
-    const mobileNumber =
-      phone ||
-      sessionStorage.getItem("auth_phone") ||
-      "";
+    inFlightRef.current = true;
+    lastSubmittedCodeRef.current = codeToVerify;
 
-    if (!mobileNumber) {
-      setOtpError(
-        "Mobile number not found. Please try again."
-      );
-      return;
-    }
+    try {
+      const mobileNumber =
+        phone ||
+        sessionStorage.getItem("auth_phone") ||
+        "";
 
-    const response = await verifyOtp(
-      mobileNumber,
-      codeToVerify
-    );
+      if (!mobileNumber) {
+        setOtpError("Mobile number not found. Please try again.");
+        inFlightRef.current = false;
+        return;
+      }
 
-    if (response) {
-      setJustVerified(true);
+      const response = await verifyOtp(mobileNumber, codeToVerify);
 
-      const redirect =
-        new URLSearchParams(window.location.search).get(
-          "redirect"
-        );
+      if (response) {
+        setJustVerified(true);
 
-      // Perform a full browser navigation to home page or validated destination
-      // Using window.location.href guarantees all fresh HttpOnly cookies are applied
-      setTimeout(() => {
-        if (
-          redirect &&
-          redirect.startsWith("/") &&
-          !redirect.startsWith("//") &&
-          !redirect.startsWith("/login") &&
-          !redirect.startsWith("/signup") &&
-          !redirect.startsWith("/verify-otp")
-        ) {
-          window.location.href = redirect;
-        } else {
-          window.location.href = "/";
-        }
-      }, 500);
+        const redirect =
+          new URLSearchParams(window.location.search).get("redirect");
+
+        setTimeout(() => {
+          if (
+            redirect &&
+            redirect.startsWith("/") &&
+            !redirect.startsWith("//") &&
+            !redirect.startsWith("/login") &&
+            !redirect.startsWith("/signup") &&
+            !redirect.startsWith("/verify-otp")
+          ) {
+            window.location.href = redirect;
+          } else {
+            window.location.href = "/";
+          }
+        }, 500);
+      } else {
+        // If verify returned null/failed, permit manual retry
+        inFlightRef.current = false;
+      }
+    } catch (err) {
+      inFlightRef.current = false;
+    } finally {
+      inFlightRef.current = false;
     }
   };
 
   const handleVerifyOtp = async () => {
     if (!validateOtp()) return;
     const enteredOtp = otp.join("");
+    // Manual click resets lastSubmittedCodeRef to allow retry
+    lastSubmittedCodeRef.current = "";
+    inFlightRef.current = false;
     await processVerify(enteredOtp);
   };
 
-  /* Mobile WebOTP Auto-fetch SMS listener (Android Chrome / WebOTP supported browsers) */
+  /* Mobile WebOTP Auto-fetch SMS listener (Android Chrome) */
   useEffect(() => {
     if (typeof window === "undefined" || !("OTPCredential" in window)) {
       return;
@@ -160,8 +178,9 @@ const OtpForm = ({
             .split("");
 
           if (digits.length === 6) {
+            // Setting otp state triggers the auto-submit effect once cleanly
+            lastSubmittedCodeRef.current = "";
             setOtp(digits);
-            processVerify(digits.join(""));
           }
         }
       })
@@ -174,18 +193,19 @@ const OtpForm = ({
     };
   }, []);
 
-  /* Auto-submit when all 6 digits are filled */
+  /* Auto-submit when all 6 digits are filled (strictly triggered ONLY when otp changes) */
   useEffect(() => {
     const fullCode = otp.join("");
     if (
       fullCode.length === 6 &&
       /^\d{6}$/.test(fullCode) &&
-      !isVerifyingOtp &&
+      fullCode !== lastSubmittedCodeRef.current &&
+      !inFlightRef.current &&
       !justVerified
     ) {
       processVerify(fullCode);
     }
-  }, [otp, isVerifyingOtp, justVerified]);
+  }, [otp]);
 
   const handleResend = async () => {
     if (isResendingOtp || seconds > 0) return;
@@ -197,19 +217,18 @@ const OtpForm = ({
 
     if (!mobileNumber) return;
 
+    lastSubmittedCodeRef.current = "";
+    inFlightRef.current = false;
+    setOtp(["", "", "", "", "", ""]);
+    setOtpError("");
     await resendOtp();
   };
 
   const handleEditNumber = () => {
     sessionStorage.removeItem("auth_phone");
-    setOtp([
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-    ]);
+    lastSubmittedCodeRef.current = "";
+    inFlightRef.current = false;
+    setOtp(["", "", "", "", "", ""]);
     setOtpError("");
     onEditNumber();
   };
