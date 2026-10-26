@@ -36,9 +36,11 @@ const useVerifyOtp = () => {
       setIsLoading(true);
 
       let data = null;
+      let isFirebaseSession = false;
 
       // 1. Try Firebase confirmation first if active
       if (typeof window !== "undefined" && window.firebaseConfirmationResult) {
+        isFirebaseSession = true;
         try {
           const fbResult = await confirmFirebaseOtp(otp);
           data = await firebaseVerifyApi({
@@ -46,21 +48,35 @@ const useVerifyOtp = () => {
             phone_number: phoneNumber,
           });
         } catch (fbErr: any) {
-          console.warn("Firebase confirmation notice, falling back to standard verify:", fbErr);
+          console.error("Firebase OTP verification failed:", fbErr);
+
+          // Clean Firebase user-facing errors
+          if (fbErr?.code === "auth/invalid-verification-code") {
+            throw new Error("Invalid OTP entered. Please check and try again.");
+          }
+          if (fbErr?.code === "auth/code-expired") {
+            throw new Error("OTP has expired. Please click 'Resend OTP'.");
+          }
+
+          // If backend API returned an error (e.g. 403 role isolation, 400, 401)
+          // Rethrow fbErr directly so the outer catch can parse error.response.data
+          throw fbErr;
         }
       }
 
-      // 2. If Firebase wasn't active or verification didn't complete, check standard database OTP
-      if (!data || data?.status !== true) {
+      // 2. Only fallback to standard database OTP if Firebase session was NOT active
+      if (!isFirebaseSession && (!data || data?.status !== true)) {
         data = await VerifyOTPApi({
           phone_number: phoneNumber,
           otp,
         });
       }
 
-
-
       if (data?.status === true) {
+        if (typeof window !== "undefined") {
+          window.firebaseConfirmationResult = undefined;
+        }
+
         saveAuthSession(data);
 
         const welcomeMsg =
