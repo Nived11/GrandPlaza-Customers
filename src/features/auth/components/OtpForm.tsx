@@ -52,6 +52,14 @@ const OtpForm = ({
     isResendingOtp,
   } = useResendOtp(activePhone, resetTimer);
 
+  // Auto-focus first input box on mount so mobile keyboard pops and iOS QuickType / Android Autofill is triggered
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      otpRefs.current[0]?.focus();
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [otpRefs]);
+
   useEffect(() => {
     const savedPhone =
       sessionStorage.getItem("auth_phone");
@@ -106,17 +114,22 @@ const OtpForm = ({
           "redirect"
         );
 
+      // Perform a full browser navigation to home page or validated destination
+      // Using window.location.href guarantees all fresh HttpOnly cookies are applied
       setTimeout(() => {
         if (
           redirect &&
           redirect.startsWith("/") &&
-          !redirect.startsWith("//")
+          !redirect.startsWith("//") &&
+          !redirect.startsWith("/login") &&
+          !redirect.startsWith("/signup") &&
+          !redirect.startsWith("/verify-otp")
         ) {
-          router.replace(redirect);
+          window.location.href = redirect;
         } else {
-          router.replace("/");
+          window.location.href = "/";
         }
-      }, 700);
+      }, 500);
     }
   };
 
@@ -126,7 +139,7 @@ const OtpForm = ({
     await processVerify(enteredOtp);
   };
 
-  /* Mobile WebOTP Auto-fetch SMS listener */
+  /* Mobile WebOTP Auto-fetch SMS listener (Android Chrome / WebOTP supported browsers) */
   useEffect(() => {
     if (typeof window === "undefined" || !("OTPCredential" in window)) {
       return;
@@ -155,9 +168,11 @@ const OtpForm = ({
       .catch(() => {});
 
     return () => {
-      ac.abort();
+      try {
+        ac.abort();
+      } catch (e) {}
     };
-  }, [phone]);
+  }, []);
 
   /* Auto-submit when all 6 digits are filled */
   useEffect(() => {
@@ -170,8 +185,7 @@ const OtpForm = ({
     ) {
       processVerify(fullCode);
     }
-  }, [otp]);
-
+  }, [otp, isVerifyingOtp, justVerified]);
 
   const handleResend = async () => {
     if (isResendingOtp || seconds > 0) return;
@@ -207,7 +221,13 @@ const OtpForm = ({
       : activePhone;
 
   return (
-    <div className="w-full">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleVerifyOtp();
+      }}
+      className="w-full"
+    >
       {/* Heading */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -270,9 +290,12 @@ const OtpForm = ({
               ref={(element) => {
                 otpRefs.current[index] = element;
               }}
+              id={`otp-input-${index}`}
+              name={`otp-${index}`}
               type="text"
               inputMode="numeric"
-              autoComplete={index === 0 ? "one-time-code" : "off"}
+              pattern="[0-9]*"
+              autoComplete="one-time-code"
               maxLength={6}
               value={digit}
               onChange={(e) =>
@@ -311,8 +334,7 @@ const OtpForm = ({
 
       {/* Verify Button */}
       <motion.button
-        type="button"
-        onClick={handleVerifyOtp}
+        type="submit"
         disabled={
           isVerifyingOtp ||
           justVerified
@@ -362,7 +384,7 @@ const OtpForm = ({
           </button>
         )}
       </div>
-    </div>
+    </form>
   );
 };
 

@@ -69,6 +69,14 @@ const RegisterOtpForm = ({
     }
   }, [phone]);
 
+  // Auto-focus first input box on mount so mobile keyboard pops and autofill triggers
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      otpRefs.current[0]?.focus();
+    }, 150);
+    return () => clearTimeout(timer);
+  }, []);
+
   /* OTP Input change */
   const handleOtpChange = (
     value: string,
@@ -88,16 +96,18 @@ const RegisterOtpForm = ({
       return;
     }
 
-    /* Pasted OTP */
+    /* Pasted / Autofilled OTP */
     if (numbersOnly.length > 1) {
       const newOtp = [...otp];
+      const digits = numbersOnly.slice(0, 6).split("");
 
-      numbersOnly
-        .slice(0, otp.length - index)
-        .split("")
-        .forEach((digit, offset) => {
-          newOtp[index + offset] = digit;
-        });
+      // If full 6 digits arrived, always fill from index 0 across all boxes
+      const startIdx = digits.length === 6 ? 0 : index;
+      digits.forEach((digit, offset) => {
+        if (startIdx + offset < 6) {
+          newOtp[startIdx + offset] = digit;
+        }
+      });
 
       setOtp(newOtp);
 
@@ -106,13 +116,13 @@ const RegisterOtpForm = ({
       }
 
       const lastIndex = Math.min(
-        index + numbersOnly.length - 1,
+        startIdx + digits.length - 1,
         otp.length - 1
       );
 
       setTimeout(() => {
         otpRefs.current[lastIndex]?.focus();
-      }, 0);
+      }, 10);
 
       return;
     }
@@ -136,12 +146,17 @@ const RegisterOtpForm = ({
     e: React.KeyboardEvent<HTMLInputElement>,
     index: number
   ) => {
-    if (
-      e.key === "Backspace" &&
-      !otp[index] &&
-      index > 0
-    ) {
-      otpRefs.current[index - 1]?.focus();
+    if (e.key === "Backspace") {
+      if (!otp[index] && index > 0) {
+        const newOtp = [...otp];
+        newOtp[index - 1] = "";
+        setOtp(newOtp);
+        otpRefs.current[index - 1]?.focus();
+      } else {
+        const newOtp = [...otp];
+        newOtp[index] = "";
+        setOtp(newOtp);
+      }
     }
 
     if (e.key === "ArrowLeft" && index > 0) {
@@ -168,13 +183,14 @@ const RegisterOtpForm = ({
     if (!pastedValue) return;
 
     const newOtp = [...otp];
+    const digits = pastedValue.split("");
+    const startIdx = digits.length === 6 ? 0 : index;
 
-    pastedValue
-      .slice(0, otp.length - index)
-      .split("")
-      .forEach((digit, offset) => {
-        newOtp[index + offset] = digit;
-      });
+    digits.forEach((digit, offset) => {
+      if (startIdx + offset < 6) {
+        newOtp[startIdx + offset] = digit;
+      }
+    });
 
     setOtp(newOtp);
 
@@ -183,13 +199,13 @@ const RegisterOtpForm = ({
     }
 
     const lastIndex = Math.min(
-      index + pastedValue.length - 1,
+      startIdx + digits.length - 1,
       otp.length - 1
     );
 
     setTimeout(() => {
       otpRefs.current[lastIndex]?.focus();
-    }, 0);
+    }, 10);
   };
 
   /* Validate OTP */
@@ -235,8 +251,8 @@ const RegisterOtpForm = ({
     setJustVerified(true);
 
     setTimeout(() => {
-      router.replace("/");
-    }, 650);
+      window.location.href = "/";
+    }, 500);
   };
 
   /* Verify OTP submit */
@@ -280,9 +296,11 @@ const RegisterOtpForm = ({
       .catch(() => {});
 
     return () => {
-      ac.abort();
+      try {
+        ac.abort();
+      } catch (e) {}
     };
-  }, [storedPhone]);
+  }, []);
 
   /* Auto-submit when all 6 digits are filled */
   useEffect(() => {
@@ -295,7 +313,7 @@ const RegisterOtpForm = ({
     ) {
       processVerify(fullCode);
     }
-  }, [otp]);
+  }, [otp, isVerifying, justVerified]);
 
   /* Resend OTP */
   const handleResend = async () => {
@@ -350,18 +368,18 @@ const RegisterOtpForm = ({
           duration: 0.35,
           ease: "easeOut",
         }}
-        className="mb-4 sm:mb-5 text-center"
+        className="mb-4 sm:mb-5"
       >
         <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight text-[#1E2A22]">
           Verify Your Number
         </h2>
 
         <p className="text-[#1E2A22]/60 text-xs sm:text-sm mt-1.5 leading-relaxed">
-          Enter the 6-digit code sent to your number.
+          Enter the 6-digit verification code sent to your number.
         </p>
       </motion.div>
 
-      {/* Phone Number Bar */}
+      {/* Phone Number Display */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -372,11 +390,12 @@ const RegisterOtpForm = ({
         }}
         className="mb-4 sm:mb-5"
       >
-        <div className="flex items-center justify-between px-1">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <p className="text-xs sm:text-sm font-semibold text-[#1E2A22]">
               {formattedPhone}
             </p>
+
             {seconds > 0 && (
               <span className="inline-flex items-center gap-1 rounded-full bg-[#0F3D2E]/10 px-2 py-0.5 text-[10px] sm:text-[11px] font-semibold text-[#0F3D2E]">
                 <span>⏱️</span>
@@ -405,9 +424,11 @@ const RegisterOtpForm = ({
                 otpRefs.current[index] = element;
               }}
               id={`register-otp-${index}`}
+              name={`register-otp-${index}`}
               type="text"
               inputMode="numeric"
-              autoComplete={index === 0 ? "one-time-code" : "off"}
+              pattern="[0-9]*"
+              autoComplete="one-time-code"
               maxLength={6}
               value={digit}
               onChange={(e) =>

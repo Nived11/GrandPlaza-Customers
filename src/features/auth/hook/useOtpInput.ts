@@ -27,31 +27,29 @@ const useOtpInput = (
 
     if (!numbersOnly) {
       const newOtp = [...otp];
-
       newOtp[index] = "";
-
       setOtp(newOtp);
 
       if (otpError) {
         setOtpError("");
       }
-
       return;
     }
 
     /*
-     * Multiple digits means the user pasted
-     * an OTP.
+     * Multiple digits means mobile autofill (iOS / Android) or paste
      */
     if (numbersOnly.length > 1) {
       const newOtp = [...otp];
+      const digits = numbersOnly.slice(0, 6).split("");
 
-      numbersOnly
-        .slice(0, otp.length - index)
-        .split("")
-        .forEach((digit, offset) => {
-          newOtp[index + offset] = digit;
-        });
+      // If full 6 digits arrived, always fill from index 0 across all boxes
+      const startIdx = digits.length === 6 ? 0 : index;
+      digits.forEach((digit, offset) => {
+        if (startIdx + offset < 6) {
+          newOtp[startIdx + offset] = digit;
+        }
+      });
 
       setOtp(newOtp);
 
@@ -59,14 +57,10 @@ const useOtpInput = (
         setOtpError("");
       }
 
-      const lastIndex = Math.min(
-        index + numbersOnly.length - 1,
-        otp.length - 1
-      );
-
+      const lastIndex = Math.min(startIdx + digits.length - 1, 5);
       setTimeout(() => {
         otpRefs.current[lastIndex]?.focus();
-      }, 0);
+      }, 10);
 
       return;
     }
@@ -75,9 +69,7 @@ const useOtpInput = (
      * Normal single digit entry
      */
     const newOtp = [...otp];
-
     newOtp[index] = numbersOnly;
-
     setOtp(newOtp);
 
     if (otpError) {
@@ -87,10 +79,7 @@ const useOtpInput = (
     /*
      * Move to next box
      */
-    if (
-      numbersOnly &&
-      index < otp.length - 1
-    ) {
+    if (numbersOnly && index < otp.length - 1) {
       otpRefs.current[index + 1]?.focus();
     }
   };
@@ -105,31 +94,30 @@ const useOtpInput = (
     /*
      * Backspace
      */
-    if (
-      e.key === "Backspace" &&
-      !otp[index] &&
-      index > 0
-    ) {
-      otpRefs.current[index - 1]?.focus();
+    if (e.key === "Backspace") {
+      if (!otp[index] && index > 0) {
+        const newOtp = [...otp];
+        newOtp[index - 1] = "";
+        setOtp(newOtp);
+        otpRefs.current[index - 1]?.focus();
+      } else {
+        const newOtp = [...otp];
+        newOtp[index] = "";
+        setOtp(newOtp);
+      }
     }
 
     /*
      * Arrow left
      */
-    if (
-      e.key === "ArrowLeft" &&
-      index > 0
-    ) {
+    if (e.key === "ArrowLeft" && index > 0) {
       otpRefs.current[index - 1]?.focus();
     }
 
     /*
      * Arrow right
      */
-    if (
-      e.key === "ArrowRight" &&
-      index < otp.length - 1
-    ) {
+    if (e.key === "ArrowRight" && index < otp.length - 1) {
       otpRefs.current[index + 1]?.focus();
     }
   };
@@ -151,13 +139,14 @@ const useOtpInput = (
     if (!pastedValue) return;
 
     const newOtp = [...otp];
+    const digits = pastedValue.split("");
+    const startIdx = digits.length === 6 ? 0 : index;
 
-    pastedValue
-      .slice(0, otp.length - index)
-      .split("")
-      .forEach((digit, offset) => {
-        newOtp[index + offset] = digit;
-      });
+    digits.forEach((digit, offset) => {
+      if (startIdx + offset < 6) {
+        newOtp[startIdx + offset] = digit;
+      }
+    });
 
     setOtp(newOtp);
 
@@ -166,13 +155,13 @@ const useOtpInput = (
     }
 
     const lastIndex = Math.min(
-      index + pastedValue.length - 1,
+      startIdx + digits.length - 1,
       otp.length - 1
     );
 
     setTimeout(() => {
       otpRefs.current[lastIndex]?.focus();
-    }, 0);
+    }, 10);
   };
 
   return {

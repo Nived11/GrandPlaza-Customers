@@ -58,7 +58,14 @@ axiosInstance.interceptors.response.use(
     ];
     const isSkippedUrl = skipUrls.some(url => originalRequest.url?.includes(url));
 
+    const isLoggedIn = typeof window !== 'undefined' && localStorage.getItem('isLoggedIn') === 'true';
+
     if (error.response?.status === 401 && !originalRequest._retry && !isSkippedUrl) {
+      if (!isLoggedIn) {
+        // Anonymous visitor: do not attempt token refresh and NEVER force-redirect to /login
+        return Promise.reject(error);
+      }
+
       if (isRefreshing) {
         return new Promise(function(resolve, reject) {
           failedQueue.push({ resolve, reject });
@@ -73,7 +80,6 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // 🌟   ‌  
         await axiosInstance.post('/accounts/token/refresh');
 
         isRefreshing = false;
@@ -88,10 +94,8 @@ axiosInstance.interceptors.response.use(
           const wasLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
           localStorage.clear();
           const currentPath = window.location.pathname;
-          if (currentPath !== loginRedirect) {
-            if (wasLoggedIn) {
-              toast.error('Session expired. Please login again!');
-            }
+          if (wasLoggedIn && currentPath !== loginRedirect) {
+            toast.error('Session expired. Please login again!');
             setTimeout(() => {
               window.location.href = loginRedirect;
             }, 1000);
