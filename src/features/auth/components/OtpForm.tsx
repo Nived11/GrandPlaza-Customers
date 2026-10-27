@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 import useVerifyOtp from "../hook/useVerifyOtp";
 import useLogin from "../hook/useLogin";
@@ -245,8 +245,55 @@ const OtpForm = ({
         e.preventDefault();
         handleVerifyOtp();
       }}
-      className="w-full"
+      className="w-full relative"
     >
+      {/* Glassmorphism Verification / Resend Loading Overlay */}
+      <AnimatePresence>
+        {(isVerifyingOtp || isResendingOtp) && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+            className="absolute -inset-3 sm:-inset-4 z-50 flex flex-col items-center justify-center rounded-3xl bg-[#FAF5EB]/90 backdrop-blur-md px-6 py-8 text-center shadow-xl border border-[#D9A441]/25"
+          >
+            {/* Spinning Dual Gold & Emerald Rings */}
+            <div className="relative mb-4 flex items-center justify-center">
+              <div className="h-16 w-16 rounded-full border-[3px] border-[#0F3D2E]/20 border-t-[#0F3D2E] animate-spin" />
+              <div className="absolute h-10 w-10 rounded-full border-2 border-[#D9A441]/30 border-b-[#D9A441] animate-spin [animation-direction:reverse] [animation-duration:1.2s]" />
+              <div className="absolute flex items-center justify-center text-[#0F3D2E]">
+                {isVerifyingOtp ? (
+                  <svg className="h-5 w-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                ) : (
+                  <svg className="h-5 w-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                )}
+              </div>
+            </div>
+
+            {/* Status Title */}
+            <h4 className="text-sm sm:text-base font-bold text-[#0F3D2E] tracking-wide">
+              {isVerifyingOtp ? "Verifying Security Code" : "Resending New Code"}
+            </h4>
+
+            {/* Subtitle */}
+            <p className="mt-1 text-xs text-[#1E2A22]/75 max-w-[250px]">
+              {isVerifyingOtp
+                ? "Authenticating your session securely..."
+                : `Dispatching new SMS OTP to ${formattedPhone}...`}
+            </p>
+
+            {/* Pulsing micro-badge */}
+            <div className="mt-3.5 inline-flex items-center gap-2 rounded-full bg-[#0F3D2E]/10 px-3 py-1 text-[11px] font-semibold text-[#0F3D2E]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#D9A441] animate-ping" />
+              <span>{isVerifyingOtp ? "Almost done..." : "Please wait a moment..."}</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Heading */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -399,12 +446,20 @@ const OtpForm = ({
           className="pointer-events-none absolute right-0 -top-4 h-18 w-auto object-contain opacity-70"
         />
 
-        <span className="relative z-10">
-          {isVerifyingOtp
-            ? "VERIFYING..."
-            : justVerified
-              ? "VERIFIED"
-              : "VERIFY OTP →"}
+        <span className="relative z-10 flex items-center justify-center gap-2">
+          {isVerifyingOtp && (
+            <svg className="h-4 w-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          )}
+          <span>
+            {isVerifyingOtp
+              ? "VERIFYING..."
+              : justVerified
+                ? "VERIFIED"
+                : "VERIFY OTP →"}
+          </span>
         </span>
       </motion.button>
 

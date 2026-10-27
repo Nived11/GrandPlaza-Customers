@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
 import useLogin from "../hook/useLogin";
 import useOtpTimer from "../hook/useOtpTimer";
@@ -90,8 +90,52 @@ const LoginPhoneForm = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4"
+      className="space-y-4 relative"
     >
+      {/* Glassmorphism Sending OTP Loading Overlay */}
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+            className="absolute -inset-3 sm:-inset-4 z-50 flex flex-col items-center justify-center rounded-3xl bg-[#FAF5EB]/90 backdrop-blur-md px-6 py-8 text-center shadow-xl border border-[#D9A441]/25"
+          >
+            {/* Spinning Dual Gold & Emerald Rings */}
+            <div className="relative mb-4 flex items-center justify-center">
+              <div className="h-16 w-16 rounded-full border-[3px] border-[#0F3D2E]/20 border-t-[#0F3D2E] animate-spin" />
+              <div className="absolute h-10 w-10 rounded-full border-2 border-[#D9A441]/30 border-b-[#D9A441] animate-spin [animation-direction:reverse] [animation-duration:1.2s]" />
+              <div className="absolute flex items-center justify-center text-[#0F3D2E]">
+                <svg className="h-5 w-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Status Title */}
+            <h4 className="text-sm sm:text-base font-bold text-[#0F3D2E] tracking-wide">
+              Sending Verification Code
+            </h4>
+
+            {/* Subtitle with Phone Number */}
+            <p className="mt-1 text-xs text-[#1E2A22]/75 max-w-[250px]">
+              Dispatching secure SMS OTP to{" "}
+              <span className="font-bold text-[#0F3D2E]">
+                {phone.length === 10
+                  ? `+91 ${phone.slice(0, 5)} ${phone.slice(5)}`
+                  : phone}
+              </span>
+            </p>
+
+            {/* Pulsing micro-badge */}
+            <div className="mt-3.5 inline-flex items-center gap-2 rounded-full bg-[#0F3D2E]/10 px-3 py-1 text-[11px] font-semibold text-[#0F3D2E]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#D9A441] animate-ping" />
+              <span>Connecting via Firebase...</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Mobile Number */}
       <motion.div
         initial={{
@@ -376,12 +420,20 @@ const LoginPhoneForm = ({
           sm:text-sm
         "
       >
-        <span className="relative z-10">
-          {isLoading
-            ? "SENDING..."
-            : seconds > 0
-              ? `CONTINUE TO OTP (${seconds}s)`
-              : "SEND OTP"}
+        <span className="relative z-10 flex items-center justify-center gap-2">
+          {isLoading && (
+            <svg className="h-4 w-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          )}
+          <span>
+            {isLoading
+              ? "SENDING..."
+              : seconds > 0
+                ? `CONTINUE TO OTP (${seconds}s)`
+                : "SEND OTP"}
+          </span>
         </span>
 
         {!isLoading && (
