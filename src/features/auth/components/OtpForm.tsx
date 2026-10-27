@@ -28,6 +28,7 @@ const OtpForm = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const inFlightRef = useRef(false);
   const lastSubmittedCodeRef = useRef<string>("");
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const { verifyOtp, isLoading: isVerifyingOtp } = useVerifyOtp();
   const { login, isLoading: isLoggingIn } = useLogin();
@@ -39,10 +40,9 @@ const OtpForm = ({
       : "");
 
   const { seconds, resetTimer } = useOtpTimer(activePhone, 45);
-
   const { resendOtp, isResendingOtp } = useResendOtp(activePhone, resetTimer);
 
-  // Auto-focus the single input on mount so mobile keyboard opens and autofill activates
+  // Auto-focus input on mount so mobile keyboard opens and autofill activates
   useEffect(() => {
     const timer = setTimeout(() => {
       inputRef.current?.focus();
@@ -147,13 +147,20 @@ const OtpForm = ({
     await processVerify(otpValue);
   };
 
-  /* Mobile WebOTP Auto-fetch SMS listener (Android Chrome) */
-  useEffect(() => {
+  /* Mobile WebOTP Auto-fetch SMS listener (Android Chrome / WebOTP supported browsers) */
+  const startWebOtp = () => {
     if (typeof window === "undefined" || !("OTPCredential" in window)) {
       return;
     }
 
+    if (abortControllerRef.current) {
+      try {
+        abortControllerRef.current.abort();
+      } catch (e) {}
+    }
+
     const ac = new AbortController();
+    abortControllerRef.current = ac;
 
     navigator.credentials
       .get({
@@ -170,11 +177,16 @@ const OtpForm = ({
         }
       })
       .catch(() => {});
+  };
 
+  useEffect(() => {
+    startWebOtp();
     return () => {
-      try {
-        ac.abort();
-      } catch (e) {}
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort();
+        } catch (e) {}
+      }
     };
   }, []);
 
@@ -189,7 +201,7 @@ const OtpForm = ({
     ) {
       processVerify(otpValue);
     }
-  }, [otpValue]);
+  }, [otpValue, justVerified]);
 
   const handleResend = async () => {
     if (isResendingOtp || seconds > 0) return;
@@ -206,7 +218,10 @@ const OtpForm = ({
     setOtpValue("");
     setOtpError("");
     inputRef.current?.focus();
-    await resendOtp();
+    const res = await resendOtp();
+    if (res) {
+      startWebOtp();
+    }
   };
 
   const handleEditNumber = () => {
@@ -285,9 +300,9 @@ const OtpForm = ({
         </div>
       </motion.div>
 
-      {/* OTP Single Input Container with 6 Visual Slots */}
+      {/* OTP Unified Input Area */}
       <div className="relative mb-5 w-full">
-        {/* Invisible Native Input covering the 6 slots for 100% native WebOTP / iOS Autofill / Paste compatibility */}
+        {/* Real Native Input styled with opacity: 0.001 so it's 100% visible to Chromium Autofill & WebOTP, but invisible to human eyes */}
         <input
           ref={inputRef}
           id="otp-native-input"
@@ -303,13 +318,28 @@ const OtpForm = ({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           disabled={isVerifyingOtp || justVerified}
-          className="absolute inset-0 z-10 h-full w-full opacity-0 cursor-pointer"
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            opacity: 0.001,
+            pointerEvents: "auto",
+            cursor: "pointer",
+            background: "transparent",
+            color: "transparent",
+            border: "none",
+            outline: "none",
+            caretColor: "transparent",
+            fontSize: "24px",
+            zIndex: 10,
+          }}
           autoFocus
           aria-label="6-digit verification code"
         />
 
         {/* 6 Visual Display Slots */}
-        <div className="flex w-full justify-between gap-2 sm:gap-3 pointer-events-none">
+        <div className="flex w-full justify-between gap-2 sm:gap-3 pointer-events-none select-none">
           {[0, 1, 2, 3, 4, 5].map((index) => {
             const digit = otpValue[index] || "";
             const isCurrent =

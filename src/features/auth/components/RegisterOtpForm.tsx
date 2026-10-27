@@ -30,6 +30,7 @@ const RegisterOtpForm = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const inFlightRef = useRef(false);
   const lastSubmittedCodeRef = useRef<string>("");
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const {
     verifyOtp,
@@ -144,13 +145,20 @@ const RegisterOtpForm = ({
     await processVerify(otpValue);
   };
 
-  /* Mobile WebOTP Auto-fetch SMS listener */
-  useEffect(() => {
+  /* Mobile WebOTP Auto-fetch SMS listener (Android Chrome / WebOTP supported browsers) */
+  const startWebOtp = () => {
     if (typeof window === "undefined" || !("OTPCredential" in window)) {
       return;
     }
 
+    if (abortControllerRef.current) {
+      try {
+        abortControllerRef.current.abort();
+      } catch (e) {}
+    }
+
     const ac = new AbortController();
+    abortControllerRef.current = ac;
 
     navigator.credentials
       .get({
@@ -167,11 +175,16 @@ const RegisterOtpForm = ({
         }
       })
       .catch(() => {});
+  };
 
+  useEffect(() => {
+    startWebOtp();
     return () => {
-      try {
-        ac.abort();
-      } catch (e) {}
+      if (abortControllerRef.current) {
+        try {
+          abortControllerRef.current.abort();
+        } catch (e) {}
+      }
     };
   }, []);
 
@@ -187,7 +200,7 @@ const RegisterOtpForm = ({
     ) {
       processVerify(fullCode);
     }
-  }, [otpValue]);
+  }, [otpValue, justVerified]);
 
   /* Resend OTP */
   const handleResend = async () => {
@@ -204,6 +217,7 @@ const RegisterOtpForm = ({
     inFlightRef.current = false;
     setOtpValue("");
     setOtpError("");
+    startWebOtp();
 
     setTimeout(() => {
       inputRef.current?.focus();
@@ -286,7 +300,7 @@ const RegisterOtpForm = ({
 
       {/* OTP Single Input Container with 6 Visual Slots */}
       <div className="relative mb-4 sm:mb-5 w-full">
-        {/* Invisible Native Input covering the 6 slots */}
+        {/* Real Native Input styled with opacity: 0.001 so it's 100% visible to Chromium Autofill & WebOTP, but invisible to human eyes */}
         <input
           ref={inputRef}
           id="register-otp-native-input"
@@ -302,13 +316,28 @@ const RegisterOtpForm = ({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           disabled={isVerifying || justVerified}
-          className="absolute inset-0 z-10 h-full w-full opacity-0 cursor-pointer"
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            opacity: 0.001,
+            pointerEvents: "auto",
+            cursor: "pointer",
+            background: "transparent",
+            color: "transparent",
+            border: "none",
+            outline: "none",
+            caretColor: "transparent",
+            fontSize: "24px",
+            zIndex: 10,
+          }}
           autoFocus
           aria-label="6-digit verification code"
         />
 
         {/* 6 Visual Display Slots */}
-        <div className="flex w-full justify-between gap-1.5 sm:gap-2.5 pointer-events-none">
+        <div className="flex w-full justify-between gap-1.5 sm:gap-2.5 pointer-events-none select-none">
           {[0, 1, 2, 3, 4, 5].map((index) => {
             const digit = otpValue[index] || "";
             const isCurrent =

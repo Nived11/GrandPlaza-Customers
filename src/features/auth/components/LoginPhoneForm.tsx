@@ -17,7 +17,12 @@ interface LoginPhoneFormProps {
 const LoginPhoneForm = ({
   onSuccess,
 }: LoginPhoneFormProps) => {
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("auth_phone") || "";
+    }
+    return "";
+  });
   const [phoneError, setPhoneError] = useState("");
 
   const { login, isLoading } = useLogin();
