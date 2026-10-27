@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 
 import useVerifyOtp from "../hook/useVerifyOtp";
 import useLogin from "../hook/useLogin";
-import useOtpInput from "../hook/useOtpInput";
 import useOtpTimer from "../hook/useOtpTimer";
 import useResendOtp from "../hook/useResendOtp";
 
@@ -21,18 +20,17 @@ const OtpForm = ({
 }: OtpFormProps) => {
   const router = useRouter();
 
+  const [otpValue, setOtpValue] = useState("");
   const [otpError, setOtpError] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
   const [justVerified, setJustVerified] = useState(false);
 
-  // Debounce & loop-prevention refs
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const inFlightRef = useRef(false);
   const lastSubmittedCodeRef = useRef<string>("");
 
-  const { verifyOtp, isLoading: isVerifyingOtp } =
-    useVerifyOtp();
-
-  const { login, isLoading: isLoggingIn } =
-    useLogin();
+  const { verifyOtp, isLoading: isVerifyingOtp } = useVerifyOtp();
+  const { login, isLoading: isLoggingIn } = useLogin();
 
   const activePhone =
     phone ||
@@ -42,33 +40,15 @@ const OtpForm = ({
 
   const { seconds, resetTimer } = useOtpTimer(activePhone, 45);
 
-  const {
-    otp,
-    setOtp,
-    otpRefs,
-    handleOtpChange: baseHandleOtpChange,
-    handleOtpKeyDown,
-    handleOtpPaste,
-  } = useOtpInput(otpError, setOtpError);
+  const { resendOtp, isResendingOtp } = useResendOtp(activePhone, resetTimer);
 
-  const handleOtpChange = (value: string, index: number) => {
-    // Reset submitted code ref so new edits can be verified
-    lastSubmittedCodeRef.current = "";
-    baseHandleOtpChange(value, index);
-  };
-
-  const {
-    resendOtp,
-    isResendingOtp,
-  } = useResendOtp(activePhone, resetTimer);
-
-  // Auto-focus first input box on mount
+  // Auto-focus the single input on mount so mobile keyboard opens and autofill activates
   useEffect(() => {
     const timer = setTimeout(() => {
-      otpRefs.current[0]?.focus();
+      inputRef.current?.focus();
     }, 150);
     return () => clearTimeout(timer);
-  }, [otpRefs]);
+  }, []);
 
   // Ensure active phone exists
   useEffect(() => {
@@ -78,25 +58,28 @@ const OtpForm = ({
     }
   }, [phone, router]);
 
-  const validateOtp = () => {
-    const enteredOtp = otp.join("");
-
-    if (enteredOtp.length !== 6) {
-      setOtpError("Please enter the complete 6-digit OTP.");
-      return false;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const numbersOnly = e.target.value.replace(/\D/g, "").slice(0, 6);
+    lastSubmittedCodeRef.current = "";
+    setOtpValue(numbersOnly);
+    if (otpError) {
+      setOtpError("");
     }
+  };
 
-    if (!/^\d{6}$/.test(enteredOtp)) {
-      setOtpError("Please enter a valid OTP.");
-      return false;
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (pasted) {
+      lastSubmittedCodeRef.current = "";
+      setOtpValue(pasted);
+      if (otpError) {
+        setOtpError("");
+      }
     }
-
-    setOtpError("");
-    return true;
   };
 
   const processVerify = async (codeToVerify: string) => {
-    // Guard against concurrent executions or re-verifying same code in loop
     if (inFlightRef.current || isVerifyingOtp || justVerified) return;
     if (lastSubmittedCodeRef.current === codeToVerify) return;
 
@@ -138,7 +121,6 @@ const OtpForm = ({
           }
         }, 500);
       } else {
-        // If verify returned null/failed, permit manual retry
         inFlightRef.current = false;
       }
     } catch (err) {
@@ -149,12 +131,20 @@ const OtpForm = ({
   };
 
   const handleVerifyOtp = async () => {
-    if (!validateOtp()) return;
-    const enteredOtp = otp.join("");
-    // Manual click resets lastSubmittedCodeRef to allow retry
+    if (otpValue.length !== 6) {
+      setOtpError("Please enter the complete 6-digit OTP.");
+      inputRef.current?.focus();
+      return;
+    }
+    if (!/^\d{6}$/.test(otpValue)) {
+      setOtpError("Please enter a valid OTP.");
+      inputRef.current?.focus();
+      return;
+    }
+    setOtpError("");
     lastSubmittedCodeRef.current = "";
     inFlightRef.current = false;
-    await processVerify(enteredOtp);
+    await processVerify(otpValue);
   };
 
   /* Mobile WebOTP Auto-fetch SMS listener (Android Chrome) */
@@ -172,15 +162,10 @@ const OtpForm = ({
       } as any)
       .then((otpCredential: any) => {
         if (otpCredential?.code) {
-          const digits = otpCredential.code
-            .replace(/\D/g, "")
-            .slice(0, 6)
-            .split("");
-
+          const digits = otpCredential.code.replace(/\D/g, "").slice(0, 6);
           if (digits.length === 6) {
-            // Setting otp state triggers the auto-submit effect once cleanly
             lastSubmittedCodeRef.current = "";
-            setOtp(digits);
+            setOtpValue(digits);
           }
         }
       })
@@ -193,19 +178,18 @@ const OtpForm = ({
     };
   }, []);
 
-  /* Auto-submit when all 6 digits are filled (strictly triggered ONLY when otp changes) */
+  /* Auto-submit when all 6 digits are entered / autofilled */
   useEffect(() => {
-    const fullCode = otp.join("");
     if (
-      fullCode.length === 6 &&
-      /^\d{6}$/.test(fullCode) &&
-      fullCode !== lastSubmittedCodeRef.current &&
+      otpValue.length === 6 &&
+      /^\d{6}$/.test(otpValue) &&
+      otpValue !== lastSubmittedCodeRef.current &&
       !inFlightRef.current &&
       !justVerified
     ) {
-      processVerify(fullCode);
+      processVerify(otpValue);
     }
-  }, [otp]);
+  }, [otpValue]);
 
   const handleResend = async () => {
     if (isResendingOtp || seconds > 0) return;
@@ -219,8 +203,9 @@ const OtpForm = ({
 
     lastSubmittedCodeRef.current = "";
     inFlightRef.current = false;
-    setOtp(["", "", "", "", "", ""]);
+    setOtpValue("");
     setOtpError("");
+    inputRef.current?.focus();
     await resendOtp();
   };
 
@@ -228,7 +213,7 @@ const OtpForm = ({
     sessionStorage.removeItem("auth_phone");
     lastSubmittedCodeRef.current = "";
     inFlightRef.current = false;
-    setOtp(["", "", "", "", "", ""]);
+    setOtpValue("");
     setOtpError("");
     onEditNumber();
   };
@@ -300,48 +285,60 @@ const OtpForm = ({
         </div>
       </motion.div>
 
-      {/* OTP Inputs */}
-      <div className="mb-5">
-        <div className="flex w-full justify-between gap-2 sm:gap-3">
-          {otp.map((digit, index) => (
-            <input
-              key={index}
-              ref={(element) => {
-                otpRefs.current[index] = element;
-              }}
-              id={`otp-input-${index}`}
-              name={`otp-${index}`}
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              autoComplete="one-time-code"
-              maxLength={6}
-              value={digit}
-              onChange={(e) =>
-                handleOtpChange(
-                  e.target.value,
-                  index
-                )
-              }
-              onKeyDown={(e) =>
-                handleOtpKeyDown(e, index)
-              }
-              onPaste={(e) =>
-                handleOtpPaste(e, index)
-              }
-              disabled={
-                isVerifyingOtp || justVerified
-              }
-              aria-label={`OTP digit ${index + 1}`}
-              className={` h-12 w-12 rounded-xl border bg-white/80 text-center text-lg font-semibold text-[#1E2A22] outline-none transition-all sm:h-14 sm:w-14
-                ${
-                  otpError
-                    ? "border-red-400 focus:border-red-500"
-                    : "border-[#1E2A22]/15 focus:border-[#D9A441]"
-                }
-              `}
-            />
-          ))}
+      {/* OTP Single Input Container with 6 Visual Slots */}
+      <div className="relative mb-5 w-full">
+        {/* Invisible Native Input covering the 6 slots for 100% native WebOTP / iOS Autofill / Paste compatibility */}
+        <input
+          ref={inputRef}
+          id="otp-native-input"
+          name="one-time-code"
+          type="tel"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          pattern="[0-9]*"
+          maxLength={6}
+          value={otpValue}
+          onChange={handleInputChange}
+          onPaste={handlePaste}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          disabled={isVerifyingOtp || justVerified}
+          className="absolute inset-0 z-10 h-full w-full opacity-0 cursor-pointer"
+          autoFocus
+          aria-label="6-digit verification code"
+        />
+
+        {/* 6 Visual Display Slots */}
+        <div className="flex w-full justify-between gap-2 sm:gap-3 pointer-events-none">
+          {[0, 1, 2, 3, 4, 5].map((index) => {
+            const digit = otpValue[index] || "";
+            const isCurrent =
+              isFocused &&
+              (index === otpValue.length ||
+                (index === 5 && otpValue.length === 6));
+
+            return (
+              <div
+                key={index}
+                className={`relative h-12 w-12 sm:h-14 sm:w-14 rounded-xl border bg-white/80 flex items-center justify-center text-center text-lg sm:text-xl font-bold text-[#1E2A22] transition-all
+                  ${
+                    otpError
+                      ? "border-red-400 bg-red-50/20"
+                      : isCurrent
+                        ? "border-[#D9A441] ring-2 ring-[#D9A441]/20 scale-105"
+                        : digit
+                          ? "border-[#0F3D2E]/40 bg-white shadow-xs"
+                          : "border-[#1E2A22]/15"
+                  }
+                `}
+              >
+                {digit}
+                {isCurrent && !digit && (
+                  <span className="inline-block w-0.5 h-5 bg-[#D9A441] animate-pulse" />
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {otpError && (
