@@ -1,6 +1,7 @@
 "use client";
 
 import React, {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -10,6 +11,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import useVerifyOtp from "../hook/useVerifyOtp";
 import useLogin from "../hook/useLogin";
 import useOtpTimer from "../hook/useOtpTimer";
+import useSmsOtp from "../hook/useSmsOtp";
+import { stopSmsOtp } from "@/lib/smsOtp";
+import OtpCodeInput from "./OtpCodeInput";
 
 interface RegisterOtpFormProps {
   phone: string;
@@ -24,13 +28,11 @@ const RegisterOtpForm = ({
 
   const [otpValue, setOtpValue] = useState("");
   const [otpError, setOtpError] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
   const [justVerified, setJustVerified] = useState(false);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const inFlightRef = useRef(false);
   const lastSubmittedCodeRef = useRef<string>("");
-  const abortControllerRef = useRef<AbortController | null>(null);
 
   const {
     verifyOtp,
@@ -98,6 +100,7 @@ const RegisterOtpForm = ({
 
     inFlightRef.current = true;
     lastSubmittedCodeRef.current = codeToVerify;
+    stopSmsOtp(storedPhone);
 
     const response = await verifyOtp(
       storedPhone,
@@ -121,6 +124,7 @@ const RegisterOtpForm = ({
     e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
+    if (inFlightRef.current || isVerifying || justVerified) return;
 
     if (otpValue.length !== 6) {
       setOtpError("Enter the complete 6-digit verification code");
@@ -145,48 +149,12 @@ const RegisterOtpForm = ({
     await processVerify(otpValue);
   };
 
-  /* Mobile WebOTP Auto-fetch SMS listener (Android Chrome / WebOTP supported browsers) */
-  const startWebOtp = () => {
-    if (typeof window === "undefined" || !("OTPCredential" in window)) {
-      return;
-    }
-
-    if (abortControllerRef.current) {
-      try {
-        abortControllerRef.current.abort();
-      } catch (e) {}
-    }
-
-    const ac = new AbortController();
-    abortControllerRef.current = ac;
-
-    navigator.credentials
-      .get({
-        otp: { transport: ["sms"] },
-        signal: ac.signal,
-      } as any)
-      .then((otpCredential: any) => {
-        if (otpCredential?.code) {
-          const digits = otpCredential.code.replace(/\D/g, "").slice(0, 6);
-          if (digits.length === 6) {
-            lastSubmittedCodeRef.current = "";
-            setOtpValue(digits);
-          }
-        }
-      })
-      .catch(() => {});
-  };
-
-  useEffect(() => {
-    startWebOtp();
-    return () => {
-      if (abortControllerRef.current) {
-        try {
-          abortControllerRef.current.abort();
-        } catch (e) {}
-      }
-    };
+  const receiveSmsCode = useCallback((code: string) => {
+    lastSubmittedCodeRef.current = "";
+    setOtpError("");
+    setOtpValue(code);
   }, []);
+  useSmsOtp(storedPhone, receiveSmsCode);
 
   /* Auto-submit when all 6 digits are filled */
   useEffect(() => {
@@ -208,16 +176,13 @@ const RegisterOtpForm = ({
       return;
     }
 
-    const response = await login(storedPhone);
-
-    if (!response) return;
-
-    resetTimer();
+    stopSmsOtp(storedPhone);
     lastSubmittedCodeRef.current = "";
-    inFlightRef.current = false;
     setOtpValue("");
     setOtpError("");
-    startWebOtp();
+    const response = await login(storedPhone);
+    if (!response) return;
+    resetTimer();
 
     setTimeout(() => {
       inputRef.current?.focus();
@@ -226,6 +191,7 @@ const RegisterOtpForm = ({
 
   /* Edit Number */
   const handleEditNumber = () => {
+    stopSmsOtp(storedPhone);
     setOtpError("");
     setOtpValue("");
     lastSubmittedCodeRef.current = "";
@@ -345,91 +311,15 @@ const RegisterOtpForm = ({
         </div>
       </motion.div>
 
-      {/* OTP Single Input Container with 6 Visual Slots */}
-      <div className="relative mb-4 sm:mb-5 w-full">
-        {/* Real Native Input styled with opacity: 0.001 so it's 100% visible to Chromium Autofill & WebOTP, but invisible to human eyes */}
-        <input
-          ref={inputRef}
-          id="register-otp-native-input"
-          name="one-time-code"
-          type="tel"
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          pattern="[0-9]*"
-          maxLength={6}
-          value={otpValue}
-          onChange={handleInputChange}
-          onPaste={handlePaste}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          disabled={isVerifying || justVerified}
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            opacity: 0.001,
-            pointerEvents: "auto",
-            cursor: "pointer",
-            background: "transparent",
-            color: "transparent",
-            border: "none",
-            outline: "none",
-            caretColor: "transparent",
-            fontSize: "24px",
-            zIndex: 10,
-          }}
-          autoFocus
-          aria-label="6-digit verification code"
-        />
-
-        {/* 6 Visual Display Slots */}
-        <div className="flex w-full justify-between gap-1.5 sm:gap-2.5 pointer-events-none select-none">
-          {[0, 1, 2, 3, 4, 5].map((index) => {
-            const digit = otpValue[index] || "";
-            const isCurrent =
-              isFocused &&
-              (index === otpValue.length ||
-                (index === 5 && otpValue.length === 6));
-
-            return (
-              <div
-                key={index}
-                className={`relative h-11 w-11 sm:h-13 sm:w-13 rounded-xl border bg-white/90 flex items-center justify-center text-center text-lg font-bold text-[#1E2A22] transition-all
-                  ${
-                    digit
-                      ? "border-[#D9A441] shadow-xs"
-                      : "border-[#1E2A22]/15"
-                  }
-                  ${
-                    otpError
-                      ? "border-red-400 bg-red-50/20"
-                      : isCurrent
-                        ? "border-[#D9A441] ring-2 ring-[#D9A441]/20 scale-105"
-                        : ""
-                  }
-                  ${
-                    justVerified
-                      ? "border-green-500 bg-green-50"
-                      : ""
-                  }
-                `}
-              >
-                {digit}
-                {isCurrent && !digit && (
-                  <span className="inline-block w-0.5 h-5 bg-[#D9A441] animate-pulse" />
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {otpError && (
-          <p className="mt-2 text-center text-xs text-red-500">
-            {otpError}
-          </p>
-        )}
-      </div>
+      <OtpCodeInput
+        ref={inputRef}
+        id="register-otp-native-input"
+        value={otpValue}
+        onChange={handleInputChange}
+        onPaste={handlePaste}
+        disabled={isVerifying || justVerified}
+        error={otpError}
+      />
 
       {/* Verify Button */}
       <motion.button

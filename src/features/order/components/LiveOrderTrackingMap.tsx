@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Phone, Navigation, Loader2, MapPin, Bike, Crosshair, Sparkles } from "lucide-react";
+import { Phone, Navigation, Loader2, MapPin, Bike, Crosshair, Sparkles, Plus, Minus } from "lucide-react";
 import { loadGoogleMaps } from "@/lib/loadGoogleMaps";
 import { getPusherClient } from "@/lib/pusherClient";
 import type { DeliveryBoyInfo } from "@/features/profile/hooks/useProfileHook";
@@ -185,14 +185,20 @@ export default function LiveOrderTrackingMap({
     };
   }, [deliveryAddress, deliveryLat, deliveryLng]);
 
-  // Fit bounds helper
+  // Fit bounds helper: Focused and smart zoom
   const fitMapBounds = (map: any, google: any) => {
     if (!map || !google || !destCoords) return;
     const bounds = new google.maps.LatLngBounds();
-    bounds.extend(STORE_LOCATION);
     bounds.extend(destCoords);
-    if (riderCoords) bounds.extend(riderCoords);
-    map.fitBounds(bounds, { top: 50, bottom: 50, left: 50, right: 50 });
+
+    if (riderCoords && orderStatus === "out_for_delivery") {
+      bounds.extend(riderCoords);
+    } else {
+      bounds.extend(STORE_LOCATION);
+      if (riderCoords) bounds.extend(riderCoords);
+    }
+
+    map.fitBounds(bounds, { top: 60, bottom: 60, left: 50, right: 50 });
   };
 
   // 2. Initialize Map & Markers
@@ -211,11 +217,17 @@ export default function LiveOrderTrackingMap({
 
         const map = new google.maps.Map(mapContainerRef.current, {
           center: initialCenter,
-          zoom: 14,
+          zoom: 15,
+          disableDefaultUI: true, // 🚫 Removes ALL default clutter buttons (StreetView, Map/Sat, Terms, etc.)
+          gestureHandling: "greedy", // 🚀 One-finger smooth panning & pinch zoom on mobile! No 2-finger popup!
+          clickableIcons: false, // 🚫 Disables clicking random POIs/businesses on map
+          keyboardShortcuts: false,
           mapTypeControl: false,
           streetViewControl: false,
           fullscreenControl: false,
-          zoomControl: false, // Clean mobile-app aesthetic
+          zoomControl: false,
+          rotateControl: false,
+          scaleControl: false,
           styles: MODERN_MAP_STYLES,
         });
         mapInstanceRef.current = map;
@@ -433,7 +445,7 @@ export default function LiveOrderTrackingMap({
   return (
     <div className="w-full rounded-3xl overflow-hidden border border-[#EADBCA] bg-white shadow-[0_12px_36px_-6px_rgba(15,61,46,0.12)] flex flex-col">
       {/* 🌟 Interactive Live Map Container */}
-      <div className="relative w-full h-64 sm:h-72 bg-stone-100">
+      <div className="relative w-full h-72 sm:h-84 md:h-96 bg-stone-100">
         {isLoading && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-stone-100/90 gap-2">
             <Loader2 size={26} className="animate-spin text-[#0F3D2E]" />
@@ -448,10 +460,13 @@ export default function LiveOrderTrackingMap({
           </div>
         )}
 
-        <div ref={mapContainerRef} className="w-full h-full" />
+        <div
+          ref={mapContainerRef}
+          className="w-full h-full [&_.gm-style-cc]:hidden [&_.gmnoprint]:hidden [&_a[href^='https://maps.google.com/maps']]:hidden"
+        />
 
-        {/* Top Floating ETA Pill Badge (Just like top delivery apps!) */}
-        <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between pointer-events-none">
+        {/* Top Floating Live Status Badge */}
+        <div className="absolute top-3 left-3 z-10 pointer-events-none">
           <div className="bg-[#0F3D2E]/95 backdrop-blur-md text-white px-3.5 py-1.5 rounded-full shadow-lg border border-[#D4AF37]/30 flex items-center gap-2">
             <span className="relative flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-80"></span>
@@ -465,7 +480,10 @@ export default function LiveOrderTrackingMap({
                 : "Cooking in Kitchen"}
             </span>
           </div>
+        </div>
 
+        {/* Floating Minimal Controls (Re-center & Smooth Zoom) */}
+        <div className="absolute top-3 right-3 z-10 flex flex-col gap-1.5 pointer-events-auto">
           {/* Re-center button */}
           <button
             type="button"
@@ -474,29 +492,44 @@ export default function LiveOrderTrackingMap({
                 fitMapBounds(mapInstanceRef.current, (window as any).google);
               }
             }}
-            className="w-8 h-8 rounded-full bg-white text-stone-700 hover:text-[#0F3D2E] shadow-md border border-stone-200 flex items-center justify-center pointer-events-auto transition-transform active:scale-95"
-            aria-label="Center Map"
+            className="w-9 h-9 rounded-xl bg-white/95 backdrop-blur-md text-stone-700 hover:text-[#0F3D2E] shadow-md border border-[#EADBCA] flex items-center justify-center transition-all active:scale-90 hover:bg-stone-50"
+            title="Re-center on Route"
+            aria-label="Re-center map"
           >
-            <Crosshair size={16} />
+            <Crosshair size={17} />
           </button>
-        </div>
 
-        {/* Bottom Map Legend */}
-        <div className="absolute bottom-3 left-3 z-10 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#EADBCA] text-[10px] font-bold shadow-md flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-[#0F3D2E]">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#0F3D2E] border border-white"></span>
-            <span>Kitchen</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-[#8C6415]">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#D9A441] border border-white"></span>
-            <span>Home</span>
-          </div>
-          {deliveryBoy && (
-            <div className="flex items-center gap-1.5 text-emerald-700">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#185843] border border-white"></span>
-              <span>Rider</span>
-            </div>
-          )}
+          {/* Zoom In button */}
+          <button
+            type="button"
+            onClick={() => {
+              if (mapInstanceRef.current) {
+                const z = mapInstanceRef.current.getZoom() || 15;
+                mapInstanceRef.current.setZoom(Math.min(z + 1, 20));
+              }
+            }}
+            className="w-9 h-9 rounded-xl bg-white/95 backdrop-blur-md text-stone-700 hover:text-[#0F3D2E] shadow-md border border-[#EADBCA] flex items-center justify-center transition-all active:scale-90 hover:bg-stone-50"
+            title="Zoom In"
+            aria-label="Zoom in"
+          >
+            <Plus size={16} />
+          </button>
+
+          {/* Zoom Out button */}
+          <button
+            type="button"
+            onClick={() => {
+              if (mapInstanceRef.current) {
+                const z = mapInstanceRef.current.getZoom() || 15;
+                mapInstanceRef.current.setZoom(Math.max(z - 1, 10));
+              }
+            }}
+            className="w-9 h-9 rounded-xl bg-white/95 backdrop-blur-md text-stone-700 hover:text-[#0F3D2E] shadow-md border border-[#EADBCA] flex items-center justify-center transition-all active:scale-90 hover:bg-stone-50"
+            title="Zoom Out"
+            aria-label="Zoom out"
+          >
+            <Minus size={16} />
+          </button>
         </div>
       </div>
 

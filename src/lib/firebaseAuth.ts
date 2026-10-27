@@ -4,6 +4,7 @@ import {
   ConfirmationResult,
 } from "firebase/auth";
 import { auth } from "./firebaseClient";
+import { markSmsOtpReady, startSmsOtp, stopSmsOtp } from "./smsOtp";
 
 declare global {
   interface Window {
@@ -64,6 +65,7 @@ export const sendFirebaseOtp = async (
   const formattedNumber = `+91${digits}`;
 
   const verifier = getRecaptchaVerifier(containerId);
+  const reception = startSmsOtp(phoneNumber);
 
   try {
     const confirmation = await signInWithPhoneNumber(
@@ -72,8 +74,12 @@ export const sendFirebaseOtp = async (
       verifier
     );
     window.firebaseConfirmationResult = confirmation;
+    // A fast SMS may arrive before Firebase returns its confirmation session.
+    // Only release the code once confirmation can safely use this new session.
+    markSmsOtpReady(reception);
     return confirmation;
   } catch (error: any) {
+    stopSmsOtp(phoneNumber);
     console.error("Firebase send OTP error details:", error);
     // Reset verifier so subsequent attempts don't fail with stale widget
     if (window.recaptchaVerifier) {
