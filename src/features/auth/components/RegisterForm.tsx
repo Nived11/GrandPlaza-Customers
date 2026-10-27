@@ -174,7 +174,7 @@ const RegisterForm = ({
             {/* Pulsing micro-badge */}
             <div className="mt-3.5 inline-flex items-center gap-2 rounded-full bg-[#0F3D2E]/10 px-3 py-1 text-[11px] font-semibold text-[#0F3D2E]">
               <span className="h-1.5 w-1.5 rounded-full bg-[#D9A441] animate-ping" />
-              <span>Connecting via Firebase...</span>
+              <span>Securing connection...</span>
             </div>
           </motion.div>
         )}

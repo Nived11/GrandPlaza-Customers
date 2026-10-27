@@ -33,21 +33,17 @@ const useLogin = () => {
           duration: 4000,
         });
       } catch (fbError: any) {
-        console.error("Firebase Phone Auth error:", fbError);
+        console.error("SMS dispatch error:", fbError);
         const fbCode = fbError?.code || "";
-        const fbMsg = fbError?.message || "";
 
-        if (fbCode === "auth/unauthorized-domain") {
-          toast.error("Firebase error: Domain (grandeplaza.com) must be added to Authorized Domains in Firebase Console!");
-          return null;
-        } else if (fbCode === "auth/too-many-requests") {
-          toast.error("Google: Too many attempts for this number. Please wait a few minutes or add as test number.");
+        if (fbCode === "auth/too-many-requests") {
+          toast.error("Too many requests for this number. Please wait a few minutes before trying again.");
           return null;
         } else if (fbCode === "auth/invalid-phone-number") {
           toast.error("Invalid phone number format.");
           return null;
         } else {
-          toast.error(`Firebase error: ${fbCode ? fbCode.replace("auth/", "") : fbMsg || "Failed to send SMS"}`);
+          toast.error("Unable to send verification SMS right now. Please try again.");
           return null;
         }
       }
