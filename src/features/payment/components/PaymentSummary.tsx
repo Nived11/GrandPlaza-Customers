@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import { Loader2, ArrowLeft, ShieldCheck, Bike } from "lucide-react";
+import { Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
 import axiosInstance from "@/lib/axios";
 import type { RootState } from "@/redux/store";
 import type { AddressData } from "@/features/address/hook/useAddressHook";
@@ -93,7 +93,7 @@ export default function PaymentSummary({
 
   const getButtonText = () => {
     if (isStoreClosed) return "Store Currently Closed";
-    if (isOutOfRadius) return `Outside Delivery Radius (${deliveryInfo?.distance_km} KM)`;
+    if (isOutOfRadius) return "Outside Delivery Area";
     if (isProcessing) return "Processing Payment...";
     if (selectedMethod === "gpay") return `Pay ₹${totalPayable.toFixed(2)} with Google Pay`;
     if (selectedMethod === "phonepe") return `Pay ₹${totalPayable.toFixed(2)} with PhonePe`;
@@ -245,22 +245,7 @@ export default function PaymentSummary({
           </div>
         )}
         <div className="flex justify-between items-center">
-          <div className="flex flex-col">
-            <span className="flex items-center gap-1.5 font-medium">
-              <span>Delivery Fee</span>
-              {deliveryInfo && deliveryInfo.distance_km > 0 && (
-                <span className="text-[10px] text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 font-bold flex items-center gap-0.5">
-                  <Bike size={11} className="text-amber-600" />
-                  <span>{deliveryInfo.distance_km} KM</span>
-                </span>
-              )}
-            </span>
-            {deliveryInfo && deliveryInfo.per_km_charge > 0 && (
-              <span className="text-[10px] text-stone-400">
-                Rate: ₹{deliveryInfo.per_km_charge}/KM
-              </span>
-            )}
-          </div>
+          <span className="font-medium">Delivery Fee</span>
           <span className="font-semibold text-slate-800">
             {isCalculatingFee ? (
               <span className="text-gray-400 text-[11px] animate-pulse">Calculating...</span>

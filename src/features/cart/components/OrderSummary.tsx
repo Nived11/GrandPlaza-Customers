@@ -118,25 +118,12 @@ const OrderSummary = () => {
           </div>
         )}
 
-        {/* Delivery Fee with info tooltip */}
+        {/* Delivery Fee */}
         <div className="flex justify-between items-center text-slate-600">
-          <span className="inline-flex items-center gap-1">
-            <span>Delivery Fee</span>
-            <span
-              title="Base rate. Exact fee is calculated dynamically based on your address distance at checkout."
-              className="inline-flex items-center"
-            >
-              <Info size={14} className="text-gray-400 cursor-help" />
-            </span>
+          <span>Delivery Fee</span>
+          <span className="font-semibold text-slate-800">
+            {deliveryFee === 0 ? "Free" : `₹${deliveryFee.toFixed(2)}`}
           </span>
-          <div className="text-right">
-            <span className="font-semibold text-slate-800">
-              {deliveryFee === 0 ? "Free" : `₹${deliveryFee.toFixed(2)}`}
-            </span>
-            <span className="text-[10px] text-stone-400 block -mt-0.5">
-              by distance
-            </span>
-          </div>
         </div>
 
         {/* Divider */}

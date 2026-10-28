@@ -136,17 +136,6 @@ const AddressSummary = ({
               <strong>30–35 mins</strong> Delivery from Empire Plaza Kitchen
             </span>
           </div>
-          {estimate && estimate.distance_km > 0 && (
-            <span
-              className={`text-[10px] font-bold px-2 py-0.5 rounded border shrink-0 ${
-                estimate.is_within_radius === false
-                  ? "text-red-700 bg-red-100 border-red-300"
-                  : "text-amber-800 bg-amber-50 border-amber-200"
-              }`}
-            >
-              {estimate.distance_km} KM
-            </span>
-          )}
         </div>
 
         {(() => {
@@ -179,7 +168,7 @@ const AddressSummary = ({
                   : isStoreClosed
                   ? "Store Currently Closed"
                   : isOutOfRadius
-                  ? `Outside Delivery Radius (${estimate?.distance_km} KM)`
+                  ? "Outside Delivery Area"
                   : "Proceed to Payment"}
               </span>
 
