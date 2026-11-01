@@ -26,7 +26,7 @@ const timelineData = [
     title: "26+ Years of Experience",
     exp: "Leading a team of 220+ professionals.",
     desc: "Today, as leaders of Empire Plaza and HUYS Global Ventures, our journey spans hospitality, real estate, and construction. We focus on building strong teams, innovation, and continuous human development.",
-    image: "/img2026new.png"
+    image: "/img2026.png"
   },
   {
     year: "FUTURE",
