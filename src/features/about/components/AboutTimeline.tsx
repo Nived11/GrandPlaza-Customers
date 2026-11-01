@@ -18,7 +18,7 @@ const timelineData = [
     title: "Entrepreneurial Vision",
     exp: "Guided by discipline and hard work.",
     desc: "Inspired by the dedication and perseverance of a farmer father, the independent entrepreneurial journey began. It was built on the core values of consistency, patience, and a strong desire to create lasting value.",
-    image: "/img2000.png"
+    image: "/img2000new.png"
   },
   {
     year: "2026",
@@ -26,7 +26,7 @@ const timelineData = [
     title: "26+ Years of Experience",
     exp: "Leading a team of 220+ professionals.",
     desc: "Today, as leaders of Empire Plaza and HUYS Global Ventures, our journey spans hospitality, real estate, and construction. We focus on building strong teams, innovation, and continuous human development.",
-    image: "/img2026.png"
+    image: "/img2026new.png"
   },
   {
     year: "FUTURE",
@@ -34,7 +34,7 @@ const timelineData = [
     title: "A Lasting Legacy",
     exp: "Taking authentic flavours to the world.",
     desc: "Our ambition is to establish a strong global presence, introducing diverse cuisines across continents. We aim to create ventures recognized for quality, purpose, and a positive impact on society.",
-    image: "/future2000.png"
+    image: "/future2000new.png"
   }
 ];
 
