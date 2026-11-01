@@ -34,7 +34,7 @@ const timelineData = [
     title: "A Lasting Legacy",
     exp: "Taking authentic flavours to the world.",
     desc: "Our ambition is to establish a strong global presence, introducing diverse cuisines across continents. We aim to create ventures recognized for quality, purpose, and a positive impact on society.",
-    image: "/future2000new.png"
+    image: "/futurenew.png"
   }
 ];
 
