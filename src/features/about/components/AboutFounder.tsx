@@ -13,7 +13,7 @@ export default function AboutFounder() {
             {/* 🌟  : aspect-square ,   1:1  */}
             <div className="relative w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[400px] aspect-square ">
               <img 
-                src="./Founder.png" 
+                src="/sirajsirpic.png" 
                 alt="Founder" 
                 className="w-full h-full object-contain"
               />
