@@ -14,22 +14,40 @@ export interface StoreStatusData {
   formattedHoursText: string;
 }
 
-export function useStoreStatus() {
-  const [status, setStatus] = useState<StoreStatusData>({
-    isOpen: true,
-    isManuallyOpen: true,
-    openingTime: null,
-    closingTime: null,
-    deliveryRadius: 0,
-    restaurantName: "Empire Plaza",
-    loading: true,
-    formattedHoursText: "",
-  });
+// ==========================================
+// 🌟 MODULE-LEVEL SHARED SINGLETON CACHE
+// Eliminates duplicate API storms from MenuItemCards
+// ==========================================
+let globalStatus: StoreStatusData = {
+  isOpen: true,
+  isManuallyOpen: true,
+  openingTime: null,
+  closingTime: null,
+  deliveryRadius: 0,
+  restaurantName: "Empire Plaza",
+  loading: true,
+  formattedHoursText: "",
+};
 
-  const lastFetchedRef = useState({ time: 0 })[0];
+let lastFetchedTime = 0;
+let inFlightPromise: Promise<StoreStatusData> | null = null;
+const listeners = new Set<(status: StoreStatusData) => void>();
+let globalPollingStarted = false;
+let globalIntervalId: NodeJS.Timeout | null = null;
 
-  const fetchStatus = useCallback(async () => {
-    lastFetchedRef.time = Date.now();
+async function fetchGlobalStoreStatus(force = false): Promise<StoreStatusData> {
+  const now = Date.now();
+  // Return cached status if fresh (< 60s) unless forced
+  if (!force && lastFetchedTime > 0 && now - lastFetchedTime < 60000) {
+    return globalStatus;
+  }
+
+  // Deduplicate concurrent in-flight requests (all components share the same promise)
+  if (inFlightPromise) {
+    return inFlightPromise;
+  }
+
+  inFlightPromise = (async () => {
     try {
       const res = await axiosInstance.get("/settings/site-settings");
       if (res.data) {
@@ -46,7 +64,7 @@ export function useStoreStatus() {
           formattedHoursText = `${formatTime(openingTime)} - ${formatTime(closingTime)}`;
         }
 
-        setStatus({
+        globalStatus = {
           isOpen,
           isManuallyOpen,
           openingTime,
@@ -55,61 +73,75 @@ export function useStoreStatus() {
           restaurantName,
           loading: false,
           formattedHoursText,
-        });
+        };
+        lastFetchedTime = Date.now();
       }
     } catch {
-      setStatus((prev) => ({ ...prev, loading: false }));
+      globalStatus = { ...globalStatus, loading: false };
+    } finally {
+      inFlightPromise = null;
+      // Notify all subscriber components in one batch
+      listeners.forEach((listener) => listener(globalStatus));
     }
-  }, [lastFetchedRef]);
+    return globalStatus;
+  })();
+
+  return inFlightPromise;
+}
+
+function initGlobalPolling() {
+  if (typeof window === "undefined" || globalPollingStarted) return;
+  globalPollingStarted = true;
+
+  const start = () => {
+    if (globalIntervalId) clearInterval(globalIntervalId);
+    globalIntervalId = setInterval(() => {
+      if (typeof document !== "undefined" && !document.hidden) {
+        fetchGlobalStoreStatus(true);
+      }
+    }, 60000); // 1 request every 60s for the entire tab
+  };
+
+  const handleVisibilityOrFocus = () => {
+    if (typeof document !== "undefined" && !document.hidden) {
+      if (Date.now() - lastFetchedTime > 45000) {
+        fetchGlobalStoreStatus(true);
+      }
+      start();
+    } else {
+      if (globalIntervalId) {
+        clearInterval(globalIntervalId);
+        globalIntervalId = null;
+      }
+    }
+  };
+
+  start();
+  document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+  window.addEventListener("focus", handleVisibilityOrFocus);
+}
+
+export function useStoreStatus() {
+  const [status, setStatus] = useState<StoreStatusData>(globalStatus);
 
   useEffect(() => {
-    // Initial fetch on mount
-    fetchStatus();
+    // Subscribe to global updates
+    listeners.add(setStatus);
 
-    // Smart polling: Only poll when user is actively viewing the tab (zero battery/server waste)
-    let intervalId: NodeJS.Timeout | null = null;
+    // Fetch if needed (deduplicated!)
+    fetchGlobalStoreStatus();
 
-    const startPolling = () => {
-      if (intervalId) clearInterval(intervalId);
-      intervalId = setInterval(() => {
-        if (typeof document !== "undefined" && !document.hidden) {
-          fetchStatus();
-        }
-      }, 45000); // 45s relaxed interval
-    };
-
-    const stopPolling = () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-        intervalId = null;
-      }
-    };
-
-    const handleVisibilityOrFocus = () => {
-      if (typeof document !== "undefined" && !document.hidden) {
-        // Tab became visible: if more than 30s passed since last fetch, update immediately
-        if (Date.now() - lastFetchedRef.time > 30000) {
-          fetchStatus();
-        }
-        startPolling();
-      } else {
-        // Tab hidden or phone locked: stop polling to save server resources
-        stopPolling();
-      }
-    };
-
-    startPolling();
-    document.addEventListener("visibilitychange", handleVisibilityOrFocus);
-    window.addEventListener("focus", handleVisibilityOrFocus);
+    // Ensure single global polling interval
+    initGlobalPolling();
 
     return () => {
-      stopPolling();
-      document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
-      window.removeEventListener("focus", handleVisibilityOrFocus);
+      listeners.delete(setStatus);
     };
-  }, [fetchStatus, lastFetchedRef]);
+  }, []);
 
-  return { ...status, refresh: fetchStatus };
+  const refresh = useCallback(() => fetchGlobalStoreStatus(true), []);
+
+  return { ...status, refresh };
 }
 
 function formatTime(timeStr: string): string {
