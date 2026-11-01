@@ -54,7 +54,7 @@ export default function AboutFounder() {
 
             <div className="mt-8 pt-6 border-t border-gray-200">
               <h3 className="text-xl font-serif font-black text-[var(--brand-green-dark)]">
-                [Founder Name]
+                Siraj N M
               </h3>
               <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-[var(--brand-gold)] mt-1.5 leading-relaxed">
                 Managing Director, Empire Plaza <br/>
