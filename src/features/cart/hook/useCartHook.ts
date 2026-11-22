@@ -173,8 +173,11 @@ const useCartHook = () => {
     } catch (error: any) {
       console.error("DELETE CART ERROR:", error);
 
-      const message = extractErrorMessages(error);
-      toast.error(message);
+      // If item was already deleted / not found on backend (404), avoid showing error toast
+      if (error?.response?.status !== 404) {
+        const message = extractErrorMessages(error);
+        toast.error(message);
+      }
 
       return null;
     } finally {

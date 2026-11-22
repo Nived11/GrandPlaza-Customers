@@ -69,6 +69,7 @@ const CartItems = () => {
 
     const newQuantity = item.quantity - 1;
     if (newQuantity < 1) {
+      handleRemove(item);
       return;
     }
 
@@ -104,29 +105,23 @@ const CartItems = () => {
       return;
     }
 
-    if (!isUserLoggedIn()) {
+    const targetId = item.cart_item_id || item.id;
+    setDeletingItemId(targetId);
+
+    try {
+      if (isUserLoggedIn() && item.cart_item_id && item.cart_item_id > 0) {
+        await deleteCart(item.cart_item_id);
+      }
+    } catch (err) {
+      console.error("Cart item delete error:", err);
+    } finally {
+      // Always remove from local Redux state so UI never gets stuck
       dispatch(
         removeFromCart({
           id: item.id,
           variantId: item.variant?.id ?? null,
         })
       );
-      return;
-    }
-
-    setDeletingItemId(item.cart_item_id);
-
-    try {
-      const response = await deleteCart(item.cart_item_id);
-      if (response) {
-        dispatch(
-          removeFromCart({
-            id: item.id,
-            variantId: item.variant?.id ?? null,
-          })
-        );
-      }
-    } finally {
       setDeletingItemId(null);
     }
   };
@@ -157,7 +152,7 @@ const CartItems = () => {
       {/* 📱 MOBILE VIEW: Clean Individual Cards (matches mobile screenshot) */}
       <div className="md:hidden space-y-3">
         {cartItems.map((item) => {
-          const isItemDeleting = isDeletingCart && deletingItemId === item.cart_item_id;
+          const isItemDeleting = isDeletingCart && (deletingItemId === item.cart_item_id || deletingItemId === item.id);
 
           return (
             <div
@@ -257,7 +252,7 @@ const CartItems = () => {
         {/* Item Rows */}
         <div className="divide-y divide-gray-100">
           {cartItems.map((item) => {
-            const isItemDeleting = isDeletingCart && deletingItemId === item.cart_item_id;
+            const isItemDeleting = isDeletingCart && (deletingItemId === item.cart_item_id || deletingItemId === item.id);
 
             return (
               <div

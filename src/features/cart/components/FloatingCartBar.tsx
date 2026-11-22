@@ -33,7 +33,18 @@ export default function FloatingCartBar() {
     0
   );
 
-  const shouldShow = totalItems > 0 && pathname !== "/cart";
+  const hiddenPaths = [
+    "/cart",
+    "/payment",
+    "/address",
+    "/order-success",
+    "/checkout",
+  ];
+  const isHiddenPage = hiddenPaths.some(
+    (p) => pathname === p || pathname?.startsWith(`${p}/`)
+  );
+
+  const shouldShow = totalItems > 0 && !isHiddenPage;
 
   return (
     <AnimatePresence>

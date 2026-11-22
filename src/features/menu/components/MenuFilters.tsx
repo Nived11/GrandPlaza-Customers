@@ -9,14 +9,9 @@ import { getCategoryIcon } from "../utils/menuUtils";
 
 export const ALL_CATEGORY = "ALL" as const;
 
-export type CategoryFilter =
-  | number
-  | typeof ALL_CATEGORY;
+export type CategoryFilter = number | typeof ALL_CATEGORY;
 
-export type DietFilter =
-  | "ALL"
-  | "VEG"
-  | "NON-VEG";
+export type DietFilter = "ALL" | "VEG" | "NON-VEG";
 
 interface MenuFiltersProps {
   categories: MenuCategory[];
@@ -24,21 +19,10 @@ interface MenuFiltersProps {
   activeDiet: DietFilter;
   activeOffers?: boolean;
 
-  onCategoryChange: (
-    category: CategoryFilter
-  ) => void;
-
-  onDietChange: (
-    diet: DietFilter
-  ) => void;
-
-  onOffersChange?: (
-    offers: boolean
-  ) => void;
-
-  onPrefetchCategory?: (
-    categoryId: number
-  ) => void;
+  onCategoryChange: (category: CategoryFilter) => void;
+  onDietChange: (diet: DietFilter) => void;
+  onOffersChange?: (offers: boolean) => void;
+  onPrefetchCategory?: (categoryId: number) => void;
 }
 
 /* =========================================================
@@ -54,26 +38,21 @@ function CategoryThumb({
   alt: string;
   active: boolean;
 }) {
-  const [errored, setErrored] =
-    React.useState(false);
-
-  const FallbackIcon =
-    getCategoryIcon(alt);
+  const [errored, setErrored] = React.useState(false);
+  const FallbackIcon = getCategoryIcon(alt);
 
   if (!src || errored) {
     return (
       <div
-        className={`flex h-[58px] w-[58px] items-center justify-center rounded-[13px] border bg-white transition-all duration-200 sm:h-[62px] sm:w-[62px] lg:h-[60px] lg:w-[60px] ${
+        className={`flex h-[58px] w-[58px] items-center justify-center rounded-2xl border bg-white transition-all duration-200 sm:h-[64px] sm:w-[64px] ${
           active
-            ? "border-[var(--brand-gold)] shadow-[0_3px_10px_rgba(212,175,55,0.14)]"
-            : "border-[#E7E9E7]"
+            ? "border-[var(--brand-gold)] shadow-[0_4px_12px_rgba(212,175,55,0.22)] ring-2 ring-[var(--brand-gold)]/40"
+            : "border-[#E7E9E7] hover:border-gray-300"
         }`}
       >
         <FallbackIcon
-          size={25}
-          strokeWidth={
-            active ? 2 : 1.7
-          }
+          size={24}
+          strokeWidth={active ? 2.2 : 1.8}
           className={
             active
               ? "text-[var(--brand-gold)]"
@@ -86,19 +65,17 @@ function CategoryThumb({
 
   return (
     <div
-      className={`flex h-[58px] w-[58px] items-center justify-center rounded-[13px] border bg-white p-[2px] transition-all duration-200 sm:h-[62px] sm:w-[62px] lg:h-[60px] lg:w-[60px] ${
+      className={`flex h-[58px] w-[58px] items-center justify-center rounded-2xl border bg-white p-[2px] transition-all duration-200 sm:h-[64px] sm:w-[64px] ${
         active
-          ? "border-[var(--brand-gold)] shadow-[0_3px_10px_rgba(212,175,55,0.14)]"
-          : "border-[#E7E9E7]"
+          ? "border-[var(--brand-gold)] shadow-[0_4px_12px_rgba(212,175,55,0.22)] ring-2 ring-[var(--brand-gold)]/40"
+          : "border-[#E7E9E7] hover:border-gray-300"
       }`}
     >
       <img
         src={src}
         alt={alt}
-        onError={() =>
-          setErrored(true)
-        }
-        className="h-full w-full rounded-[10px] object-cover"
+        onError={() => setErrored(true)}
+        className="h-full w-full rounded-[13px] object-cover"
       />
     </div>
   );
@@ -131,22 +108,17 @@ export default function MenuFilters({
 }: MenuFiltersProps) {
   return (
     <section className="w-full bg-transparent">
-
       {/* =====================================================
           MENU TITLE
       ===================================================== */}
-
       <div className="mx-auto w-full max-w-[1600px] px-4 pt-6 sm:px-6 sm:pt-7 lg:px-8 lg:pt-7">
         <div className="flex flex-col items-center text-center">
-
           {/* Eyebrow */}
           <div className="mb-1.5 flex items-center justify-center gap-3 sm:mb-2">
             <span className="h-px w-6 bg-[var(--brand-gold)] sm:w-8" />
-
             <span className="text-[9px] font-bold uppercase tracking-[0.35em] text-[var(--brand-gold)] sm:text-[10px] lg:text-[11px]">
               Explore Our Menu
             </span>
-
             <span className="h-px w-6 bg-[var(--brand-gold)] sm:w-8" />
           </div>
 
@@ -159,304 +131,206 @@ export default function MenuFilters({
 
       {/* =====================================================
           CATEGORY SECTION
-          ALL ITEMS FIXED
-          OTHER CATEGORIES SCROLL
+          UNIFIED HORIZONTAL SCROLL (MOBILE & DESKTOP)
       ===================================================== */}
-
       <div className="mx-auto mt-5 w-full max-w-[1600px] px-4 sm:mt-6 sm:px-6 lg:mt-5 lg:px-8">
-
-        <div className="flex w-full items-start gap-3 sm:gap-4 lg:gap-[14px]">
-
-          {/* =================================================
-              FIXED ALL ITEMS
-          ================================================= */}
-
-          <div className="w-[72px] shrink-0 sm:w-[78px] lg:w-[76px]">
+        <div className="relative w-full">
+          <div className="no-scrollbar flex w-full items-start gap-3 sm:gap-4 lg:gap-5 overflow-x-auto pb-2 pt-1">
+            {/* ALL ITEMS CARD */}
             <button
               type="button"
-              onClick={() =>
-                onCategoryChange(
-                  ALL_CATEGORY
-                )
-              }
-              className="group flex w-full flex-col items-center"
+              onClick={() => onCategoryChange(ALL_CATEGORY)}
+              className="group flex w-[72px] shrink-0 flex-col items-center sm:w-[78px] lg:w-[82px] cursor-pointer"
             >
               <CategoryThumb
                 src={null}
                 alt="All"
-                active={
-                  activeCategory ===
-                  ALL_CATEGORY
-                }
+                active={activeCategory === ALL_CATEGORY}
               />
 
-              <span
-                className={`mt-2 line-clamp-2 w-full text-center text-[8px] font-extrabold uppercase leading-[1.25] tracking-[0.02em] sm:text-[9px] ${
-                  activeCategory ===
-                  ALL_CATEGORY
-                    ? "text-[var(--brand-green-dark)]"
-                    : "text-[#33433D]"
-                }`}
-              >
-                All Items
-              </span>
+              <div className="mt-2 h-[26px] flex items-center justify-center w-full">
+                <span
+                  className={`line-clamp-2 w-full text-center text-[9px] font-extrabold uppercase leading-[1.2] tracking-[0.01em] sm:text-[10px] ${
+                    activeCategory === ALL_CATEGORY
+                      ? "text-[var(--brand-green-dark)]"
+                      : "text-[#33433D]"
+                  }`}
+                >
+                  All Items
+                </span>
+              </div>
 
               {/* Active Gold Underline */}
               <span
-                className={`mt-2 h-[2px] w-[68px] rounded-full transition-all duration-300 sm:w-[74px] ${
-                  activeCategory ===
-                  ALL_CATEGORY
-                    ? "bg-[var(--brand-gold)]"
+                className={`mt-1.5 h-[2.5px] w-[56px] rounded-full transition-all duration-300 sm:w-[64px] ${
+                  activeCategory === ALL_CATEGORY
+                    ? "bg-[var(--brand-gold)] shadow-xs"
                     : "bg-transparent"
                 }`}
               />
             </button>
-          </div>
 
-          {/* =================================================
-              SCROLLABLE OTHER CATEGORIES
-          ================================================= */}
+            {/* DYNAMIC CATEGORIES */}
+            {categories.map((category) => {
+              const active = activeCategory === category.id;
 
-          <div className="relative min-w-0 flex-1">
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  onClick={() => onCategoryChange(category.id)}
+                  onMouseEnter={() => onPrefetchCategory?.(category.id)}
+                  onFocus={() => onPrefetchCategory?.(category.id)}
+                  className="group flex w-[72px] shrink-0 flex-col items-center sm:w-[78px] lg:w-[82px] cursor-pointer"
+                >
+                  <CategoryThumb
+                    src={category.image}
+                    alt={category.name}
+                    active={active}
+                  />
 
-            <div className="no-scrollbar flex w-full items-start gap-3 overflow-x-auto pb-3 sm:gap-4 lg:gap-[14px]">
-
-              {categories.map(
-                (category) => {
-                  const active =
-                    activeCategory ===
-                    category.id;
-
-                  return (
-                    <button
-                      key={category.id}
-                      type="button"
-                      onClick={() =>
-                        onCategoryChange(
-                          category.id
-                        )
-                      }
-                      onMouseEnter={() =>
-                        onPrefetchCategory?.(
-                          category.id
-                        )
-                      }
-                      onFocus={() =>
-                        onPrefetchCategory?.(
-                          category.id
-                        )
-                      }
-                      className="group flex w-[72px] shrink-0 flex-col items-center sm:w-[78px] lg:w-[76px]"
+                  <div className="mt-2 h-[26px] flex items-center justify-center w-full">
+                    <span
+                      className={`line-clamp-2 w-full text-center text-[9px] font-extrabold uppercase leading-[1.2] tracking-[0.01em] sm:text-[10px] ${
+                        active
+                          ? "text-[var(--brand-green-dark)]"
+                          : "text-[#33433D]"
+                      }`}
                     >
-                      <CategoryThumb
-                        src={category.image}
-                        alt={category.name}
-                        active={active}
-                      />
+                      {category.name}
+                    </span>
+                  </div>
 
-                      <span
-                        className={`mt-2 line-clamp-2 w-full text-center text-[8px] font-extrabold uppercase leading-[1.25] tracking-[0.01em] sm:text-[9px] ${
-                          active
-                            ? "text-[var(--brand-green-dark)]"
-                            : "text-[#33433D]"
-                        }`}
-                      >
-                        {category.name}
-                      </span>
-
-                      {/* Active Gold Underline */}
-                      <span
-                        className={`mt-2 h-[2px] w-[68px] rounded-full transition-all duration-300 sm:w-[74px] ${
-                          active
-                            ? "bg-[var(--brand-gold)]"
-                            : "bg-transparent"
-                        }`}
-                      />
-                    </button>
-                  );
-                }
-              )}
-            </div>
-
-            {/* =================================================
-                SUBTLE RIGHT FADE
-            ================================================= */}
-
-            <div
-              className="pointer-events-none absolute right-0 top-0 h-full w-4 bg-gradient-to-l from-[#FCF8F0]/80 via-[#FCF8F0]/25 to-transparent sm:w-5"
-              aria-hidden="true"
-            />
+                  {/* Active Gold Underline */}
+                  <span
+                    className={`mt-1.5 h-[2.5px] w-[56px] rounded-full transition-all duration-300 sm:w-[64px] ${
+                      active
+                        ? "bg-[var(--brand-gold)] shadow-xs"
+                        : "bg-transparent"
+                    }`}
+                  />
+                </button>
+              );
+            })}
           </div>
 
+          {/* Subtle Right Fade Gradient */}
+          <div
+            className="pointer-events-none absolute right-0 top-0 h-full w-6 bg-gradient-to-l from-[#FCF8F0] via-[#FCF8F0]/40 to-transparent"
+            aria-hidden="true"
+          />
         </div>
       </div>
 
       {/* =====================================================
           DIVIDER
       ===================================================== */}
-
       <div className="mt-1 h-px w-full bg-[#E8EBE9]" />
 
       {/* =====================================================
-          DIET FILTERS
+          DIET & OFFERS FILTERS (RESPONSIVE HORIZONTAL BAR)
       ===================================================== */}
-
-      <div className="mx-auto w-full max-w-[1400px] px-4 py-4 sm:px-6 lg:px-8 lg:py-5">
-
-        <div className="flex w-full items-center gap-1.5 sm:w-auto sm:gap-3">
-
-          {/* =================================================
-              ALL ITEMS
-          ================================================= */}
-
+      <div className="mx-auto w-full max-w-[1400px] px-4 py-3 sm:px-6 lg:px-8 lg:py-4">
+        <div className="no-scrollbar flex w-full items-center gap-2 overflow-x-auto py-1 sm:justify-center sm:gap-3">
+          {/* ALL ITEMS */}
           <button
             type="button"
-            onClick={() =>
-              onDietChange("ALL")
-            }
-            className={`relative flex h-10 min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-full px-2 text-[9px] font-bold uppercase tracking-wide transition-all duration-200 sm:h-[40px] sm:flex-none sm:gap-2 sm:px-6 sm:text-[11px] ${
+            onClick={() => onDietChange("ALL")}
+            className={`relative flex h-9 sm:h-10 shrink-0 items-center justify-center gap-1.5 rounded-full px-3.5 sm:px-5 text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 shadow-xs active:scale-95 whitespace-nowrap cursor-pointer ${
               activeDiet === "ALL"
-                ? "bg-[#C88D18] text-white shadow-[0_5px_16px_rgba(200,141,24,0.20)]"
-                : "border border-[#E2E5E3] bg-white/70 text-[var(--brand-green-dark)] hover:border-[#C7CDC9]"
+                ? "bg-[#C88D18] text-white shadow-[0_4px_12px_rgba(200,141,24,0.25)] ring-1 ring-[#C88D18]"
+                : "border border-[#E2E5E3] bg-white/80 text-[var(--brand-green-dark)] hover:border-[#C7CDC9] hover:bg-white"
             }`}
           >
             <motion.span
               className={`flex shrink-0 items-center justify-center ${
-                activeDiet === "ALL"
-                  ? "text-white"
-                  : "text-[#C88D18]"
+                activeDiet === "ALL" ? "text-white" : "text-[#C88D18]"
               }`}
               animate={{
-                scale:
-                  activeDiet === "ALL"
-                    ? 1.06
-                    : 0.96,
+                scale: activeDiet === "ALL" ? 1.06 : 0.96,
               }}
               transition={iconTransition}
             >
-              <UtensilsCrossed
-                size={15}
-                strokeWidth={2}
-              />
+              <UtensilsCrossed size={14} strokeWidth={2} />
             </motion.span>
-
-            <span className="whitespace-nowrap">
-              All items
-            </span>
+            <span>All Items</span>
           </button>
 
-          {/* =================================================
-              VEG
-          ================================================= */}
-
+          {/* VEG */}
           <button
             type="button"
-            onClick={() =>
-              onDietChange("VEG")
-            }
-            className={`relative flex h-10 min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-full px-2 text-[9px] font-bold uppercase tracking-wide transition-all duration-200 sm:h-[40px] sm:flex-none sm:gap-2 sm:px-6 sm:text-[11px] ${
+            onClick={() => onDietChange("VEG")}
+            className={`relative flex h-9 sm:h-10 shrink-0 items-center justify-center gap-1.5 rounded-full px-3.5 sm:px-5 text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 shadow-xs active:scale-95 whitespace-nowrap cursor-pointer ${
               activeDiet === "VEG"
-                ? "bg-[var(--brand-green-dark)] text-white shadow-[0_5px_16px_rgba(15,61,46,0.20)]"
-                : "border border-[#E2E5E3] bg-white/70 text-[var(--brand-green-dark)] hover:border-[#C7CDC9]"
+                ? "bg-[var(--brand-green-dark)] text-white shadow-[0_4px_12px_rgba(15,61,46,0.25)] ring-1 ring-[var(--brand-green-dark)]"
+                : "border border-[#E2E5E3] bg-white/80 text-[var(--brand-green-dark)] hover:border-[#C7CDC9] hover:bg-white"
             }`}
           >
             <motion.span
               className={`flex shrink-0 items-center justify-center ${
-                activeDiet === "VEG"
-                  ? "text-white"
-                  : "text-[#17883B]"
+                activeDiet === "VEG" ? "text-white" : "text-[#17883B]"
               }`}
               animate={{
-                scale:
-                  activeDiet === "VEG"
-                    ? 1.06
-                    : 0.96,
+                scale: activeDiet === "VEG" ? 1.06 : 0.96,
               }}
               transition={iconTransition}
             >
               <span
-                className={`flex h-[16px] w-[16px] items-center justify-center rounded-[3px] border-2 ${
-                  activeDiet === "VEG"
-                    ? "border-white"
-                    : "border-[#17883B]"
+                className={`flex h-[14px] w-[14px] items-center justify-center rounded-[3px] border-2 ${
+                  activeDiet === "VEG" ? "border-white" : "border-[#17883B]"
                 }`}
               >
                 <span
-                  className={`h-[7px] w-[7px] rounded-[2px] ${
-                    activeDiet === "VEG"
-                      ? "bg-white"
-                      : "bg-[#17883B]"
+                  className={`h-[6px] w-[6px] rounded-[1px] ${
+                    activeDiet === "VEG" ? "bg-white" : "bg-[#17883B]"
                   }`}
                 />
               </span>
             </motion.span>
-
-            <span className="whitespace-nowrap">
-              Veg
-            </span>
+            <span>Veg</span>
           </button>
 
-          {/* =================================================
-              NON-VEG
-          ================================================= */}
-
+          {/* NON-VEG */}
           <button
             type="button"
-            onClick={() =>
-              onDietChange("NON-VEG")
-            }
-            className={`relative flex h-10 min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-full px-2 text-[9px] font-bold uppercase tracking-wide transition-all duration-200 sm:h-[40px] sm:flex-none sm:gap-2 sm:px-6 sm:text-[11px] ${
+            onClick={() => onDietChange("NON-VEG")}
+            className={`relative flex h-9 sm:h-10 shrink-0 items-center justify-center gap-1.5 rounded-full px-3.5 sm:px-5 text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 shadow-xs active:scale-95 whitespace-nowrap cursor-pointer ${
               activeDiet === "NON-VEG"
-                ? "bg-[#C62828] text-white shadow-[0_5px_16px_rgba(198,40,40,0.20)]"
-                : "border border-[#E2E5E3] bg-white/70 text-[var(--brand-green-dark)] hover:border-[#C7CDC9]"
+                ? "bg-[#C62828] text-white shadow-[0_4px_12px_rgba(198,40,40,0.25)] ring-1 ring-[#C62828]"
+                : "border border-[#E2E5E3] bg-white/80 text-[var(--brand-green-dark)] hover:border-[#C7CDC9] hover:bg-white"
             }`}
           >
             <motion.span
               className={`flex shrink-0 items-center justify-center ${
-                activeDiet === "NON-VEG"
-                  ? "text-white"
-                  : "text-[#E63333]"
+                activeDiet === "NON-VEG" ? "text-white" : "text-[#E63333]"
               }`}
               animate={{
-                scale:
-                  activeDiet === "NON-VEG"
-                    ? 1.06
-                    : 0.96,
+                scale: activeDiet === "NON-VEG" ? 1.06 : 0.96,
               }}
               transition={iconTransition}
             >
               <span
-                className={`flex h-[16px] w-[16px] items-center justify-center rounded-[3px] border-2 ${
-                  activeDiet === "NON-VEG"
-                    ? "border-white"
-                    : "border-[#E63333]"
+                className={`flex h-[14px] w-[14px] items-center justify-center rounded-[3px] border-2 ${
+                  activeDiet === "NON-VEG" ? "border-white" : "border-[#E63333]"
                 }`}
               >
                 <span
-                  className={`h-[7px] w-[7px] rounded-[2px] ${
-                    activeDiet === "NON-VEG"
-                      ? "bg-white"
-                      : "bg-[#E63333]"
+                  className={`h-[6px] w-[6px] rounded-[1px] ${
+                    activeDiet === "NON-VEG" ? "bg-white" : "bg-[#E63333]"
                   }`}
                 />
               </span>
             </motion.span>
-
-            <span className="whitespace-nowrap">
-              Non-veg
-            </span>
+            <span>Non-Veg</span>
           </button>
 
-          {/* =================================================
-              OFFERS FILTER
-          ================================================= */}
-
+          {/* OFFERS */}
           <button
             type="button"
             onClick={() => onOffersChange?.(!activeOffers)}
-            className={`relative flex h-10 min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-full px-2.5 text-[9px] font-bold uppercase tracking-wide transition-all duration-200 sm:h-[40px] sm:flex-none sm:gap-2 sm:px-5 sm:text-[11px] ${
+            className={`relative flex h-9 sm:h-10 shrink-0 items-center justify-center gap-1.5 rounded-full px-3.5 sm:px-5 text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 shadow-xs active:scale-95 whitespace-nowrap cursor-pointer ${
               activeOffers
-                ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black shadow-[0_5px_16px_rgba(245,158,11,0.35)] ring-2 ring-amber-400"
+                ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black shadow-[0_4px_14px_rgba(245,158,11,0.35)] ring-2 ring-amber-400"
                 : "border border-amber-300/80 bg-amber-50/70 text-amber-900 hover:border-amber-400 hover:bg-amber-100/70"
             }`}
           >
@@ -472,11 +346,9 @@ export default function MenuFilters({
               <Flame size={15} strokeWidth={2.2} />
             </motion.span>
 
-            <span className="whitespace-nowrap">
-              Offers
-            </span>
+            <span>Offers</span>
             <span
-              className={`text-[7px] sm:text-[8px] px-1.5 py-0.5 rounded-full font-black ${
+              className={`text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded-full font-black ${
                 activeOffers
                   ? "bg-black text-amber-300"
                   : "bg-amber-200 text-amber-900"
@@ -485,10 +357,8 @@ export default function MenuFilters({
               % OFF
             </span>
           </button>
-
         </div>
       </div>
-
     </section>
   );
 }
