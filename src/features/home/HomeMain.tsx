@@ -72,7 +72,7 @@ const HomeMain = () => {
 
           <div className="lg:col-span-8 flex flex-col gap-6 lg:gap-8">
 
-            <div className="block lg:hidden -mt-8 sm:-mt-12 relative z-10">
+            <div className="block lg:hidden mt-2 sm:mt-4 mb-2 relative z-10">
               <ExclusiveOffersCard />
             </div>
 

@@ -12,7 +12,7 @@ export default function MainLayout({
     <div className="min-h-screen flex flex-col">
       <UserHeader />
 
-      <main className="flex-1 w-full mt-31 md:mt-28 pb-20 md:pb-0">
+      <main className="flex-1 w-full mt-[108px] md:mt-28 pb-20 md:pb-0">
         {children}
       </main>
 

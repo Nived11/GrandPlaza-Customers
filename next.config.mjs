@@ -22,6 +22,10 @@ const nextConfig = {
         source: '/api/:path*',
         destination: `${process.env.BACKEND_API_URL}/api/:path*`, 
       },
+      {
+        source: '/media/:path*',
+        destination: `${process.env.BACKEND_API_URL}/media/:path*`, 
+      },
     ];
   },
 };

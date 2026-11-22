@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
+import { Flame } from "lucide-react";
 
 import MenuFilters, {
   ALL_CATEGORY,
@@ -16,6 +17,7 @@ import MenuSkeleton from "./components/MenuSkeleton";
 import ProductQuickViewModal from "@/features/product/components/ProductQuickViewModal";
 
 import { useMenuHook } from "./hooks/useMenuHook";
+import { hasOffer } from "./utils/menuUtils";
 
 import type { HomeMenuItem } from "@/features/home/hooks/useHomeHook";
 
@@ -23,6 +25,7 @@ const MenuMain = () => {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category");
   const searchParam = searchParams.get("search");
+  const offersParam = searchParams.get("offers");
 
   /* =========================================================
      FILTER STATE
@@ -34,7 +37,10 @@ const MenuMain = () => {
   const [activeDiet, setActiveDiet] =
     React.useState<DietFilter>("ALL");
 
-  // Sync category param from URL
+  const [activeOffers, setActiveOffers] =
+    React.useState<boolean>(false);
+
+  // Sync category & offers params from URL
   useEffect(() => {
     if (categoryParam) {
       const num = Number(categoryParam);
@@ -45,6 +51,10 @@ const MenuMain = () => {
       setActiveCategory(ALL_CATEGORY);
     }
   }, [categoryParam]);
+
+  useEffect(() => {
+    setActiveOffers(offersParam === "true");
+  }, [offersParam]);
 
   /* =========================================================
      PRODUCT QUICK VIEW
@@ -90,6 +100,7 @@ const MenuMain = () => {
     );
 
     setActiveDiet("ALL");
+    setActiveOffers(false);
     if (typeof window !== "undefined") {
       window.history.replaceState(null, "", "/menu");
     }
@@ -108,6 +119,29 @@ const MenuMain = () => {
       window.history.replaceState(null, "", q ? `/menu?${q}` : "/menu");
     }
   };
+
+  const handleOffersChange = (enabled: boolean) => {
+    setActiveOffers(enabled);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (enabled) {
+        params.set("offers", "true");
+      } else {
+        params.delete("offers");
+      }
+      const q = params.toString();
+      window.history.replaceState(null, "", q ? `/menu?${q}` : "/menu");
+    }
+  };
+
+  /* =========================================================
+     FILTERED ITEMS (OFFERS)
+  ========================================================= */
+
+  const displayedItems = useMemo(() => {
+    if (!activeOffers) return menuItems;
+    return menuItems.filter(hasOffer);
+  }, [menuItems, activeOffers]);
 
   /* =========================================================
      INITIAL LOADING
@@ -154,16 +188,52 @@ const MenuMain = () => {
           activeCategory
         }
         activeDiet={activeDiet}
+        activeOffers={activeOffers}
         onCategoryChange={
           handleCategoryChange
         }
         onDietChange={
           setActiveDiet
         }
+        onOffersChange={
+          handleOffersChange
+        }
         onPrefetchCategory={
           prefetchCategory
         }
       />
+
+      {/* =====================================================
+          ACTIVE OFFERS BANNER
+      ===================================================== */}
+
+      {activeOffers && (
+        <div className="mx-auto w-full max-w-[1400px] px-6 lg:px-8 pt-4">
+          <div className="flex items-center justify-between rounded-xl bg-amber-500/10 border border-amber-400/40 p-3.5 sm:p-4 text-amber-950 backdrop-blur-sm shadow-sm">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/20 text-amber-600 shrink-0">
+                <Flame className="h-4 w-4 animate-pulse" />
+              </span>
+              <div>
+                <h4 className="text-[12px] sm:text-[14px] font-black text-amber-900 leading-tight">
+                  Special Offers & Discounts Active
+                </h4>
+                <p className="text-[10px] sm:text-[11px] font-medium text-amber-800/80">
+                  Showing {displayedItems.length} dishes with active discounts
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => handleOffersChange(false)}
+              className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-amber-900 hover:text-amber-950 underline underline-offset-4 shrink-0 ml-3"
+            >
+              Show All Menu
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* =====================================================
           PRODUCT GRID
@@ -177,7 +247,7 @@ const MenuMain = () => {
         }`}
       >
         <MenuGrid
-          items={menuItems}
+          items={displayedItems}
           onOpenItem={
             setSelectedProduct
           }

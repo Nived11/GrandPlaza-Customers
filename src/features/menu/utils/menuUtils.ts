@@ -90,6 +90,31 @@ const CATEGORY_ICON_RULES: [RegExp, LucideIcon][] = [
   [/chicken|meat|beef|mutton|seafood|fish/i, Drumstick],
 ];
 
+export const hasOffer = (item: HomeMenuItem): boolean => {
+  // 1. Direct offer price on item
+  if (item.offer_price && Number(item.offer_price) > 0) {
+    if (!item.actual_price || Number(item.actual_price) > Number(item.offer_price)) {
+      return true;
+    }
+  }
+
+  // 2. Variants offer price
+  if (item.has_variants && Array.isArray(item.variants)) {
+    const hasVariantOffer = item.variants.some((v) => {
+      if (!v.is_available) return false;
+      if (v.offer_price && Number(v.offer_price) > 0) {
+        return !v.actual_price || Number(v.actual_price) > Number(v.offer_price);
+      }
+      return false;
+    });
+    if (hasVariantOffer) return true;
+  }
+
+  // 3. Discount percentage check
+  const discount = getDiscountPercent(item);
+  return discount !== null && discount > 0;
+};
+
 export const getCategoryIcon = (categoryName: string): LucideIcon => {
   const match = CATEGORY_ICON_RULES.find(([pattern]) => pattern.test(categoryName));
   return match ? match[1] : UtensilsCrossed;

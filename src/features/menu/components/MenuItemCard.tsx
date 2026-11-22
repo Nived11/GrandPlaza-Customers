@@ -23,6 +23,7 @@ import VegNonVegBadge from "@/components/common/VegNonVegBadge";
 
 import {
   getDisplayPrice,
+  getDiscountPercent,
   isOrderable,
 } from "../utils/menuUtils";
 
@@ -60,36 +61,12 @@ const MenuItemCard = ({
 
   /*
    * =====================================================
-   * DISCOUNT CALCULATION
+   * DISCOUNT CALCULATION (SUPPORTS VARIANTS & DIRECT PRICES)
    * =====================================================
    */
 
-  const actualPrice =
-    item.actual_price !== null
-      ? Number(item.actual_price)
-      : null;
-
-  const offerPrice =
-    item.offer_price !== null
-      ? Number(item.offer_price)
-      : null;
-
-  const hasDiscount =
-    actualPrice !== null &&
-    offerPrice !== null &&
-    Number.isFinite(actualPrice) &&
-    Number.isFinite(offerPrice) &&
-    actualPrice > 0 &&
-    offerPrice > 0 &&
-    offerPrice < actualPrice;
-
-  const discountPercentage = hasDiscount
-    ? Math.round(
-        ((actualPrice - offerPrice) /
-          actualPrice) *
-          100
-      )
-    : 0;
+  const discountPercentage = getDiscountPercent(item) ?? 0;
+  const hasDiscount = discountPercentage > 0;
 
   /*
    * =====================================================

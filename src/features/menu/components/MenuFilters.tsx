@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { UtensilsCrossed } from "lucide-react";
+import { UtensilsCrossed, Flame } from "lucide-react";
 
 import type { MenuCategory } from "../hooks/useMenuHook";
 import { getCategoryIcon } from "../utils/menuUtils";
@@ -22,6 +22,7 @@ interface MenuFiltersProps {
   categories: MenuCategory[];
   activeCategory: CategoryFilter;
   activeDiet: DietFilter;
+  activeOffers?: boolean;
 
   onCategoryChange: (
     category: CategoryFilter
@@ -29,6 +30,10 @@ interface MenuFiltersProps {
 
   onDietChange: (
     diet: DietFilter
+  ) => void;
+
+  onOffersChange?: (
+    offers: boolean
   ) => void;
 
   onPrefetchCategory?: (
@@ -118,8 +123,10 @@ export default function MenuFilters({
   categories,
   activeCategory,
   activeDiet,
+  activeOffers = false,
   onCategoryChange,
   onDietChange,
+  onOffersChange,
   onPrefetchCategory,
 }: MenuFiltersProps) {
   return (
@@ -437,6 +444,45 @@ export default function MenuFilters({
 
             <span className="whitespace-nowrap">
               Non-veg
+            </span>
+          </button>
+
+          {/* =================================================
+              OFFERS FILTER
+          ================================================= */}
+
+          <button
+            type="button"
+            onClick={() => onOffersChange?.(!activeOffers)}
+            className={`relative flex h-10 min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-full px-2.5 text-[9px] font-bold uppercase tracking-wide transition-all duration-200 sm:h-[40px] sm:flex-none sm:gap-2 sm:px-5 sm:text-[11px] ${
+              activeOffers
+                ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black shadow-[0_5px_16px_rgba(245,158,11,0.35)] ring-2 ring-amber-400"
+                : "border border-amber-300/80 bg-amber-50/70 text-amber-900 hover:border-amber-400 hover:bg-amber-100/70"
+            }`}
+          >
+            <motion.span
+              className={`flex shrink-0 items-center justify-center ${
+                activeOffers ? "text-slate-950" : "text-amber-600"
+              }`}
+              animate={{
+                scale: activeOffers ? 1.1 : 0.96,
+              }}
+              transition={iconTransition}
+            >
+              <Flame size={15} strokeWidth={2.2} />
+            </motion.span>
+
+            <span className="whitespace-nowrap">
+              Offers
+            </span>
+            <span
+              className={`text-[7px] sm:text-[8px] px-1.5 py-0.5 rounded-full font-black ${
+                activeOffers
+                  ? "bg-black text-amber-300"
+                  : "bg-amber-200 text-amber-900"
+              }`}
+            >
+              % OFF
             </span>
           </button>
 

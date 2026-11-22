@@ -12,6 +12,10 @@ export interface StoreStatusData {
   restaurantName: string;
   loading: boolean;
   formattedHoursText: string;
+  offerTitle: string;
+  offerSubtitle: string;
+  offerBadgeText: string;
+  isOfferCardActive: boolean;
 }
 
 // ==========================================
@@ -27,6 +31,10 @@ let globalStatus: StoreStatusData = {
   restaurantName: "Empire Plaza",
   loading: true,
   formattedHoursText: "",
+  offerTitle: "Up to 40% OFF",
+  offerSubtitle: "Midnight feast on selected items",
+  offerBadgeText: "Late Night Special",
+  isOfferCardActive: true,
 };
 
 let lastFetchedTime = 0;
@@ -64,6 +72,16 @@ async function fetchGlobalStoreStatus(force = false): Promise<StoreStatusData> {
           formattedHoursText = `${formatTime(openingTime)} - ${formatTime(closingTime)}`;
         }
 
+        const offerTitle = d.offerTitle ?? d.offer_title ?? "Up to 40% OFF";
+        const offerSubtitle = d.offerSubtitle ?? d.offer_subtitle ?? "Midnight feast on selected items";
+        const offerBadgeText = d.offerBadgeText ?? d.offer_badge_text ?? "Late Night Special";
+        const isOfferCardActive =
+          d.isOfferCardActive !== undefined
+            ? Boolean(d.isOfferCardActive)
+            : d.is_offer_card_active !== undefined
+            ? Boolean(d.is_offer_card_active)
+            : true;
+
         globalStatus = {
           isOpen,
           isManuallyOpen,
@@ -73,6 +91,10 @@ async function fetchGlobalStoreStatus(force = false): Promise<StoreStatusData> {
           restaurantName,
           loading: false,
           formattedHoursText,
+          offerTitle,
+          offerSubtitle,
+          offerBadgeText,
+          isOfferCardActive,
         };
         lastFetchedTime = Date.now();
       }
