@@ -469,6 +469,19 @@ const ProductQuickViewModal = ({
           event.stopPropagation()
         }
       >
+        {/* Floating Close Button - Always visible at top right */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close product quick view"
+          className="absolute right-3.5 top-3.5 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[#0F3D2E] shadow-md border border-[#0F3D2E]/15 hover:bg-[#FBF6EC] hover:text-[#09281E] hover:scale-105 active:scale-95 transition-all cursor-pointer backdrop-blur"
+        >
+          <X
+            size={18}
+            strokeWidth={2.4}
+          />
+        </button>
+
         {/* LEFT — IMAGE */}
         <div className="relative h-[260px] shrink-0 overflow-hidden bg-[#FBF6EC] md:h-auto md:w-[45%]">
           <img
@@ -495,7 +508,7 @@ const ProductQuickViewModal = ({
           <button
             type="button"
             aria-label="Save product"
-            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-[#0F3D2E] shadow-md backdrop-blur transition hover:bg-white"
+            className="absolute right-14 top-3.5 md:right-4 md:top-4 z-40 flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full bg-white/90 text-[#0F3D2E] shadow-md backdrop-blur transition hover:bg-white"
           >
             <Heart
               size={18}
@@ -505,28 +518,13 @@ const ProductQuickViewModal = ({
         </div>
 
         {/* RIGHT — INFORMATION */}
-        <div className="flex min-h-0 flex-1 flex-col">
-          {/* Close */}
-          <div className="flex justify-end px-4 pt-4 sm:px-5">
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close product quick view"
-              className="flex h-9 w-9 items-center justify-center rounded-full text-[#1E2320]/60 transition hover:bg-[#FBF6EC] hover:text-[#0F3D2E]"
-            >
-              <X
-                size={20}
-                strokeWidth={1.8}
-              />
-            </button>
-          </div>
-
+        <div className="flex min-h-0 flex-1 flex-col md:w-[55%]">
           {/* Product information */}
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5 sm:px-6">
+          <div className="min-h-0 flex-1 overflow-y-auto px-5 pt-5 pb-5 pr-14 sm:px-6 sm:pt-6 sm:pr-14">
             {/* Title */}
             <h2
               id="quick-view-product-title"
-              className="mt-1 text-[24px] font-semibold leading-tight tracking-[-0.02em] text-[#0F3D2E] sm:text-[28px]"
+              className="text-[24px] font-semibold leading-tight tracking-[-0.02em] text-[#0F3D2E] sm:text-[28px]"
             >
               {product.name}
             </h2>
