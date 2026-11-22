@@ -25,6 +25,7 @@ import {
 
 import useCartHook from "@/features/cart/hook/useCartHook";
 import { useStoreStatus } from "@/hooks/useStoreStatus";
+import VegNonVegBadge from "@/components/common/VegNonVegBadge";
 
 interface ProductQuickViewModalProps {
   product: HomeMenuItem | null;
@@ -491,18 +492,14 @@ const ProductQuickViewModal = ({
           />
 
           {/* Dietary badge */}
-          <div className="absolute left-4 top-4">
-            <span
-              className={`inline-flex items-center rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] ${
-                product.dietary_preference ===
-                "VEG"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-            >
-              {product.dietary_preference}
-            </span>
-          </div>
+          {product.dietary_preference && (
+            <div className="absolute left-4 top-4 z-10 rounded-full bg-white/95 px-2.5 py-1 shadow-sm border border-gray-100 backdrop-blur-sm">
+              <VegNonVegBadge
+                dietaryPreference={product.dietary_preference}
+                size="sm"
+              />
+            </div>
+          )}
 
           {/* Save button */}
           <button

@@ -8,6 +8,7 @@ import { addToCart, setCart } from "@/redux/slices/cartSlice";
 import type { AppDispatch, RootState } from "@/redux/store";
 import useCartHook from "@/features/cart/hook/useCartHook";
 import { useStoreStatus } from "@/hooks/useStoreStatus";
+import VegNonVegBadge from "@/components/common/VegNonVegBadge";
 import type { HomeMenuItem } from "../hooks/useHomeHook";
 
 interface HotPicksSectionProps {
@@ -230,24 +231,8 @@ export default function HotPicksSection({
               <div className="p-2.5 sm:p-4 flex flex-col flex-grow bg-white">
                 
                 {/* Dietary Preference */}
-                <div className="flex items-center gap-1 mb-1.5 sm:mb-2">
-                  <div
-                    className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
-                      item.dietary_preference === "NON-VEG"
-                        ? "bg-red-500"
-                        : "bg-green-500"
-                    }`}
-                  />
-
-                  <span
-                    className={`text-[7px] sm:text-[8px] font-black tracking-widest ${
-                      item.dietary_preference === "NON-VEG"
-                        ? "text-red-600"
-                        : "text-green-600"
-                    }`}
-                  >
-                    {item.dietary_preference}
-                  </span>
+                <div className="mb-1.5 sm:mb-2">
+                  <VegNonVegBadge dietaryPreference={item.dietary_preference} size="sm" />
                 </div>
 
                 {/* Title */}

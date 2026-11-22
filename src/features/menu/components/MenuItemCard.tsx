@@ -19,6 +19,7 @@ import useCartHook from "@/features/cart/hook/useCartHook";
 import { useStoreStatus } from "@/hooks/useStoreStatus";
 
 import type { HomeMenuItem } from "@/features/home/hooks/useHomeHook";
+import VegNonVegBadge from "@/components/common/VegNonVegBadge";
 
 import {
   getDisplayPrice,
@@ -548,13 +549,18 @@ const MenuItemCard = ({
 
       <div className="p-3 sm:p-4">
 
-        {/* CATEGORY */}
+        {/* CATEGORY & DIETARY PREFERENCE */}
+        <div className="mb-1.5 flex items-center justify-between gap-1.5">
+          {item.category_name ? (
+            <p className="text-[8px] font-bold uppercase tracking-[0.14em] text-[var(--brand-gold)] sm:text-[9px]">
+              {item.category_name}
+            </p>
+          ) : (
+            <span />
+          )}
 
-        {item.category_name && (
-          <p className="mb-1 text-[8px] font-bold uppercase tracking-[0.14em] text-[var(--brand-gold)] sm:text-[9px]">
-            {item.category_name}
-          </p>
-        )}
+          <VegNonVegBadge dietaryPreference={item.dietary_preference} size="sm" />
+        </div>
 
         {/* NAME */}
 
