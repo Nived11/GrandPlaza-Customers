@@ -16,6 +16,7 @@ export default function ExclusiveOffersCard() {
   const badgeText = storeStatus.offerBadgeText || "Late Night Special";
   const title = storeStatus.offerTitle || "Up to 40% OFF";
   const subtitle = storeStatus.offerSubtitle || "Midnight feast on selected items";
+  const bannerSrc = storeStatus.offerBannerImage || "/offers-banner.jpg";
 
   return (
     <Link
@@ -25,7 +26,7 @@ export default function ExclusiveOffersCard() {
       <div className="relative min-h-[180px] sm:min-h-[200px] lg:min-h-[220px] w-full flex items-center bg-[#0d1f18]">
         {/* Background Poster Image */}
         <img
-          src="/offers-banner.jpg"
+          src={bannerSrc}
           alt="Empire Plaza Late Night Offers"
           className="absolute inset-0 h-full w-full object-cover object-[85%_35%] sm:object-center transition-transform duration-700 ease-out group-hover:scale-105"
         />

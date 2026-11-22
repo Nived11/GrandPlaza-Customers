@@ -15,6 +15,7 @@ export interface StoreStatusData {
   offerTitle: string;
   offerSubtitle: string;
   offerBadgeText: string;
+  offerBannerImage: string | null;
   isOfferCardActive: boolean;
 }
 
@@ -34,6 +35,7 @@ let globalStatus: StoreStatusData = {
   offerTitle: "Up to 40% OFF",
   offerSubtitle: "Midnight feast on selected items",
   offerBadgeText: "Late Night Special",
+  offerBannerImage: null,
   isOfferCardActive: true,
 };
 
@@ -75,6 +77,7 @@ async function fetchGlobalStoreStatus(force = false): Promise<StoreStatusData> {
         const offerTitle = d.offerTitle ?? d.offer_title ?? "Up to 40% OFF";
         const offerSubtitle = d.offerSubtitle ?? d.offer_subtitle ?? "Midnight feast on selected items";
         const offerBadgeText = d.offerBadgeText ?? d.offer_badge_text ?? "Late Night Special";
+        const offerBannerImage = d.offerBannerImage ?? d.offer_banner_image ?? null;
         const isOfferCardActive =
           d.isOfferCardActive !== undefined
             ? Boolean(d.isOfferCardActive)
@@ -94,6 +97,7 @@ async function fetchGlobalStoreStatus(force = false): Promise<StoreStatusData> {
           offerTitle,
           offerSubtitle,
           offerBadgeText,
+          offerBannerImage,
           isOfferCardActive,
         };
         lastFetchedTime = Date.now();
