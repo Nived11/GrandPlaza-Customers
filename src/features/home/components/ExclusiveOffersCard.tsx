@@ -33,11 +33,25 @@ export default function ExclusiveOffersCard() {
     >
       <div className="relative min-h-[160px] sm:min-h-[200px] lg:min-h-[220px] w-full flex items-center bg-[#0d1f18]">
         {/* Festive Holiday Corner Ribbon */}
-        {isChristmas && (
+        {isCelebrationActive && (
           <div className="absolute top-0 right-0 z-20 pointer-events-none">
-            <div className="flex items-center gap-1.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-800 text-amber-200 text-[8px] sm:text-[9px] font-black uppercase tracking-widest py-1 px-3 rounded-bl-xl shadow-md border-b border-l border-amber-300/40">
-              <span className="text-[10px]">🎄</span>
-              <span>Holiday Special</span>
+            <div className={`flex items-center gap-1.5 text-[8px] sm:text-[9px] font-black uppercase tracking-widest py-1 px-3 rounded-bl-xl shadow-md border-b border-l ${
+              activeTheme === "onam"
+                ? "bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-700 text-amber-950 border-amber-300/60"
+                : activeTheme === "vishu"
+                ? "bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600 text-amber-950 border-yellow-200"
+                : activeTheme === "eid"
+                ? "bg-gradient-to-r from-emerald-700 via-teal-600 to-emerald-900 text-amber-200 border-amber-300/40"
+                : activeTheme === "diwali"
+                ? "bg-gradient-to-r from-orange-600 via-amber-500 to-orange-800 text-amber-100 border-amber-300/50"
+                : "bg-gradient-to-r from-red-600 via-rose-600 to-red-800 text-amber-200 border-amber-300/40"
+            }`}>
+              <span className="text-[10px]">
+                {activeTheme === "onam" ? "🌼" : activeTheme === "vishu" ? "🌟" : activeTheme === "eid" ? "🌙" : activeTheme === "diwali" ? "🪔" : "🎄"}
+              </span>
+              <span>
+                {activeTheme === "onam" ? "Onam Special" : activeTheme === "vishu" ? "Vishu Special" : activeTheme === "eid" ? "Eid Special" : activeTheme === "diwali" ? "Diwali Special" : "Holiday Special"}
+              </span>
             </div>
           </div>
         )}

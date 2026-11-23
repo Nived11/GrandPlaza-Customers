@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState } from "react";
 import { useStoreStatus } from "@/hooks/useStoreStatus";
 
 export type FestivalTheme = "christmas" | "onam" | "vishu" | "eid" | "diwali" | "none";
@@ -25,24 +25,25 @@ export function CelebrationThemeProvider({
   children: React.ReactNode;
 }) {
   const storeStatus = useStoreStatus();
-  const [isCelebrationActive, setIsCelebrationActive] = useState<boolean>(false);
-  const [activeTheme, setActiveThemeState] = useState<FestivalTheme>("christmas");
+  const [overrideActive, setOverrideActive] = useState<boolean | null>(null);
+  const [overrideTheme, setOverrideTheme] = useState<FestivalTheme | null>(null);
 
-  useEffect(() => {
-    if (!storeStatus.loading) {
-      setIsCelebrationActive(Boolean(storeStatus.celebrationMode));
-      if (storeStatus.celebrationTheme) {
-        setActiveThemeState(storeStatus.celebrationTheme as FestivalTheme);
-      }
-    }
-  }, [storeStatus.loading, storeStatus.celebrationMode, storeStatus.celebrationTheme]);
+  const isCelebrationActive =
+    overrideActive !== null
+      ? overrideActive
+      : Boolean(storeStatus.celebrationMode);
+
+  const activeTheme =
+    overrideTheme !== null
+      ? overrideTheme
+      : ((storeStatus.celebrationTheme as FestivalTheme) || "christmas");
 
   const toggleCelebration = () => {
-    setIsCelebrationActive((prev) => !prev);
+    setOverrideActive((prev) => (prev !== null ? !prev : !isCelebrationActive));
   };
 
   const setActiveTheme = (theme: FestivalTheme) => {
-    setActiveThemeState(theme);
+    setOverrideTheme(theme);
   };
 
   return (
