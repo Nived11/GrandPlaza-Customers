@@ -4,9 +4,12 @@ import React from "react";
 import Link from "next/link";
 import { ArrowRight, Flame } from "lucide-react";
 import { useStoreStatus } from "@/hooks/useStoreStatus";
+import { useCelebrationTheme } from "@/context/CelebrationThemeContext";
 
 export default function ExclusiveOffersCard() {
   const storeStatus = useStoreStatus();
+  const { isCelebrationActive, activeTheme } = useCelebrationTheme();
+  const isChristmas = isCelebrationActive && activeTheme === "christmas";
 
   // If the admin turned off the offer card, don't display it
   if (!storeStatus.isOfferCardActive) {
@@ -18,10 +21,10 @@ export default function ExclusiveOffersCard() {
     (!storeStatus.offerTitle && !storeStatus.offerSubtitle && !storeStatus.offerBadgeText)
   );
 
-  const badgeText = storeStatus.offerBadgeText || "";
-  const title = storeStatus.offerTitle || "";
-  const subtitle = storeStatus.offerSubtitle || "";
-  const bannerSrc = storeStatus.offerBannerImage || "/offers-banner.jpg";
+  const badgeText = isChristmas && !storeStatus.offerBadgeText ? "Christmas Special" : (storeStatus.offerBadgeText || "");
+  const title = isChristmas && !storeStatus.offerTitle ? "Festive Feasts & Offers" : (storeStatus.offerTitle || "");
+  const subtitle = isChristmas && !storeStatus.offerSubtitle ? "Celebrate the season with signature roasts and holiday delights" : (storeStatus.offerSubtitle || "");
+  const bannerSrc = isChristmas && !storeStatus.offerBannerImage ? "/christmas-banner.jpg" : (storeStatus.offerBannerImage || "/offers-banner.jpg");
 
   return (
     <Link
@@ -29,6 +32,16 @@ export default function ExclusiveOffersCard() {
       className="group relative block w-full overflow-hidden rounded-2xl border border-[var(--brand-gold)]/30 shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5"
     >
       <div className="relative min-h-[160px] sm:min-h-[200px] lg:min-h-[220px] w-full flex items-center bg-[#0d1f18]">
+        {/* Festive Holiday Corner Ribbon */}
+        {isChristmas && (
+          <div className="absolute top-0 right-0 z-20 pointer-events-none">
+            <div className="flex items-center gap-1.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-800 text-amber-200 text-[8px] sm:text-[9px] font-black uppercase tracking-widest py-1 px-3 rounded-bl-xl shadow-md border-b border-l border-amber-300/40">
+              <span className="text-[10px]">🎄</span>
+              <span>Holiday Special</span>
+            </div>
+          </div>
+        )}
+
         {/* Background Poster Image */}
         <img
           src={bannerSrc}

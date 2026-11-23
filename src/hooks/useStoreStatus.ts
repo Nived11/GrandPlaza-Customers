@@ -18,6 +18,8 @@ export interface StoreStatusData {
   offerBannerImage: string | null;
   hideTextOverlay: boolean;
   isOfferCardActive: boolean;
+  celebrationMode: boolean;
+  celebrationTheme: string;
 }
 
 // ==========================================
@@ -39,6 +41,8 @@ let globalStatus: StoreStatusData = {
   offerBannerImage: null,
   hideTextOverlay: false,
   isOfferCardActive: true,
+  celebrationMode: false,
+  celebrationTheme: "christmas",
 };
 
 let lastFetchedTime = 0;
@@ -87,6 +91,8 @@ async function fetchGlobalStoreStatus(force = false): Promise<StoreStatusData> {
             : d.is_offer_card_active !== undefined
             ? Boolean(d.is_offer_card_active)
             : true;
+        const celebrationMode = Boolean(d.celebrationMode ?? d.celebration_mode ?? false);
+        const celebrationTheme = String(d.celebrationTheme ?? d.celebration_theme ?? "christmas");
 
         globalStatus = {
           isOpen,
@@ -103,6 +109,8 @@ async function fetchGlobalStoreStatus(force = false): Promise<StoreStatusData> {
           offerBannerImage,
           hideTextOverlay,
           isOfferCardActive,
+          celebrationMode,
+          celebrationTheme,
         };
         lastFetchedTime = Date.now();
       }
